@@ -1,7 +1,7 @@
 package application.appRate;
 
 import application.Application;
-import application.regression.Logger;
+import application.Logger;
 import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;

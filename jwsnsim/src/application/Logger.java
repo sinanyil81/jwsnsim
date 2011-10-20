@@ -1,4 +1,4 @@
-package application.regression;
+package application;
 
 import java.io.BufferedWriter;
 import java.io.File;
