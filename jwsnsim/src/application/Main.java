@@ -2,21 +2,34 @@ package application;
 
 import application.appFlooding.FloodingApp;
 import application.appFtspMinimumVariance.FtspApp;
+import application.appRateDetection.RateApp;
 
 public class Main {
 	
-	static int MAX_DIAMETER = 60;
-	private static final int DIAMETER_OFFSET = 5;
-	
 	public static void main(String[] args) {
+		
 		/*------------------------------------------*/
-		ftspSimulations();
+		rateSimulations();
+		/*------------------------------------------*/
+		
+		/*------------------------------------------*/
+		//ftspSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
 		//fcsaSimulations();
 		/*------------------------------------------*/		
 	}		
+
+	public static void rateSimulations(){
+
+		try{			
+			new application.appRateDetection.RateApp(30,"RateConvergence.txt",RateApp.LINE);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}									
+	}
 
 
 	/**
