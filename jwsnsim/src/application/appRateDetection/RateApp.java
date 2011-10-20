@@ -41,13 +41,13 @@ public class RateApp extends Application implements TimerHandler{
 	}
 
 	private void createTopology(int topology) {
-		//nodes = new RateNode[NUMNODES];
-		nodes = new RateNodeLS[NUMNODES];
+		nodes = new RateNode[NUMNODES];
+		//nodes = new RateNodeLS[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-				//nodes[i] = new RateNode(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new RateNodeLS(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new RateNode(i+1,new Position(i*5,i*5,0));
+				//nodes[i] = new RateNodeLS(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 	}

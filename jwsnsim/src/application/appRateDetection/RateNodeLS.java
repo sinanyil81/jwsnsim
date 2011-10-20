@@ -1,7 +1,6 @@
 package application.appRateDetection;
 
 import application.regression.LeastSquares;
-import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -164,9 +163,9 @@ public class RateNodeLS extends Node implements TimerHandler {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
-		s += " " + (1.0f + (float)CLOCK.getDrift());
-		s += " " + myRate;
-		s += " " + (1.0f + (float)CLOCK.getDrift()-myRate);
+		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
+		s += " " + Float.floatToIntBits(myRate);
+		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift()-myRate);
 
 		return s;
 	}

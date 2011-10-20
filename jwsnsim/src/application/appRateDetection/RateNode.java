@@ -127,7 +127,7 @@ public class RateNode extends Node implements TimerHandler {
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
-				rateSum += neighbors[i].relativeRate*neighbors[i].rate + neighbors[i].rate+neighbors[i].relativeRate;
+				rateSum += neighbors[i].relativeRate*neighbors[i].rate + neighbors[i].rate;
 				numNeighbors++;
 			}
 		}
@@ -179,9 +179,10 @@ public class RateNode extends Node implements TimerHandler {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
-		s += " " + (1.0f + (float)CLOCK.getDrift());
-		s += " " + x/myRate;
-		s += " " + (1.0f + (float)CLOCK.getDrift()-x/myRate);
+		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
+		s += " " + Float.floatToIntBits(x/myRate);
+		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift()-x/myRate);
+		//s += " " + Float.floatToIntBits((1.0f + (float)CLOCK.getDrift())*myRate);
 
 		return s;
 	}
