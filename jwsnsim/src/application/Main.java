@@ -9,7 +9,7 @@ public class Main {
 	public static void main(String[] args) {
 		
 		/*------------------------------------------*/
-		rateSimulations();
+		//rateSimulations();
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
@@ -17,7 +17,7 @@ public class Main {
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
-		//fcsaSimulations();
+		fcsaSimulations();
 		/*------------------------------------------*/		
 	}		
 
@@ -58,9 +58,10 @@ public class Main {
 	 */
 	public static void fcsaSimulations(){
 		try{
-			for(int j = 1;j<=10;j++)
-				for(int i = 10;i<=100;i+=10)
-					new application.appFlooding.FloodingApp(i,"FloodingSimLine"+i+"#"+j,FloodingApp.LINE);
+//			for(int j = 1;j<=10;j++)
+//				for(int i = 10;i<=100;i+=10)
+//					new application.appFlooding.FloodingApp(i,"FloodingSimLine"+i+"#"+j,FloodingApp.LINE);
+			new application.appFlooding.FloodingApp(20,"FCSA.txt",FloodingApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
