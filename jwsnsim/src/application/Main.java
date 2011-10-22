@@ -1,6 +1,6 @@
 package application;
 
-import application.appFlooding.FloodingApp;
+import application.appFcsa.FloodingApp;
 import application.appFtspMinimumVariance.FtspApp;
 import application.appRateDetection.RateApp;
 
@@ -61,7 +61,7 @@ public class Main {
 //			for(int j = 1;j<=10;j++)
 //				for(int i = 10;i<=100;i+=10)
 //					new application.appFlooding.FloodingApp(i,"FloodingSimLine"+i+"#"+j,FloodingApp.LINE);
-			new application.appFlooding.FloodingApp(20,"FCSA.txt",FloodingApp.LINE);
+			new application.appFcsa.FloodingApp(20,"FCSA.txt",FloodingApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
