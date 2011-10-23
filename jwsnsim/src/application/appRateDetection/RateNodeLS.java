@@ -117,7 +117,8 @@ public class RateNodeLS extends Node implements TimerHandler {
 			outgoingMsg.sequence = msg.sequence;
 			
 			if(NODE_ID !=1){
-				myRate = rr*msg.rate;
+				myRate = 1.0f/(1.0f+rr);
+				myRate *=msg.rate;
 			}
 		}
 		else {
@@ -163,9 +164,10 @@ public class RateNodeLS extends Node implements TimerHandler {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
-		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
 		s += " " + Float.floatToIntBits(myRate);
 		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift()-myRate);
+		//s += " " + myRate;
+		//s += " " + (1.0f + (float)CLOCK.getDrift());
 
 		return s;
 	}

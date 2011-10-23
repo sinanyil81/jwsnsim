@@ -26,7 +26,7 @@ public class RateNode extends Node implements TimerHandler {
 	RadioPacket processedMsg = null;
 	RateMessage outgoingMsg = new RateMessage();
     
-	float myRate = 1;
+	float myRate = 0;
 	float x = 1;
 	
 	public RateNode(int id, Position position) {
@@ -127,7 +127,7 @@ public class RateNode extends Node implements TimerHandler {
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
-				rateSum += neighbors[i].relativeRate*neighbors[i].rate + neighbors[i].rate;
+				rateSum += neighbors[i].relativeRate*neighbors[i].rate + neighbors[i].rate+neighbors[i].relativeRate;
 				numNeighbors++;
 			}
 		}
@@ -157,7 +157,7 @@ public class RateNode extends Node implements TimerHandler {
 		
 		if( 1 == NODE_ID ) {
 			outgoingMsg.sequence++;
-			outgoingMsg.x = myRate;
+			outgoingMsg.x = (myRate+1.0f);
 		}
 		else{
 			outgoingMsg.x = x;
@@ -179,10 +179,13 @@ public class RateNode extends Node implements TimerHandler {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
-		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
-		s += " " + Float.floatToIntBits(x/myRate);
-		s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift()-x/myRate);
-		//s += " " + Float.floatToIntBits((1.0f + (float)CLOCK.getDrift())*myRate);
+		//s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
+//		s += " " + x/(myRate+1.0f);
+		s += " " + x;
+//		s += " " + (1.0f+(float) CLOCK.getDrift());
+		s += " " + (myRate+1.0f)*(1.0f+(float) CLOCK.getDrift());
+		//s += " " + Float.floatToIntBits(x/(myRate+1.0f));
+		//s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift()-x/(myRate+1.0f));
 
 		return s;
 	}
