@@ -9,7 +9,7 @@ public class Main {
 	public static void main(String[] args) {
 		
 		/*------------------------------------------*/
-		//rateSimulations();
+		rateSimulations();
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
@@ -17,14 +17,14 @@ public class Main {
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
-		fcsaSimulations();
+		//fcsaSimulations();
 		/*------------------------------------------*/		
 	}		
 
 	public static void rateSimulations(){
 
 		try{			
-			new application.appRateDetection.RateApp(30,"RateConvergence.txt",RateApp.LINE);
+			new application.appRateDetection.RateApp(50,"RateConvergence.txt",RateApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
