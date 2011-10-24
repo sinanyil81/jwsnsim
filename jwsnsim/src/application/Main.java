@@ -1,7 +1,7 @@
 package application;
 
 import application.appFcsa.FloodingApp;
-import application.appFtspMinimumVariance.FtspApp;
+import application.appFtsp.FtspApp;
 import application.appRateDetection.RateApp;
 
 public class Main {
@@ -9,11 +9,11 @@ public class Main {
 	public static void main(String[] args) {
 		
 		/*------------------------------------------*/
-		rateSimulations();
+		//rateSimulations();
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		//ftspSimulations();
+		ftspSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
@@ -40,13 +40,14 @@ public class Main {
 
 		try{
 			
-			for (int i = 10; i <= 100; i+= 10) {
-				for(int j=1;j<=10;j++){
-					new application.appFtsp.FtspApp(i,"FtspSim"+i+"#"+j,FtspApp.LINE);
-					new application.appFtspMinimumVariance.FtspApp(i,"FtspSimMV"+i+"#"+j,FtspApp.LINE);
-					
-				}
-			}
+//			for (int i = 10; i <= 100; i+= 10) {
+//				for(int j=1;j<=10;j++){
+//					new application.appFtsp.FtspApp(i,"FtspSim"+i+"#"+j,FtspApp.LINE);
+//					new application.appFtspMinimumVariance.FtspApp(i,"FtspSimMV"+i+"#"+j,FtspApp.LINE);
+//					
+//				}					
+//			}
+			new application.appFtsp.FtspApp(20,"FtspDiscontinuity.txt",FtspApp.LINE);		
 		}
 		catch (Exception e) {
 			e.printStackTrace();
