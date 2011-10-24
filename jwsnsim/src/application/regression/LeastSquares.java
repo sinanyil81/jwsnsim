@@ -116,4 +116,17 @@ public class LeastSquares {
 		
         return result;
 	}
+	
+	public UInt32 calculateY(UInt32 x,UInt32 meanX,int meanY) {
+		UInt32 diff = new UInt32(x);
+		diff = diff.subtract(meanX);
+		
+		int  mult = (int)(slope*(float)(diff.toInteger()));
+		mult += meanY;
+		
+		UInt32 result = new UInt32(mult);
+		result = result.add(x);
+		
+        return result;
+	}
 }
