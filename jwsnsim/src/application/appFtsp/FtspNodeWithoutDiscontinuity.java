@@ -13,7 +13,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class FtspNode extends Node implements TimerHandler{
+public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	
 	private static final int MAX_ENTRIES           = 8;              	// number of entries in the table
 	private static final int BEACON_RATE           = 30000000;  	 	// how often send the beacon msg (in seconds)
@@ -40,7 +40,7 @@ public class FtspNode extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     FtspMessage outgoingMsg = new FtspMessage();
 
-	public FtspNode(int id, Position position) {
+	public FtspNodeWithoutDiscontinuity(int id, Position position) {
 		super(id,position);
 		
 		CLOCK = new ConstantDriftClock();		
@@ -172,9 +172,28 @@ public class FtspNode extends Node implements TimerHandler{
     	table[freeItem].free = false;
         table[freeItem].x  = new UInt32(localTime);
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
-    
+
+        /* calculate using previous least-squares line */
+        UInt32 y1 = local2Global(localTime);
+        
         /* calculate new least-squares line */
         ls.calculate(table, tableEntries);
+        
+        /* calculate using new least-squares line */
+        UInt32 y2 = local2Global(localTime);
+        
+        /* detect time discontinuity */
+        timeError = y1.subtract(y2).toInteger();
+        
+        if(is_synced() && timeError> 1){
+//        	System.out.println("Second:" + Simulator.getInstance().getSecond().longValue() +
+//			 " Node:" + NODE_ID + 
+//			 " Diff:" + timeError);
+        	       	
+        	UInt32 offset = new UInt32((int)((float)timeError/ls.getSlope()));
+        	ls.setMeanX(ls.getMeanX().add(offset));
+        }
+
         numEntries = tableEntries;
     }
 

@@ -1,6 +1,6 @@
 package application.appFtsp;
 
-import application.regression.LeastSquares;
+import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -13,7 +13,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class FtspNode extends Node implements TimerHandler{
+public class FtspNodeMinimumVariance extends Node implements TimerHandler{
 	
 	private static final int MAX_ENTRIES           = 8;              	// number of entries in the table
 	private static final int BEACON_RATE           = 30000000;  	 	// how often send the beacon msg (in seconds)
@@ -21,13 +21,14 @@ public class FtspNode extends Node implements TimerHandler{
 	private static final int IGNORE_ROOT_MSG       = 4;              	// after becoming the root ignore other roots messages (in send period)
 	private static final int ENTRY_VALID_LIMIT     = 4;              	// number of entries to become synchronized
 	private static final int ENTRY_SEND_LIMIT      = 3;              	// number of entries to send sync messages
-	private static final int ENTRY_THROWOUT_LIMIT  = Integer.MAX_VALUE;	// if time sync error is bigger than this clear the table
+	private static final int ENTRY_THROWOUT_LIMIT  = Integer.MAX_VALUE; // if time sync error is bigger than this clear the table
 	
-	LeastSquares ls = new LeastSquares();	
-	
+	MinimumVarianceSlopeRegression ls = new MinimumVarianceSlopeRegression();
 	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
+	
 	int tableEntries = 0;	
     int numEntries;
+    int tableEnd = -1;
 	
 	Timer timer0;
 	
@@ -40,7 +41,7 @@ public class FtspNode extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     FtspMessage outgoingMsg = new FtspMessage();
 
-	public FtspNode(int id, Position position) {
+	public FtspNodeMinimumVariance(int id, Position position) {
 		super(id,position);
 		
 		CLOCK = new ConstantDriftClock();		
@@ -128,52 +129,36 @@ public class FtspNode extends Node implements TimerHandler{
 	private int numErrors=0;    
     void addNewEntry(FtspMessage msg,UInt32 localTime)
     {
-        int i, freeItem = -1, oldestItem = 0;
-        UInt32 age, oldestTime = new UInt32();
+        int i;
         int  timeError;
 
         // clear table if the received entry's been inconsistent for some time
-        timeError = local2Global(localTime).toInteger() - msg.clock.toInteger();
+        timeError = ls.calculateY(localTime).subtract(msg.clock).toInteger();
         
-        if( is_synced() && (timeError > ENTRY_THROWOUT_LIMIT || timeError < -ENTRY_THROWOUT_LIMIT))
+        if( is_synced() && (Math.abs(timeError) > ENTRY_THROWOUT_LIMIT) )
         {
-            if (++numErrors > 3)
-                clearTable();
-            return; // don't incorporate a bad reading
+            if (++numErrors > 3);
+//                clearTable();
+//            return; // don't incorporate a bad reading
         }
-        
-        tableEntries = 0; // don't reset table size unless you're recounting
+
         numErrors = 0;
-
-        for(i = 0; i < MAX_ENTRIES; ++i) {  
-        	age = new UInt32(localTime);
-        	age = age.subtract(table[i].x);
-
-            //logical time error compensation
-            if( age.getValue() >= 0x7FFFFFFFL )
-                table[i].free = true;
-
-            if( table[i].free)
-                freeItem = i;
-            else
-                ++tableEntries;
-
-            if( age.compareTo(oldestTime) >= 0 ) {
-                oldestTime = age;
-                oldestItem = i;
+        
+        if (tableEntries == MAX_ENTRIES){
+            /* shift left all the entries: we get ranked  x values */
+            for(i=0; i < MAX_ENTRIES-1; i++){
+              table[i] = new RegressionEntry(table[i+1]);
             }
-        }
-
-        if( freeItem < 0 )
-            freeItem = oldestItem;
-        else
-            ++tableEntries;
-
-    	table[freeItem].free = false;
-        table[freeItem].x  = new UInt32(localTime);
-        table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
-    
-        /* calculate new least-squares line */
+          }
+          else{
+        	  tableEnd++;
+        	  tableEntries++;          
+          }
+        
+    	table[tableEnd].free = false;
+        table[tableEnd].x  = new UInt32(localTime);
+        table[tableEnd].y = msg.clock.subtract(localTime).toInteger();	  
+        
         ls.calculate(table, tableEntries);
         numEntries = tableEntries;
     }
@@ -185,6 +170,8 @@ public class FtspNode extends Node implements TimerHandler{
             table[i].free = true;
 
         numEntries = 0;
+        tableEnd = -1;
+        tableEntries = 0;
 	}
 	
     void processMsg()
@@ -220,14 +207,7 @@ public class FtspNode extends Node implements TimerHandler{
 	}
 	
 	public UInt32 local2Global() {
-		UInt32 now = CLOCK.getValue();
-		
-		return ls.calculateY(now);
-	}
-	
-	public UInt32 local2Global(UInt32 now) {
-		
-		return ls.calculateY(now);
+		return ls.calculateY(CLOCK.getValue());
 	}
 	
 	public String toString(){
@@ -236,7 +216,7 @@ public class FtspNode extends Node implements TimerHandler{
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " " + Float.floatToIntBits(ls.getSlope());
-		
+
 		return s;		
 	}
 }
