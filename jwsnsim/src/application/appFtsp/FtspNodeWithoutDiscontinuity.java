@@ -185,13 +185,21 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         /* detect time discontinuity */
         timeError = y1.subtract(y2).toInteger();
         
-        if(is_synced() && timeError> 1){
+        //if(is_synced() && timeError> 1){
+        if(is_synced()){
 //        	System.out.println("Second:" + Simulator.getInstance().getSecond().longValue() +
 //			 " Node:" + NODE_ID + 
 //			 " Diff:" + timeError);
         	       	
-        	UInt32 offset = new UInt32((int)((float)timeError/ls.getSlope()));
-        	ls.setMeanX(ls.getMeanX().add(offset));
+        	int offset = (int)((float)timeError/ls.getSlope());
+        	UInt32 o = new UInt32(offset);
+        	
+        	if(timeError> 1){        		
+        		ls.setMeanX(ls.getMeanX().add(o));
+        	}
+        	else if (timeError < -1){
+            	ls.setMeanX(ls.getMeanX().subtract(o));
+        	}
         }
 
         numEntries = tableEntries;
