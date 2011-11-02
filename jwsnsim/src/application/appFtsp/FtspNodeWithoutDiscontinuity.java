@@ -28,6 +28,8 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
 	int tableEntries = 0;	
     int numEntries;
+    
+    UInt32 correction = new UInt32();
 	
 	Timer timer0;
 	
@@ -190,16 +192,29 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 //        	System.out.println("Second:" + Simulator.getInstance().getSecond().longValue() +
 //			 " Node:" + NODE_ID + 
 //			 " Diff:" + timeError);
-        	       	
-        	int offset = (int)((float)timeError/ls.getSlope());
-        	UInt32 o = new UInt32(offset);
         	
-        	if(timeError> 1){        		
-        		ls.setMeanX(ls.getMeanX().add(o));
+        	if(timeError > 1){        		
+        		correction =  y1.subtract(y2);
+        		
+//        		y2 = local2Global(localTime);
+//                  
+//            	System.out.println("Set Back Second:" + Simulator.getInstance().getSecond().longValue() +
+//   			 " Node:" + NODE_ID + 
+//   			 " Old Diff:" + timeError+
+//   			 " New Diff:" + y1.subtract(y2).toInteger());
         	}
         	else if (timeError < -1){
-            	ls.setMeanX(ls.getMeanX().subtract(o));
+        		correction =  y1.subtract(y2);
+        		
+//        		y2 = local2Global(localTime);
+                
+//            	System.out.println("Set Forward Second:" + Simulator.getInstance().getSecond().longValue() +
+//              			 " Node:" + NODE_ID + 
+//               			 " Old Diff:" + timeError+
+//               			 " New Diff:" + y1.subtract(y2).toInteger());
         	}
+        	
+        	
         }
 
         numEntries = tableEntries;
@@ -247,14 +262,15 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	}
 	
 	public UInt32 local2Global() {
-		UInt32 now = CLOCK.getValue();
+		UInt32 time = ls.calculateY(CLOCK.getValue());;
 		
-		return ls.calculateY(now);
+		return time.add(correction);
 	}
 	
 	public UInt32 local2Global(UInt32 now) {
+		UInt32 time = ls.calculateY(now);
 		
-		return ls.calculateY(now);
+		return time.add(correction); 
 	}
 	
 	public String toString(){
