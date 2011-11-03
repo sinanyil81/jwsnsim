@@ -29,7 +29,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	int tableEntries = 0;	
     int numEntries;
     
-    UInt32 correction = new UInt32();
+    int correction = 0;
 	
 	Timer timer0;
 	
@@ -180,6 +180,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         
         /* calculate new least-squares line */
         ls.calculate(table, tableEntries);
+        correction = 0;
         
         /* calculate using new least-squares line */
         UInt32 y2 = local2Global(localTime);
@@ -193,27 +194,20 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 //			 " Node:" + NODE_ID + 
 //			 " Diff:" + timeError);
         	
-        	if(timeError > 1){        		
-        		correction =  y1.subtract(y2);
+        	if(timeError > 1 ){ 
         		
-//        		y2 = local2Global(localTime);
-//                  
-//            	System.out.println("Set Back Second:" + Simulator.getInstance().getSecond().longValue() +
-//   			 " Node:" + NODE_ID + 
-//   			 " Old Diff:" + timeError+
-//   			 " New Diff:" + y1.subtract(y2).toInteger());
-        	}
-        	else if (timeError < -1){
-        		correction =  y1.subtract(y2);
+        		int offset = (int)((float)timeError/(1.0f + ls.getSlope()));
+        		ls.setMeanX(ls.getMeanX().add(new UInt32(offset/2)));
+        		ls.setMeanY(ls.getMeanY()+timeError/2);
+        		        		
+        		y2 = local2Global(localTime);
         		
-//        		y2 = local2Global(localTime);
-                
-//            	System.out.println("Set Forward Second:" + Simulator.getInstance().getSecond().longValue() +
-//              			 " Node:" + NODE_ID + 
-//               			 " Old Diff:" + timeError+
-//               			 " New Diff:" + y1.subtract(y2).toInteger());
-        	}
-        	
+        		int error =y1.subtract(y2).toInteger(); 
+        		if( error > 1){
+        			System.out.println(error);
+        			y2 = local2Global(localTime);
+        		}
+        	}        	
         	
         }
 
@@ -262,15 +256,16 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	}
 	
 	public UInt32 local2Global() {
-		UInt32 time = ls.calculateY(CLOCK.getValue());;
+		UInt32 local = CLOCK.getValue();		
+		UInt32 time = ls.calculateY(local);
 		
-		return time.add(correction);
+		return time;
 	}
 	
 	public UInt32 local2Global(UInt32 now) {
 		UInt32 time = ls.calculateY(now);
 		
-		return time.add(correction); 
+		return time;
 	}
 	
 	public String toString(){

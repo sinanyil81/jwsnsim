@@ -17,6 +17,6 @@ public class LogicalClock {
 		int timePassed = currentTime.subtract(updateLocalTime).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*rate);
 		
-		return value.add(progress);
+		return value.add(new UInt32(progress));
 	}
 }
