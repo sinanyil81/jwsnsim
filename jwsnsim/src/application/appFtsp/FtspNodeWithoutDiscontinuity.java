@@ -194,11 +194,14 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 //			 " Node:" + NODE_ID + 
 //			 " Diff:" + timeError);
         	
-        	if(timeError > 1 ){ 
+        	if(timeError != 0 ){ 
         		
-        		int offset = (int)((float)timeError/(1.0f + ls.getSlope()));
-        		ls.setMeanX(ls.getMeanX().add(new UInt32(offset/2)));
-        		ls.setMeanY(ls.getMeanY()+timeError/2);
+        		int offset = timeError/2;
+        		
+        		ls.setMeanY(ls.getMeanY()+offset);
+        		
+        		offset = (int)((float)offset/ls.getSlope());
+        		ls.setMeanX(ls.getMeanX().subtract(new UInt32(offset)));
         		        		
         		y2 = local2Global(localTime);
         		
