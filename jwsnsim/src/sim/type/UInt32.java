@@ -24,12 +24,14 @@ public class UInt32 implements Comparable<UInt32>{
 	}
 	
 	public UInt32(long value) {
-		this.value = value & 0xFFFFFFFFL;
+		this.value = value & MAX_VALUE;
 	}
 	
 	public UInt32(int value) {
-		if(value < 0){
-			this.value = value & 0x7FFFFFFFL;
+		/* get all bits other than the sign bit */		
+		this.value = value & 0x7FFFFFFFL;
+		
+		if(value < 0){			
 			this.value |= 0x80000000L;
 		}
 		else{
@@ -44,23 +46,11 @@ public class UInt32 implements Comparable<UInt32>{
 	public UInt32 add(UInt32 x){
 		long result = value + x.getValue();
 		
-		if(result > 0xFFFFFFFFL)
-			result -= 0xFFFFFFFFL;
-		
-		return new UInt32(result);
-	}
-	
-	/**
-	 * 
-	 * @param x Must be a positive integer value.
-	 * @return
-	 */
-	public UInt32 add(long x){
-		long result = value + x;
-		
-		if(result > 0xFFFFFFFFL)
-			result -= 0xFFFFFFFFL;
-		
+		if(result > MAX_VALUE){
+			result -= MAX_VALUE;
+			result--;
+		}
+					
 		return new UInt32(result);
 	}
 	
@@ -68,36 +58,23 @@ public class UInt32 implements Comparable<UInt32>{
 		long result = value;
 		
 		/* inverse of 2's complement */
-		result = (~result) & 0xFFFFFFFFL;
-		result++;
+		result = (~result) & MAX_VALUE;
 		
-		if(result > 0xFFFFFFFFL)
-			result -= 0xFFFFFFFFL;
+		if(result == MAX_VALUE){
+			result = 0;
+		}
+		else{
+			result++;
+		}
 		
 		return new UInt32(result);
 	}
 	
 	public UInt32 subtract(UInt32 x){
-		long result = x.getValue();
 		
-		/* 2's complement */
-		result = (~result) & 0xFFFFFFFFL;
-		//result += 0xFFFFFFFFL;
-		result++;
-				
-		if(result > 0xFFFFFFFFL)
-			result -= 0xFFFFFFFFL;
-		
-		result += value;
-		
-		if(result > 0xFFFFFFFFL)
-			result -= 0xFFFFFFFFL;
-		
-		return new UInt32(result);
-	}
-	
-	public UInt32 divide(UInt32 x){
-		return new UInt32(value/x.getValue());
+		UInt32 twosComplementOfX = x.twosComplement();
+					
+		return add(twosComplementOfX);
 	}
 	
 	public int toInteger(){
