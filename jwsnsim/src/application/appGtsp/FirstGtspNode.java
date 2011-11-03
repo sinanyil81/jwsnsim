@@ -66,7 +66,7 @@ public class FirstGtspNode extends Node implements TimerHandler{
 		long timePassed = currentTime.subtract(updateLocalTime).getValue();
 		long progress = (long)((double)timePassed*logicalClockRate) + logicalClockOffset;
 		
-		return logicalClock.add(progress);
+		return logicalClock.add(new  UInt32(progress));
 	}
 	
 	private void copyMessage(GtspMessage message, NeighborEntry entry,UInt32 receiveTime){

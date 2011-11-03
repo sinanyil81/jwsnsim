@@ -13,6 +13,6 @@ public class LogicalClock {
 		long timePassed = currentTime.subtract(updateLocalTime).getValue();
 		long progress = (long)((double)timePassed*rate) + offset;
 		
-		return value.add(progress);
+		return value.add(new UInt32(progress));
 	}
 }
