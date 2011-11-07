@@ -42,14 +42,16 @@ public class FtspApp extends Application implements TimerHandler{
 
 	private void createTopology(int topology) {
 		//nodes = new FtspNode[NUMNODES];	
-		nodes = new FtspNodeWithoutDiscontinuity[NUMNODES];
+//		nodes = new FtspNodeWithoutDiscontinuity[NUMNODES];
 		//nodes = new FtspNodeMinimumVariance[NUMNODES];
+		nodes = new FtspNodeAverage[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
 				//nodes[i] = new FtspNode(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new FtspNodeWithoutDiscontinuity(i+1,new Position(i*5,i*5,0));
+//				nodes[i] = new FtspNodeWithoutDiscontinuity(i+1,new Position(i*5,i*5,0));
 				//nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new FtspNodeAverage(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 	}
