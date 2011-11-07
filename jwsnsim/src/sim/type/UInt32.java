@@ -54,6 +54,10 @@ public class UInt32 implements Comparable<UInt32>{
 		return new UInt32(result);
 	}
 	
+	public UInt32 add(int x){
+		return add(new UInt32(x));
+	}
+	
 	public UInt32 twosComplement(){
 		long result = value;
 		
@@ -75,6 +79,16 @@ public class UInt32 implements Comparable<UInt32>{
 		UInt32 twosComplementOfX = x.twosComplement();
 					
 		return add(twosComplementOfX);
+	}
+	
+	public UInt32 subtract(int x){
+		return subtract(new UInt32(x));
+	}
+	
+	public UInt32 multiply(float x){
+		float result = x*((float)toInteger());
+		
+		return new UInt32((int)result);
 	}
 	
 	public int toInteger(){
