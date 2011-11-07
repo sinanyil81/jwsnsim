@@ -32,10 +32,15 @@ public class FtspNodeAverage extends Node implements TimerHandler{
     int correction = 0;
 	
 	Timer timer0;
-	
+
 	float slopeTable[] = new float[MAX_ENTRIES];
 	int slopeIndex = 0;
 	int numSlopes = 0;
+	
+	private static final int MAX_AVERAGES = 8;
+	float averageTable[] = new float[MAX_AVERAGES];
+	int averageIndex = 0;
+	int numAverages = 0;
 	
 	int ROOT_ID;
 	int sequence;
@@ -133,22 +138,33 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	
 	void adjustSlope(){
         if(is_synced()){
+        	
         	slopeTable[slopeIndex] = ls.getSlope();
-
+        	slopeIndex = (slopeIndex + 1) % MAX_ENTRIES;
         	if (numSlopes<MAX_ENTRIES)
         		numSlopes++;
         	
-        	float slopeSum = 0.0f;
+        	float slopeAvg = 0.0f;
         	
         	for(int i= 0;i<numSlopes;i++){
-        		slopeSum += slopeTable[i];
-        	}        	      
+        		slopeAvg += slopeTable[i]/(float)numSlopes;
+        	}  
         	
-        	ls.setSlope(slopeSum/(float)numSlopes);        	
-        	slopeTable[slopeIndex] = ls.getSlope();	
-        	slopeIndex = (slopeIndex + 1) % MAX_ENTRIES;
+        	averageTable[averageIndex] = slopeAvg;  
+        	averageIndex = (averageIndex + 1) % MAX_AVERAGES;
+        	if (numAverages<MAX_AVERAGES)
+        		numAverages++;
+        	        	
+        	slopeAvg = 0.0f;
+        	
+        	for(int i= 0;i<numAverages;i++){
+        		slopeAvg += averageTable[i]/(float)numAverages;
+        	}  
+        	
+        	ls.setSlope((slopeAvg + ls.getSlope())/2.0f);        	
         }
 	}
+	
 	private int numErrors=0;    
     void addNewEntry(FtspMessage msg,UInt32 localTime)
     {
@@ -215,6 +231,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         
     	slopeIndex = 0;
     	numSlopes = 0;
+    	averageIndex = 0;
+    	numAverages = 0;
 	}
 	
     void processMsg()
