@@ -22,7 +22,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	private static final int IGNORE_ROOT_MSG       = 4;              	// after becoming the root ignore other roots messages (in send period)
 	private static final int ENTRY_VALID_LIMIT     = 4;              	// number of entries to become synchronized
 	private static final int ENTRY_SEND_LIMIT      = 3;              	// number of entries to send sync messages
-	private static final int ENTRY_THROWOUT_LIMIT  = 1000;				// if time sync error is bigger than this clear the table
+	private static final int ENTRY_THROWOUT_LIMIT  = 10000;				// if time sync error is bigger than this clear the table
 	
 	ModifiedLeastSquares ls = new ModifiedLeastSquares();	
 	
@@ -264,7 +264,12 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         /* calculate new least-squares line */
         ls.calculate(table, tableEntries);
         
-        adjustSlope();
+        timeError = msg.clock.subtract(ls.calculateY(localTime)).toInteger();
+        if(timeError !=0 && is_synced()){
+        	System.out.println(NODE_ID + " " + timeError);
+        }
+        
+//        adjustSlope();
 
         numEntries = tableEntries;
     }
