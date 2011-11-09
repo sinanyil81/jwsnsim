@@ -5,6 +5,8 @@ import sim.type.UInt32;
 public class ModifiedLeastSquares {
 	
 	private float slope = 0.0f;
+	private UInt32 meanX = new UInt32();
+	private int meanY = 0;
 	private UInt32 offset = new UInt32();
 	
 	public void calculate(RegressionEntry table[], int tableEntries){
@@ -67,6 +69,8 @@ public class ModifiedLeastSquares {
             newSlope = (float)ySum / (float)xSum;
 
         slope = newSlope;
+        meanY = newMeanY;
+        meanX = new UInt32(newMeanX);
         
         offset = new UInt32(newMeanY);
         newMeanX = newMeanX.multiply(slope);
@@ -86,15 +90,22 @@ public class ModifiedLeastSquares {
 	}
 
 	public void setOffset(int offset) {
+		if(this.offset.toInteger() != offset){
+			int val = meanY-offset-meanX.multiply(slope).toInteger();
+			val = (int) (((float)val)/slope);
+			meanX.add(val); 			
+		}
+		
 		this.offset = new UInt32(offset);
 	}
 		
 	public UInt32 calculateY(UInt32 x) {
 		UInt32 result = new UInt32(x);
-	
+
+		result = result.subtract(meanX);		
 		result = result.multiply(slope);
-		result = result.add(offset);
-		result = result.add(x);
+		result = result.add(meanY);
+		result = result.add(x);	
 				
         return result;
 	}
