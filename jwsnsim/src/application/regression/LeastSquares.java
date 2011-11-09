@@ -110,8 +110,8 @@ public class LeastSquares {
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);
 		result = result.add(meanY);
-		result = result.add(x);
-		
+		result = result.add(x);	
+				
         return result;
 	}
 	
