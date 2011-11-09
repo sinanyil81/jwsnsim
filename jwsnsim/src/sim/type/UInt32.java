@@ -86,9 +86,21 @@ public class UInt32 implements Comparable<UInt32>{
 	}
 	
 	public UInt32 multiply(float x){
-		float result = x*((float)toInteger());
 		
-		return new UInt32((int)result);
+		UInt32 result;
+		
+		if(this.value <= 0x7FFFFFFFL){
+			result = new UInt32((int)(x*((float)this.value)));
+		}
+		else{
+			result = new UInt32((int)(x*((float)(this.value & 0x7FFFFFFFL))));
+			long y = 0x7FFFFFFFL;
+			float z = (float)y;
+			z *= x;
+			result = result.add((int)z);			
+		}
+		
+		return result;
 	}
 	
 	public int toInteger(){
