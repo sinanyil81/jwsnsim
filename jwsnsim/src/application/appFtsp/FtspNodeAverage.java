@@ -1,6 +1,7 @@
 package application.appFtsp;
 
 import application.regression.LeastSquares;
+import application.regression.ModifiedLeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -21,9 +22,9 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	private static final int IGNORE_ROOT_MSG       = 4;              	// after becoming the root ignore other roots messages (in send period)
 	private static final int ENTRY_VALID_LIMIT     = 4;              	// number of entries to become synchronized
 	private static final int ENTRY_SEND_LIMIT      = 3;              	// number of entries to send sync messages
-	private static final int ENTRY_THROWOUT_LIMIT  = Integer.MAX_VALUE;	// if time sync error is bigger than this clear the table
+	private static final int ENTRY_THROWOUT_LIMIT  = 1000;				// if time sync error is bigger than this clear the table
 	
-	LeastSquares ls = new LeastSquares();	
+	ModifiedLeastSquares ls = new ModifiedLeastSquares();	
 	
 	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
 	int tableEntries = 0;	
@@ -35,12 +36,20 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 
 	float slopeTable[] = new float[MAX_ENTRIES];
 	int slopeIndex = 0;
-	int numSlopes = 0;
+	int numSlopes = 0;	
 	
 	private static final int MAX_AVERAGES = 8;
 	float averageTable[] = new float[MAX_AVERAGES];
 	int averageIndex = 0;
 	int numAverages = 0;
+	
+	int offsetTable[] = new int[MAX_ENTRIES];
+	int offsetIndex = 0;
+	int numOffsets = 0;
+	
+	int offsetAverageTable[] = new int[MAX_AVERAGES];
+	int offsetAverageIndex = 0;
+	int numAverageOffsets = 0;
 	
 	int ROOT_ID;
 	int sequence;
@@ -98,11 +107,11 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         // we need to periodically update the reference point for the root
         // to avoid wrapping the 32-bit (localTime - localAverage) value
         if( outgoingMsg.rootid == NODE_ID ) {
-            if( (localTime.subtract(ls.getMeanX())).getValue() >= 0x20000000 )
-            {
-            		ls.setMeanX(new UInt32(localTime));
-                    ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
-            }
+//            if( (localTime.subtract(ls.getMeanX())).getValue() >= 0x20000000 )
+//            {
+//            		ls.setMeanX(new UInt32(localTime));
+//                    ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
+//            }
         }
         else if( heartBeats >= ROOT_TIMEOUT ) {
             heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
@@ -148,20 +157,59 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         	
         	for(int i= 0;i<numSlopes;i++){
         		slopeAvg += slopeTable[i]/(float)numSlopes;
-        	}  
+        	}
         	
-        	averageTable[averageIndex] = slopeAvg;  
-        	averageIndex = (averageIndex + 1) % MAX_AVERAGES;
-        	if (numAverages<MAX_AVERAGES)
-        		numAverages++;
-        	        	
-        	slopeAvg = 0.0f;
+        	ls.setSlope(slopeAvg);
+
         	
-        	for(int i= 0;i<numAverages;i++){
-        		slopeAvg += averageTable[i]/(float)numAverages;
-        	}  
+//        	averageTable[averageIndex] = slopeAvg;  
+//        	averageIndex = (averageIndex + 1) % MAX_AVERAGES;
+//        	if (numAverages<MAX_AVERAGES)
+//        		numAverages++;
+//        	
+//        	slopeAvg = 0.0f;
+//        	
+//        	for(int i= 0;i<numAverages;i++){
+//        		slopeAvg += averageTable[i]/(float)numAverages;
+//        	}  
+//        	
+////        	ls.setSlope((slopeAvg + ls.getSlope())/2.0f);
+//        	ls.setSlope(slopeAvg);
+
+        	offsetTable[offsetIndex] = ls.getOffset();
+        	offsetIndex = (offsetIndex + 1) % MAX_ENTRIES;
+        	if (numOffsets<MAX_ENTRIES)
+        		numOffsets++;        	        	
         	
-        	ls.setSlope((slopeAvg + ls.getSlope())/2.0f);        	
+        	int offsetAvg = 0;
+        	int offsetAvgRemainder = 0;
+        	
+        	for(int i= 0;i<numOffsets;i++){
+        		offsetAvg += offsetTable[i]/numOffsets;
+        		offsetAvgRemainder += (offsetTable[i] % numOffsets);
+        	}
+        	
+        	offsetAvg += offsetAvgRemainder/numOffsets;       	        	      	
+        	
+        	ls.setOffset(offsetAvg);
+
+        	
+//        	offsetAverageTable[offsetAverageIndex] = offsetAvg;  
+//        	offsetAverageIndex = (offsetAverageIndex + 1) % MAX_AVERAGES;
+//        	if (numAverageOffsets<MAX_AVERAGES)
+//        		numAverageOffsets++;
+//        	
+//        	offsetAvg = 0;
+//        	offsetAvgRemainder = 0;
+//        	
+//        	for(int i= 0;i<numAverageOffsets;i++){
+//        		offsetAvg += offsetAverageTable[i]/numAverageOffsets;
+//        		offsetAvgRemainder += (offsetAverageTable[i] % numAverageOffsets);
+//        	}
+//        	
+//        	offsetAvg += offsetAvgRemainder/numAverageOffsets;    
+//        	
+//        	ls.setOffset(offsetAvg);
         }
 	}
 	
@@ -233,6 +281,11 @@ public class FtspNodeAverage extends Node implements TimerHandler{
     	numSlopes = 0;
     	averageIndex = 0;
     	numAverages = 0;
+    	
+    	offsetIndex = 0;
+    	numOffsets = 0;    	   
+    	offsetAverageIndex = 0;
+    	numAverageOffsets = 0;
 	}
 	
     void processMsg()
