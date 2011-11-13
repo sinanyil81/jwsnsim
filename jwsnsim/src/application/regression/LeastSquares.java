@@ -104,6 +104,12 @@ public class LeastSquares {
 		this.meanY = meanY;
 	}
 	
+	public int getOffset() {
+		int val = meanY-meanX.multiply(slope).toInteger();
+		
+		return val;
+	}
+	
 	public UInt32 calculateY(UInt32 x) {
 		UInt32 result = new UInt32(x);
 
