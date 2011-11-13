@@ -24,33 +24,21 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	private static final int ENTRY_SEND_LIMIT      = 3;              	// number of entries to send sync messages
 	private static final int ENTRY_THROWOUT_LIMIT  = 10000;				// if time sync error is bigger than this clear the table
 	
-	ModifiedLeastSquares ls = new ModifiedLeastSquares();	
+	LeastSquares ls = new LeastSquares();
+	LeastSquares currentls = new LeastSquares();
 	
 	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
 	int tableEntries = 0;	
     int numEntries;
 
-    int correction = 0;
+    /* average related variables */
+	float slopeTable[] = new float[MAX_ENTRIES];
+	int offsetTable[] = new int[MAX_ENTRIES];
+	int lineIndex = 0;
+	int numLines = 0;	
 	
 	Timer timer0;
-
-	float slopeTable[] = new float[MAX_ENTRIES];
-	int slopeIndex = 0;
-	int numSlopes = 0;	
-	
-	private static final int MAX_AVERAGES = 8;
-	float averageTable[] = new float[MAX_AVERAGES];
-	int averageIndex = 0;
-	int numAverages = 0;
-	
-	int offsetTable[] = new int[MAX_ENTRIES];
-	int offsetIndex = 0;
-	int numOffsets = 0;
-	
-	int offsetAverageTable[] = new int[MAX_AVERAGES];
-	int offsetAverageIndex = 0;
-	int numAverageOffsets = 0;
-	
+		
 	int ROOT_ID;
 	int sequence;
 
@@ -145,71 +133,51 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 		timer0.startPeriodic(BEACON_RATE);
 	}	
 	
-	void adjustSlope(){
+	void adjustLine(){
         if(is_synced()){
         	
-        	slopeTable[slopeIndex] = ls.getSlope();
-        	slopeIndex = (slopeIndex + 1) % MAX_ENTRIES;
-        	if (numSlopes<MAX_ENTRIES)
-        		numSlopes++;
+        	slopeTable[lineIndex] = ls.getSlope();
+        	offsetTable[lineIndex] = ls.getOffset();
+//        	offsetTable[lineIndex] = ls.getMeanY();
+        	lineIndex = (lineIndex + 1) % MAX_ENTRIES;
+        	if (numLines<MAX_ENTRIES)
+        		numLines++;
         	
+        	/* calculate slope average */
         	float slopeAvg = 0.0f;
         	
-        	for(int i= 0;i<numSlopes;i++){
-        		slopeAvg += slopeTable[i]/(float)numSlopes;
+        	for(int i= 0; i < numLines; i++){
+        		slopeAvg += slopeTable[i]/(float)numLines;
         	}
-        	
-        	ls.setSlope(slopeAvg);
-
-        	
-//        	averageTable[averageIndex] = slopeAvg;  
-//        	averageIndex = (averageIndex + 1) % MAX_AVERAGES;
-//        	if (numAverages<MAX_AVERAGES)
-//        		numAverages++;
-//        	
-//        	slopeAvg = 0.0f;
-//        	
-//        	for(int i= 0;i<numAverages;i++){
-//        		slopeAvg += averageTable[i]/(float)numAverages;
-//        	}  
-//        	
-////        	ls.setSlope((slopeAvg + ls.getSlope())/2.0f);
-//        	ls.setSlope(slopeAvg);
-
-        	offsetTable[offsetIndex] = ls.getOffset();
-        	offsetIndex = (offsetIndex + 1) % MAX_ENTRIES;
-        	if (numOffsets<MAX_ENTRIES)
-        		numOffsets++;        	        	
         	
         	int offsetAvg = 0;
         	int offsetAvgRemainder = 0;
         	
-        	for(int i= 0;i<numOffsets;i++){
-        		offsetAvg += offsetTable[i]/numOffsets;
-        		offsetAvgRemainder += (offsetTable[i] % numOffsets);
+        	for(int i= 0; i < numLines; i++){
+        		offsetAvg += offsetTable[i]/numLines;
+        		offsetAvgRemainder += (offsetTable[i] % numLines);
         	}
         	
-        	offsetAvg += offsetAvgRemainder/numOffsets;       	        	      	
+        	offsetAvg += offsetAvgRemainder/numLines;
+        	        	
+        	int diff = offsetAvg - ls.getOffset();
+//        	int diff = offsetAvg - ls.getMeanY();
         	
-        	ls.setOffset(offsetAvg);
-
+        	if(diff > 1000 || diff < -1000){
+        		diff--;
+        	}      
         	
-//        	offsetAverageTable[offsetAverageIndex] = offsetAvg;  
-//        	offsetAverageIndex = (offsetAverageIndex + 1) % MAX_AVERAGES;
-//        	if (numAverageOffsets<MAX_AVERAGES)
-//        		numAverageOffsets++;
-//        	
-//        	offsetAvg = 0;
-//        	offsetAvgRemainder = 0;
-//        	
-//        	for(int i= 0;i<numAverageOffsets;i++){
-//        		offsetAvg += offsetAverageTable[i]/numAverageOffsets;
-//        		offsetAvgRemainder += (offsetAverageTable[i] % numAverageOffsets);
-//        	}
-//        	
-//        	offsetAvg += offsetAvgRemainder/numAverageOffsets;    
-//        	
-//        	ls.setOffset(offsetAvg);
+//        	diff = (int) ((float)diff/slopeAvg);
+//        	currentls.setMeanX(ls.getMeanX().subtract(diff));
+////        	currentls.setMeanY(ls.getMeanY()+diff);
+        	currentls.setMeanX(ls.getMeanX());
+        	currentls.setMeanY(ls.getMeanY());
+        	currentls.setSlope(slopeAvg);
+        }
+        else{
+        	currentls.setMeanX(ls.getMeanX());
+        	currentls.setMeanY(ls.getMeanY());
+        	currentls.setSlope(ls.getSlope());
         }
 	}
 	
@@ -262,14 +230,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
      
         /* calculate new least-squares line */
-        ls.calculate(table, tableEntries);
-        
-        timeError = msg.clock.subtract(ls.calculateY(localTime)).toInteger();
-        if(timeError !=0 && is_synced()){
-        	System.out.println(NODE_ID + " " + timeError);
-        }
-        
-//        adjustSlope();
+        ls.calculate(table, tableEntries);                
+        adjustLine();
 
         numEntries = tableEntries;
     }
@@ -282,15 +244,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 
         numEntries = 0;
         
-    	slopeIndex = 0;
-    	numSlopes = 0;
-    	averageIndex = 0;
-    	numAverages = 0;
-    	
-    	offsetIndex = 0;
-    	numOffsets = 0;    	   
-    	offsetAverageIndex = 0;
-    	numAverageOffsets = 0;
+    	lineIndex = 0;
+    	numLines = 0;    	   
 	}
 	
     void processMsg()
@@ -327,15 +282,26 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	
 	public UInt32 local2Global() {
 		UInt32 local = CLOCK.getValue();
-		local = local.add(new UInt32(correction));
 		UInt32 time = ls.calculateY(local);
 		
 		return time;
 	}
 	
 	public UInt32 local2Global(UInt32 now) {
-		now = now.add(new UInt32(correction));
 		UInt32 time = ls.calculateY(now);
+		
+		return time;
+	}
+	
+	public UInt32 myLocal2Global() {
+		UInt32 local = CLOCK.getValue();
+		UInt32 time = currentls.calculateY(local);
+		
+		return time;
+	}
+	
+	public UInt32 myLocal2Global(UInt32 now) {
+		UInt32 time = currentls.calculateY(now);
 		
 		return time;
 	}
@@ -344,8 +310,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 		String s = Simulator.getInstance().getSecond().toString(10);
 		
 		s += " " + NODE_ID;
-		s += " " + local2Global().toString();
-		s += " " + Float.floatToIntBits(ls.getSlope());
+		s += " " + myLocal2Global().toString();
+		s += " " + Float.floatToIntBits(currentls.getSlope());
 		
 		return s;		
 	}
