@@ -11,9 +11,9 @@ import sim.clock.Clock;
 import sim.node.Node;
 
 public class Simulator {
-	//static private long SIMULATOR_SEED = 0x123456L;	
-	//static public Random random = new Random(SIMULATOR_SEED);
-	static public Random random = new Random();
+	static private long SIMULATOR_SEED = 0x123456L;	
+	static public Random random = new Random(SIMULATOR_SEED);
+//	static public Random random = new Random();
 	
 	private static Simulator simulator = null;
 	private BigInteger realTime = BigInteger.ZERO;

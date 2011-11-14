@@ -20,7 +20,7 @@ public class UInt32 implements Comparable<UInt32>{
 	}
 	
 	public UInt32(UInt32 value) {
-		this.value = value.getValue();
+		this.value = value.toLong();
 	}
 	
 	public UInt32(long value) {
@@ -38,13 +38,9 @@ public class UInt32 implements Comparable<UInt32>{
 			this.value = value;
 		}		
 	}
-
-	public long getValue(){
-		return value;
-	}
 	
 	public UInt32 add(UInt32 x){
-		long result = value + x.getValue();
+		long result = value + x.toLong();
 		
 		if(result > MAX_VALUE){
 			result -= MAX_VALUE;
@@ -85,22 +81,13 @@ public class UInt32 implements Comparable<UInt32>{
 		return subtract(new UInt32(x));
 	}
 	
-	public UInt32 multiply(float x){
+	public UInt32 multiply(float x){		
 		
-		UInt32 result;
-		
-		if(this.value <= 0x7FFFFFFFL){
-			result = new UInt32((int)(x*((float)this.value)));
-		}
-		else{
-			result = new UInt32((int)(x*((float)(this.value & 0x7FFFFFFFL))));
-			long y = 0x7FFFFFFFL;
-			float z = (float)y;
-			z *= x;
-			result = result.add((int)z);			
-		}
-		
-		return result;
+		return new UInt32((int)(x*this.value));
+	}
+
+	public long toLong(){
+		return value;
 	}
 	
 	public int toInteger(){
@@ -121,7 +108,7 @@ public class UInt32 implements Comparable<UInt32>{
 
 	@Override
 	public int compareTo(UInt32 o) {
-		return (int)(value - o.getValue());
+		return (int)(value - o.toLong());
 	}
 
 }

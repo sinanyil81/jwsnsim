@@ -17,26 +17,26 @@ public class UInt32Test {
 		int x = 5;
 		
 		unsigned = new UInt32(x);
-		assertTrue(unsigned.getValue() == 5);		
+		assertTrue(unsigned.toLong() == 5);		
 		
 		x = -5;
 		unsigned = new UInt32(x);
-		assertTrue(unsigned.getValue() == 0xFFFFFFFBL);
+		assertTrue(unsigned.toLong() == 0xFFFFFFFBL);
 		assertTrue(unsigned.toInteger()==-5);
 		
 		unsigned = new UInt32(0xFFFFFFFFL);
 		unsigned1 = new UInt32(0xFFFFFFF0L);
 		unsigned = unsigned.add(unsigned1);
-		assertTrue(unsigned.getValue() == 0xFFFFFFF0L);
+		assertTrue(unsigned.toLong() == 0xFFFFFFF0L);
 		
 		unsigned = new UInt32(0xFFFFFFFFL);
 		unsigned1 = new UInt32(0xFFFFFFF0L);
 		unsigned = unsigned.subtract(unsigned1);
-		assertTrue(unsigned.getValue() == 0x10L);
+		assertTrue(unsigned.toLong() == 0x10L);
 		
 		unsigned = new UInt32(0xFFFFFFF0L);
 		unsigned1 = new UInt32(0xFFFFFFFFL);
 		unsigned = unsigned.subtract(unsigned1);
-		assertTrue(unsigned.getValue() == 0xFFFFFFF1L);
+		assertTrue(unsigned.toLong() == 0xFFFFFFF1L);
 	}
 }
