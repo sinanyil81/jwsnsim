@@ -43,7 +43,7 @@ public class MinimumVarianceSlopeRegression {
 			}
 
 		xSum = (new UInt32(xSum).add(new UInt32(meanXRest / tableEntries)))
-				.getValue();
+				.toLong();
 		newMeanX = newMeanX.add(new UInt32(xSum));
 
 		newMeanY += ySum + meanYRest / tableEntries;

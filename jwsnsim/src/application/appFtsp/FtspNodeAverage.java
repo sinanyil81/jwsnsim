@@ -1,7 +1,6 @@
 package application.appFtsp;
 
 import application.regression.LeastSquares;
-import application.regression.ModifiedLeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -27,13 +26,12 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	LeastSquares ls = new LeastSquares();
 	LeastSquares currentls = new LeastSquares();
 	
-	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
+	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES];	
 	int tableEntries = 0;	
-    int numEntries;
+    int numEntries;   
 
     /* average related variables */
 	float slopeTable[] = new float[MAX_ENTRIES];
-	int offsetTable[] = new int[MAX_ENTRIES];
 	int lineIndex = 0;
 	int numLines = 0;	
 	
@@ -95,11 +93,11 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         // we need to periodically update the reference point for the root
         // to avoid wrapping the 32-bit (localTime - localAverage) value
         if( outgoingMsg.rootid == NODE_ID ) {
-//            if( (localTime.subtract(ls.getMeanX())).getValue() >= 0x20000000 )
-//            {
-//            		ls.setMeanX(new UInt32(localTime));
-//                    ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
-//            }
+            if( (localTime.subtract(ls.getMeanX())).toLong() >= 0x20000000 )
+            {
+            		ls.setMeanX(new UInt32(localTime));
+                    ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
+            }
         }
         else if( heartBeats >= ROOT_TIMEOUT ) {
             heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
@@ -133,12 +131,22 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 		timer0.startPeriodic(BEACON_RATE);
 	}	
 	
-	void adjustLine(){
+	public int getOffsetDifference(int offset,float slope,long length) {
+		int val = offset;		
+		
+		val -= (int) (slope*(float)length);		
+				
+		if(val > 10 || val < -10){
+			val--;
+		}
+		
+		return val;
+	}
+	
+	void adjustLine(UInt32 localTime){
         if(is_synced()){
         	
-        	slopeTable[lineIndex] = ls.getSlope();
-        	offsetTable[lineIndex] = ls.getOffset();
-//        	offsetTable[lineIndex] = ls.getMeanY();
+        	slopeTable[lineIndex] = ls.getSlope();       	
         	lineIndex = (lineIndex + 1) % MAX_ENTRIES;
         	if (numLines<MAX_ENTRIES)
         		numLines++;
@@ -149,27 +157,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         	for(int i= 0; i < numLines; i++){
         		slopeAvg += slopeTable[i]/(float)numLines;
         	}
-        	
-        	int offsetAvg = 0;
-        	int offsetAvgRemainder = 0;
-        	
-        	for(int i= 0; i < numLines; i++){
-        		offsetAvg += offsetTable[i]/numLines;
-        		offsetAvgRemainder += (offsetTable[i] % numLines);
-        	}
-        	
-        	offsetAvg += offsetAvgRemainder/numLines;
-        	        	
-        	int diff = offsetAvg - ls.getOffset();
-//        	int diff = offsetAvg - ls.getMeanY();
-        	
-        	if(diff > 1000 || diff < -1000){
-        		diff--;
-        	}      
-        	
-//        	diff = (int) ((float)diff/slopeAvg);
-//        	currentls.setMeanX(ls.getMeanX().subtract(diff));
-////        	currentls.setMeanY(ls.getMeanY()+diff);
+        	       	       	        	
         	currentls.setMeanX(ls.getMeanX());
         	currentls.setMeanY(ls.getMeanY());
         	currentls.setSlope(slopeAvg);
@@ -206,7 +194,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
-            if( age.getValue() >= 0x7FFFFFFFL )
+            if( age.toLong() >= 0x7FFFFFFFL )
                 table[i].free = true;
 
             if( table[i].free)
@@ -230,8 +218,21 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
      
         /* calculate new least-squares line */
-        ls.calculate(table, tableEntries);                
-        adjustLine();
+        ls.calculate(table, tableEntries);
+        
+        UInt32 time1 = currentls.calculateY(localTime);
+        adjustLine(localTime);
+
+        /* time discontinuity adjustment */
+        UInt32 time2 = currentls.calculateY(localTime);
+        
+        timeError = time1.subtract(time2).toInteger();
+        
+        if(timeError > 1 && is_synced()){
+        	currentls.setMeanY(currentls.getMeanY()+timeError/2);
+        	timeError = (int) ((float)timeError/currentls.getSlope());
+        	currentls.setMeanX(currentls.getMeanX().subtract(timeError/2));
+        }
 
         numEntries = tableEntries;
     }
@@ -245,7 +246,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         numEntries = 0;
         
     	lineIndex = 0;
-    	numLines = 0;    	   
+    	numLines = 0;  
 	}
 	
     void processMsg()
@@ -312,6 +313,9 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 		s += " " + NODE_ID;
 		s += " " + myLocal2Global().toString();
 		s += " " + Float.floatToIntBits(currentls.getSlope());
+		
+//		s += " " + local2Global().toString();
+//		s += " " + Float.floatToIntBits(ls.getSlope());
 		
 		return s;		
 	}

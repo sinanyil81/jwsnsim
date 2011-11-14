@@ -154,7 +154,7 @@ public class ModifiedGtspNode extends Node implements TimerHandler{
         	age = age.subtract(neighbors[i].timestamp);
 
             //logical time error compensation
-            if( age.getValue() >= 0x7FFFFFFFL )
+            if( age.toLong() >= 0x7FFFFFFFL )
             	neighbors[i].free = true;
 
             if( neighbors[i].free)

@@ -50,7 +50,7 @@ public class ModifiedLeastSquares {
             }
         
         
-        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).getValue();    
+        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).toLong();    
         newMeanX =  newMeanX.add(new UInt32(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;

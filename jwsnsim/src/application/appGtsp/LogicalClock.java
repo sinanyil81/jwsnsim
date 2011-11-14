@@ -10,7 +10,7 @@ public class LogicalClock {
     UInt32 updateLocalTime = new UInt32();
     
 	public UInt32 getValue(UInt32 currentTime){
-		long timePassed = currentTime.subtract(updateLocalTime).getValue();
+		long timePassed = currentTime.subtract(updateLocalTime).toLong();
 		long progress = (long)((double)timePassed*rate) + offset;
 		
 		return value.add(new UInt32(progress));

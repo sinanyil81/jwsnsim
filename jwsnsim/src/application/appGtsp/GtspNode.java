@@ -61,7 +61,7 @@ public class GtspNode extends Node implements TimerHandler{
 		entry.L_j_minus_L_i = (message.logicalClock.subtract(nodeLogicalClock)).toInteger();
 		entry.l_j = message.rate;
 							
-		if(entry.timestamp.getValue() != 0){
+		if(entry.timestamp.toLong() != 0){
 			entry.x_j_over_h_i =(message.logicalClock.subtract(entry.L_j)).toDouble()/(receiveTime.subtract(entry.timestamp)).toDouble();
 		}
 		

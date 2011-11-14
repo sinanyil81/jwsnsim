@@ -41,22 +41,16 @@ public class LeastSquares {
         while( ++i < table.length )
             if( !table[i].free) {                
             	UInt32 diff = table[i].x.subtract(newMeanX);
-
-//            	xSum += diff.getValue() / tableEntries;
-//            	meanXRest += diff.getValue() % tableEntries;
             	
             	xSum += diff.toInteger() / tableEntries;
             	meanXRest += diff.toInteger() % tableEntries;
-            	
-//            	localSum += (table[i].localTime - newLocalAverage) / tableEntries;
-//            	localAverageRest += (table[i].localTime - newLocalAverage) % tableEntries;
-            	               
+            	            	               
                 ySum += (table[i].y - newMeanY) / tableEntries;
                 meanYRest += (table[i].y - newMeanY) % tableEntries;
             }
         
         
-        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).getValue();    
+        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).toLong();    
         newMeanX =  newMeanX.add(new UInt32(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;
@@ -65,7 +59,6 @@ public class LeastSquares {
         for(i = 0; i < table.length; ++i)
             if( !table[i].free) {
                 int a = (table[i].x.subtract(newMeanX)).toInteger();
-                //int a = table[i].x.toInteger() - newMeanX.toInteger();
                 int b = table[i].y - newMeanY;
 
                 xSum += (long)a * a;
@@ -102,12 +95,12 @@ public class LeastSquares {
 
 	public void setMeanY(int meanY) {
 		this.meanY = meanY;
-	}
+	}	
 	
-	public int getOffset() {
-		int val = meanY-meanX.multiply(slope).toInteger();
-		
-		return val;
+	public void clear(){
+		slope = 0.0f;
+		meanX = new UInt32();
+		meanY = 0;
 	}
 	
 	public UInt32 calculateY(UInt32 x) {

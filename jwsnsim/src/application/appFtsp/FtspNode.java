@@ -87,7 +87,7 @@ public class FtspNode extends Node implements TimerHandler{
         // we need to periodically update the reference point for the root
         // to avoid wrapping the 32-bit (localTime - localAverage) value
         if( outgoingMsg.rootid == NODE_ID ) {
-            if( (localTime.subtract(ls.getMeanX())).getValue() >= 0x20000000 )
+            if( (localTime.subtract(ls.getMeanX())).toLong() >= 0x20000000 )
             {
             		ls.setMeanX(new UInt32(localTime));
                     ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
@@ -150,7 +150,7 @@ public class FtspNode extends Node implements TimerHandler{
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
-            if( age.getValue() >= 0x7FFFFFFFL )
+            if( age.toLong() >= 0x7FFFFFFFL )
                 table[i].free = true;
 
             if( table[i].free)

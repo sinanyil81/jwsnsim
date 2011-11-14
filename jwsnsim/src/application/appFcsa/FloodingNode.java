@@ -73,7 +73,7 @@ public class FloodingNode extends Node implements TimerHandler {
 			age = new UInt32(localTime);
 			age = age.subtract(neighbors[i].timestamp);
 			
-			if(age.getValue() >= NEIGHBOR_REMOVE && neighbors[i].free == false) {
+			if(age.toLong() >= NEIGHBOR_REMOVE && neighbors[i].free == false) {
 				neighbors[i].free = true;
 				neighbors[i].clearTable();
 			}

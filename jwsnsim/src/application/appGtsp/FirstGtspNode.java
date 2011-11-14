@@ -63,7 +63,7 @@ public class FirstGtspNode extends Node implements TimerHandler{
 	}
 	
 	public UInt32 getLogicalClock(UInt32 currentTime){
-		long timePassed = currentTime.subtract(updateLocalTime).getValue();
+		long timePassed = currentTime.subtract(updateLocalTime).toLong();
 		long progress = (long)((double)timePassed*logicalClockRate) + logicalClockOffset;
 		
 		return logicalClock.add(new  UInt32(progress));
@@ -81,7 +81,7 @@ public class FirstGtspNode extends Node implements TimerHandler{
 		entry.x2 = new UInt32(receiveTime);
 		/* TODO entry.y2 = new UInt32(message.hardwareClock); */
 				
-		if(entry.x1.getValue() != 0 && entry.y1.getValue() != 0){
+		if(entry.x1.toLong() != 0 && entry.y1.toLong() != 0){
 			entry.h_j_over_h_i =(entry.y2.subtract(entry.y1)).toDouble()/(entry.x2.subtract(entry.x1)).toDouble();
 		}
 		

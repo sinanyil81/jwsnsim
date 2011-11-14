@@ -79,7 +79,7 @@ public class RBSGradientNode extends Node implements TimerHandler{
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
-            if( age.getValue() >= 0x7FFFFFFFL )
+            if( age.toLong() >= 0x7FFFFFFFL )
                 table[i].free = true;
 
             if( table[i].free)
@@ -139,11 +139,11 @@ public class RBSGradientNode extends Node implements TimerHandler{
 		
 	   if(numEntries >= ENTRY_SEND_LIMIT){
 		   beaconGlobal = regression.calculateY(beaconLocal);
-		   average =  beaconGlobal.getValue();
+		   average =  beaconGlobal.toLong();
 	   }
 	   else{
 		   beaconGlobal = new UInt32(beaconLocal);
-		   average = beaconGlobal.getValue();
+		   average = beaconGlobal.toLong();
 	   }
 	   
 	   outgoingMsg.type = RBSGradientMessage.INFO;
@@ -175,7 +175,7 @@ public class RBSGradientNode extends Node implements TimerHandler{
 
 	public long getNetworkTime() {
 		if(numEntries >= ENTRY_SEND_LIMIT){
-			return (regression.calculateY(CLOCK.getValue())).getValue();
+			return (regression.calculateY(CLOCK.getValue())).toLong();
 		}
 		
 		return 0;
@@ -227,7 +227,7 @@ public class RBSGradientNode extends Node implements TimerHandler{
 				if(msg.sequence == sequence){
 					int error = (int)Math.abs(beaconGlobal.subtract(msg.clock).toInteger());                    
 					if(error < MAX_ERROR){
-						average  += msg.clock.getValue();
+						average  += msg.clock.toLong();
 						numReply++;
 				        status |= STATUS_REPLY;
 					}				
