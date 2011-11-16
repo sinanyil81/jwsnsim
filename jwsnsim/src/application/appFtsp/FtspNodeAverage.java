@@ -38,6 +38,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	int numLines = 0;	
 	float mySlopeAvg = 0.0f;
 	
+	int discontiniutyOffset = 0;
+	
 	Timer timer0;
 		
 	int ROOT_ID;
@@ -244,6 +246,35 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         }
 	}
 	
+	void adjustLine4(UInt32 localTime){
+        if(is_synced()){
+        	
+        	slopeTable[lineIndex] = ls.getSlope();       	
+        	lineIndex = (lineIndex + 1) % MAX_ENTRIES;
+        	if (numLines<MAX_ENTRIES)
+        		numLines++;
+        	
+        	/* calculate slope average */
+        	float slopeAvg = 0.0f;
+        	
+        	for(int i= 0; i < numLines; i++){
+        		slopeAvg += slopeTable[i]/(float)numLines;
+        	}
+        	       	       	        	
+        	currentls.setMeanX(ls.getMeanX());
+        	currentls.setMeanY(ls.getMeanY());        	        	
+        	
+        	currentls.setSlope((mySlopeAvg + slopeAvg)/2.0f);
+        	mySlopeAvg = slopeAvg;
+        }
+        else{
+        	currentls.setMeanX(ls.getMeanX());
+        	currentls.setMeanY(ls.getMeanY());
+        	currentls.setSlope(ls.getSlope());
+        	mySlopeAvg = ls.getSlope();
+        }
+	}	
+	
 	private int numErrors=0;    
     void addNewEntry(FtspMessage msg,UInt32 localTime)
     {
@@ -305,10 +336,9 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         
         timeError = time1.subtract(time2).toInteger();
         
-        if(timeError > 1 && is_synced()){
-//        	currentls.setMeanY(currentls.getMeanY()+timeError/2);
-//        	timeError = (int) ((float)timeError/currentls.getSlope());
-//        	currentls.setMeanX(currentls.getMeanX().subtract(timeError/2));
+        if(timeError !=0 && is_synced()){
+        	discontiniutyOffset = timeError/2;
+//        	currentls.shift(discontiniutyOffset);
         }
 
         numEntries = tableEntries;
@@ -324,6 +354,8 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         
     	lineIndex = 0;
     	numLines = 0;  
+    	
+    	discontiniutyOffset = 0;
 	}
 	
     void processMsg()
