@@ -8,7 +8,7 @@ public class Neighbor {
 	private static final int MAX_ENTRIES = 8;
 	
 	public int id;
-	public float rate;
+	public UInt32 clock = new UInt32();
 	public float relativeRate;
 	public UInt32 timestamp = new UInt32();
 	public boolean free = true;
