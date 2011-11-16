@@ -114,6 +114,12 @@ public class LeastSquares {
         return result;
 	}
 	
+	public void shift(int shiftVal) {
+    	this.meanY += shiftVal;
+    	int xOffset = (int) ((float)shiftVal/slope);
+    	setMeanX(meanX.subtract(xOffset));
+	}
+	
 	public UInt32 calculateY(UInt32 x,UInt32 meanX,int meanY) {
 		UInt32 result = new UInt32(x);
 
@@ -123,5 +129,5 @@ public class LeastSquares {
 		result = result.add(x);
 		
         return result;
-	}
+	}	
 }
