@@ -143,6 +143,7 @@ public class FloodingNode extends Node implements TimerHandler {
 			rootClock = new UInt32(msg.rootClock);
 			lastUpdate = new UInt32(processedMsg.getEventTime());
 			rootRate = 0;
+			heartBeats = 0;
 		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
 			outgoingMsg.sequence = msg.sequence;
 			
@@ -155,6 +156,8 @@ public class FloodingNode extends Node implements TimerHandler {
 			else{
 				rootRate = 0.0f;
 			}
+			
+			heartBeats = 0;
 		}
 		else {
 			return;
@@ -177,7 +180,7 @@ public class FloodingNode extends Node implements TimerHandler {
 		UInt32 localTime = CLOCK.getValue();
 
 		if( outgoingMsg.rootid == NODE_ID ) {
-			rootClock.add(localTime.subtract(lastUpdate));
+			rootClock = rootClock.add(localTime.subtract(lastUpdate));
 			lastUpdate = new UInt32(localTime);
 		}
 		else if( heartBeats >= ROOT_TIMEOUT ) {
@@ -211,14 +214,14 @@ public class FloodingNode extends Node implements TimerHandler {
 	
 	public UInt32 local2Global(UInt32 now) {
 		int diff = now.subtract(lastUpdate).toInteger();
-		diff = (int)(rootRate*(float)diff);
-		return now.add(diff);
+		diff += (int)(rootRate*(float)diff);
+		return rootClock.add(diff);
 	}
 
 	public UInt32 local2Global() {
 		int diff = CLOCK.getValue().subtract(lastUpdate).toInteger();
-		diff = (int)(rootRate*(float)diff);
-		return CLOCK.getValue().add(diff);
+		diff += (int)(rootRate*(float)diff);
+		return rootClock.add(diff);
 	}
 
 	public String toString() {
