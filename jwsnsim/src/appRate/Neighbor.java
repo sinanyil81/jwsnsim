@@ -9,7 +9,7 @@ public class Neighbor {
 	
 	public int id;
 	public UInt32 clock = new UInt32();
-	public float relativeRate;
+	public float rate;
 	public UInt32 timestamp = new UInt32();
 	public boolean free = true;
 
