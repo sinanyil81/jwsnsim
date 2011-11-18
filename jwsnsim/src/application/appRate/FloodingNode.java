@@ -16,7 +16,7 @@ public class FloodingNode extends Node implements TimerHandler {
 
 	private static final int MAX_NEIGHBORS = 8;
 	
-	private static final int BEACON_RATE = 10000000;  
+	private static final int BEACON_RATE = 30000000;  
 	private static final int ROOT_TIMEOUT = 5;
 	private static final int IGNORE_ROOT_MSG = 4;	
 	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
@@ -34,9 +34,6 @@ public class FloodingNode extends Node implements TimerHandler {
 
 	RadioPacket processedMsg = null;
 	FloodingMessage outgoingMsg = new FloodingMessage();
-    
-	int heartBeats; // the number of sucessfully sent messages
-    // since adding a new entry with lower beacon id than ours	
 
 	public FloodingNode(int id, Position position) {
 		super(id, position);
@@ -46,11 +43,9 @@ public class FloodingNode extends Node implements TimerHandler {
 		RADIO = new SimpleRadio(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
-		
-		heartBeats = 0;
 
 		outgoingMsg.sequence = 0;
-		outgoingMsg.rootid = 0xFFFF;
+		outgoingMsg.rootid = NODE_ID;
 
 		for (int i = 0; i < neighbors.length; i++) {
 			neighbors[i] = new Neighbor();
@@ -131,19 +126,19 @@ public class FloodingNode extends Node implements TimerHandler {
 	void processMsg() {
 		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
 
-		addEntry(msg, processedMsg.getEventTime());
+		addEntry(msg, processedMsg.getEventTime());	
 		
-		if( msg.rootid < outgoingMsg.rootid &&
+		if( msg.rootid < outgoingMsg.rootid){ 
+//				&&
 	            //after becoming the root, a node ignores messages that advertise the old root (it may take
 	            //some time for all nodes to timeout and discard the old root) 
-	            !(heartBeats < IGNORE_ROOT_MSG && outgoingMsg.rootid == NODE_ID)){
+//	            !(heartBeats < IGNORE_ROOT_MSG && outgoingMsg.rootid == NODE_ID)){
 			outgoingMsg.rootid = msg.rootid;
 			outgoingMsg.sequence = msg.sequence;
 			
 			rootClock = new UInt32(msg.rootClock);
 			lastUpdate = new UInt32(processedMsg.getEventTime());
 			rootRate = 0;
-			heartBeats = 0;
 		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
 			outgoingMsg.sequence = msg.sequence;
 			
@@ -156,8 +151,6 @@ public class FloodingNode extends Node implements TimerHandler {
 			else{
 				rootRate = 0.0f;
 			}
-			
-			heartBeats = 0;
 		}
 		else {
 			return;
@@ -183,11 +176,6 @@ public class FloodingNode extends Node implements TimerHandler {
 			rootClock = rootClock.add(localTime.subtract(lastUpdate));
 			lastUpdate = new UInt32(localTime);
 		}
-		else if( heartBeats >= ROOT_TIMEOUT ) {
-            heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
-            outgoingMsg.rootid = NODE_ID;
-            outgoingMsg.sequence++; // maybe set it to zero?
-		}
 		
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = CLOCK.getValue();
@@ -202,8 +190,6 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		if (outgoingMsg.rootid == NODE_ID)
 			++outgoingMsg.sequence;
-		
-		++heartBeats;
 	}
 
 	@Override
