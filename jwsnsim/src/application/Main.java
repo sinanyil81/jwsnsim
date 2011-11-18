@@ -48,7 +48,7 @@ public class Main {
 //				}					
 //			}
 //			new application.appFtsp.FtspApp(20,"FtspDiscontinuity.txt",FtspApp.LINE);
-			new application.appRate.FloodingApp(20,"FtspDiscontinuity.txt",FtspApp.LINE);
+			new application.appRate.FloodingApp(40,"FtspDiscontinuity.txt",FtspApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
