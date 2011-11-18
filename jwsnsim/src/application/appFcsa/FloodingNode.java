@@ -16,7 +16,7 @@ public class FloodingNode extends Node implements TimerHandler {
 
 	private static final int MAX_NEIGHBORS = 8;
 	
-	private static final int BEACON_RATE = 10000000;  
+	private static final int BEACON_RATE = 30000000;  
 	private static final int ROOT_TIMEOUT = 5;
 	private static final int IGNORE_ROOT_MSG = 4;	
 	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
