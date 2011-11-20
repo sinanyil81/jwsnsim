@@ -44,7 +44,8 @@ public class FtspApp extends Application implements TimerHandler{
 //		nodes = new FtspNode[NUMNODES];	
 //		nodes = new FtspNodeWithoutDiscontinuity[NUMNODES];
 //		nodes = new FtspNodeMinimumVariance[NUMNODES];
-		nodes = new FtspNodeAverage[NUMNODES];
+//		nodes = new FtspNodeAverage[NUMNODES];
+		nodes = new FtspNodeLSAverage[NUMNODES];
 //		nodes = new FtspNodeMedian[NUMNODES];
 		
 		if(topology == LINE){
@@ -52,7 +53,8 @@ public class FtspApp extends Application implements TimerHandler{
 //				nodes[i] = new FtspNode(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeWithoutDiscontinuity(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new FtspNodeAverage(i+1,new Position(i*5,i*5,0));
+//				nodes[i] = new FtspNodeAverage(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new FtspNodeLSAverage(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeMedian(i+1,new Position(i*5,i*5,0));
 			}			
 		}
