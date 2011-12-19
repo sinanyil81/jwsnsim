@@ -23,8 +23,14 @@ public class FtspNode extends Node implements TimerHandler{
 	private static final int ENTRY_SEND_LIMIT      = 3;              	// number of entries to send sync messages
 	private static final int ENTRY_THROWOUT_LIMIT  = Integer.MAX_VALUE;	// if time sync error is bigger than this clear the table
 	
-	LeastSquares ls = new LeastSquares();	
+	private static final int MAX_NEIGHBORS = 8;
+	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
+
+	Neighbor neighbors[] = new Neighbor[MAX_NEIGHBORS];
+	LeastSquares ls = new LeastSquares();
+	int numNeighbors = 0;	
 	
+	LeastSquares myls = new LeastSquares();		
 	RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES]; 
 	int tableEntries = 0;	
     int numEntries;
@@ -33,9 +39,6 @@ public class FtspNode extends Node implements TimerHandler{
 	
 	int ROOT_ID;
 	int sequence;
-
-    int heartBeats; // the number of sucessfully sent messages
-                    // since adding a new entry with lower beacon id than ours
 	
     RadioPacket processedMsg = null;
     FtspMessage outgoingMsg = new FtspMessage();
@@ -55,8 +58,89 @@ public class FtspNode extends Node implements TimerHandler{
 			table[i] = new RegressionEntry();
 		}
 		
+		for (int i = 0; i < neighbors.length; i++) {
+			neighbors[i] = new Neighbor();
+		}
+		
 		outgoingMsg.rootid = 0xFFFF;
 	}
+	
+	private int findNeighborSlot(int id) {
+		for (int i = 0; i < neighbors.length; i++) {
+			if ((neighbors[i].free == false) && (neighbors[i].id == id)) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+	
+	private void updateNeighborhood(){
+		int i;
+		UInt32 age;
+
+		UInt32 localTime = CLOCK.getValue();
+
+		for (i = 0; i < MAX_NEIGHBORS; ++i) {
+			age = new UInt32(localTime);
+			age = age.subtract(neighbors[i].timestamp);
+			
+			if(age.toLong() >= NEIGHBOR_REMOVE && neighbors[i].free == false) {
+				neighbors[i].free = true;
+				neighbors[i].clearTable();
+			}
+		}
+	}
+
+	private int getFreeSlot() {
+		int i, freeItem = -1;
+
+		for (i = 0; i < MAX_NEIGHBORS; ++i) {
+			
+			if(neighbors[i].free){
+				freeItem = i;
+			}
+		}
+
+		return freeItem;
+	}
+
+	private void addNeighborEntry(FtspMessage msg, UInt32 eventTime) {
+
+		boolean found = false;
+				
+		updateNeighborhood();
+		
+		/* find and add neighbor */
+		int index = findNeighborSlot(msg.nodeid);
+		
+		if(index >= 0){
+			found = true;
+		}
+		else{
+			index = getFreeSlot();
+		}
+
+		if (index >= 0) {
+
+			
+			neighbors[index].free = false;
+			neighbors[index].id = msg.nodeid;
+			neighbors[index].rate = msg.rate;
+			neighbors[index].logicalClock = new UInt32(msg.rootClock);
+			neighbors[index].addNewEntry(msg.clock,eventTime);
+			neighbors[index].timestamp = new UInt32(eventTime);
+			
+			if(found){
+				ls.calculate(neighbors[index].table, neighbors[index].tableEntries);
+				neighbors[index].relativeRate = ls.getSlope();
+			}
+			else{
+				neighbors[index].relativeRate = 0;
+			}						
+		}
+	}
+
 	
 	@Override
 	public void receiveMessage(RadioPacket packet) {		
@@ -65,16 +149,8 @@ public class FtspNode extends Node implements TimerHandler{
 	}
 
 	@Override
-	public void fireEvent(Timer timer) {
-        
-		if( outgoingMsg.rootid == 0xFFFF && ++heartBeats >= ROOT_TIMEOUT ) {
-            outgoingMsg.sequence = 0;
-            outgoingMsg.rootid = NODE_ID;
-        }
-
-        if( outgoingMsg.rootid != 0xFFFF ) {
-           sendMsg();
-        }
+	public void fireEvent(Timer timer) {        
+		sendMsg();
 	}
 
 	private void sendMsg() {
@@ -93,18 +169,16 @@ public class FtspNode extends Node implements TimerHandler{
                     ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
             }
         }
-        else if( heartBeats >= ROOT_TIMEOUT ) {
-            heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
-            outgoingMsg.rootid = NODE_ID;
-            outgoingMsg.sequence++; // maybe set it to zero?
-        }
 
-        outgoingMsg.clock = new UInt32(globalTime);
+        outgoingMsg.clock = new UInt32(localTime);
         outgoingMsg.nodeid = NODE_ID;
+        
+        outgoingMsg.rate = ls.getSlope();  
+        outgoingMsg.rootClock = new UInt32(globalTime);  
         
         // we don't send time sync msg, if we don't have enough data
         if( numEntries < ENTRY_SEND_LIMIT && outgoingMsg.rootid != NODE_ID ){
-            ++heartBeats;
+        	
         }
         else{
         	RadioPacket packet = new RadioPacket(new FtspMessage(outgoingMsg));
@@ -114,8 +188,6 @@ public class FtspNode extends Node implements TimerHandler{
             
             if( outgoingMsg.rootid == NODE_ID )
                 ++outgoingMsg.sequence;
-            
-            ++heartBeats;
         }        
 	}
 
@@ -174,7 +246,7 @@ public class FtspNode extends Node implements TimerHandler{
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
     
         /* calculate new least-squares line */
-        ls.calculate(table, tableEntries);
+        myls.calculate(table, tableEntries);
         numEntries = tableEntries;
     }
 
@@ -191,10 +263,7 @@ public class FtspNode extends Node implements TimerHandler{
     {
         FtspMessage msg = (FtspMessage)processedMsg.getPayload();
 
-        if( msg.rootid < outgoingMsg.rootid &&
-            //after becoming the root, a node ignores messages that advertise the old root (it may take
-            //some time for all nodes to timeout and discard the old root) 
-            !(heartBeats < IGNORE_ROOT_MSG && outgoingMsg.rootid == NODE_ID)){
+        if( msg.rootid < outgoingMsg.rootid ){
             outgoingMsg.rootid = msg.rootid;
             outgoingMsg.sequence = msg.sequence;
             clearTable();
@@ -205,10 +274,13 @@ public class FtspNode extends Node implements TimerHandler{
         else{
         	return;
         }
-
-        if( outgoingMsg.rootid  < NODE_ID )
-            heartBeats = 0;
         
+        /* add neighbor entry */
+        if(outgoingMsg.rootid == msg.rootid){
+        	addNeighborEntry(msg, processedMsg.getEventTime());
+        }
+        
+        /* add our entry */
         addNewEntry(msg,processedMsg.getEventTime());
     }
 
@@ -222,12 +294,12 @@ public class FtspNode extends Node implements TimerHandler{
 	public UInt32 local2Global() {
 		UInt32 now = CLOCK.getValue();
 		
-		return ls.calculateY(now);
+		return myls.calculateY(now);
 	}
 	
 	public UInt32 local2Global(UInt32 now) {
 		
-		return ls.calculateY(now);
+		return myls.calculateY(now);
 	}
 	
 	public String toString(){
@@ -235,7 +307,7 @@ public class FtspNode extends Node implements TimerHandler{
 		
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-		s += " " + Float.floatToIntBits(ls.getSlope());
+		s += " " + Float.floatToIntBits(myls.getSlope());
 		
 		return s;		
 	}
