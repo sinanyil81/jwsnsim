@@ -8,11 +8,10 @@ import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
-import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 
 
-public class RBSGradientApp extends Application implements TimerHandler{
+public class FtspApp extends Application implements TimerHandler{
 
 	public static final int LINE = 0;
 	public static final int RING = 1;
@@ -25,7 +24,7 @@ public class RBSGradientApp extends Application implements TimerHandler{
 	Timer timer = new Timer(clock,this);
 	Logger logger;
 
-	public RBSGradientApp(int numNodes,String logFile,int topology) throws Exception {
+	public FtspApp(int numNodes,String logFile,int topology) throws Exception {
 		logger = new Logger(logFile);		
 		this.NUMNODES = numNodes;
 			
@@ -42,23 +41,11 @@ public class RBSGradientApp extends Application implements TimerHandler{
 	}
 
 	private void createTopology(int topology) {
-		nodes = new RBSGradientNode[NUMNODES];
+		nodes = new FtspNode[NUMNODES];	
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new RBSGradientNode(i+1,new Position(i*5,i*5,0));
-			}			
-		}
-				
-		if(topology == RING){
-			
-			double oneStep = 360.0 / NUMNODES;
-			double radius = SimpleRadio.MAX_DISTANCE/Math.toRadians(oneStep); 
-					
-			for(int i = 0; i< NUMNODES;i++){
-				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
-											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
-				nodes[i] = new RBSGradientNode(i+1,pos);
+				nodes[i] = new FtspNode(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 	}
