@@ -13,11 +13,15 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		ftspSimulations();
+		//ftspSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
 		//fcsaSimulations();
+		/*------------------------------------------*/
+		
+		/*------------------------------------------*/
+		gradientSimulations();
 		/*------------------------------------------*/		
 	}		
 
@@ -69,4 +73,19 @@ public class Main {
 			e.printStackTrace();
 		}									
 	}
+	
+	/**
+	 * Flooding Time Synchronization With Common Speed Agreement
+	 */
+	public static void gradientSimulations(){
+		try{
+//			for(int j = 1;j<=10;j++)
+//				for(int i = 10;i<=100;i+=10)
+			new application.appFcsa.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
+			new application.appGradient.FloodingApp(50,"GFCSA.txt",FloodingApp.LINE);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}									
+	}	
 }
