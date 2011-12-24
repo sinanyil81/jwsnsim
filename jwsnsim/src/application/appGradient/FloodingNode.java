@@ -115,7 +115,7 @@ public class FloodingNode extends Node implements TimerHandler {
 			neighbors[index].free = false;
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.multiplier;
-			neighbors[index].rootClock = msg.rootClock;			
+			neighbors[index].rootClock = new UInt32(msg.rootClock);			
 			neighbors[index].addNewEntry(msg.clock,eventTime);
 			neighbors[index].timestamp = new UInt32(eventTime);
 			if(found){
@@ -227,19 +227,18 @@ public class FloodingNode extends Node implements TimerHandler {
 	
 	public UInt32 gradientClock(){
 		UInt32 gclock = logicalClock.getValue(CLOCK.getValue());
-		int numNeighbors = 0;
 		int diffSum = 0;
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
 				UInt32 nclock = neighbors[i].getClock(CLOCK.getValue());
-				diffSum += nclock.subtract(gclock).toInteger()/(numNeighbors+1);
+				diffSum += nclock.subtract(gclock).toInteger()/(this.numNeighbors+1);
 			}
 		}
 		
 		gclock.add(diffSum);
 		
-		return logicalClock.getValue(CLOCK.getValue());
+		return gclock;
 	}
 
 	public String toString() {
