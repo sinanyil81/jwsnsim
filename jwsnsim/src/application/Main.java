@@ -51,8 +51,9 @@ public class Main {
 //					
 //				}					
 //			}
-//			new application.appFtsp.FtspApp(20,"FtspDiscontinuity.txt",FtspApp.LINE);
-			new application.appRate.FloodingApp(40,"FtspDiscontinuity.txt",FtspApp.LINE);
+			new application.appFtsp.FtspApp(20,"LSAverage.txt",FtspApp.LINE);
+//			new application.appRate.FloodingApp(40,"Rate.txt",FtspApp.LINE);
+//			new application.appFcsa.FloodingApp(40,"Fcsa.txt",FloodingApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
