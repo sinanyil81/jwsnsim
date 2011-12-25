@@ -13,6 +13,8 @@ public class Neighbor {
 	
 	public UInt32 rootClock = new UInt32();
 	
+
+
 	public UInt32 timestamp = new UInt32();
 	public boolean free = true;
 
@@ -27,6 +29,22 @@ public class Neighbor {
 
 		tableEntries = 0;
 		tableEnd = -1;
+	}
+	
+	public float getRate() {
+		return rate;
+	}
+
+	public float getRelativeRate() {
+		return relativeRate;
+	}
+
+	public UInt32 getRootClock() {
+		return rootClock;
+	}
+
+	public UInt32 getTimestamp() {
+		return timestamp;
 	}
 
 	public void clearTable() {

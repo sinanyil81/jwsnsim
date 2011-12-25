@@ -17,7 +17,6 @@ public class FloodingNode extends Node implements TimerHandler {
 	private static final int MAX_NEIGHBORS = 8;
 	
 	private static final int BEACON_RATE = 30000000;  
-	private static final int ROOT_TIMEOUT = 5;
 	private static final int IGNORE_ROOT_MSG = 4;	
 	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
 
@@ -30,9 +29,6 @@ public class FloodingNode extends Node implements TimerHandler {
 
 	RadioPacket processedMsg = null;
 	FloodingMessage outgoingMsg = new FloodingMessage();
-    
-	int heartBeats; // the number of sucessfully sent messages
-    // since adding a new entry with lower beacon id than ours	
 
 	public FloodingNode(int id, Position position) {
 		super(id, position);
@@ -42,11 +38,9 @@ public class FloodingNode extends Node implements TimerHandler {
 		RADIO = new SimpleRadio(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
-		
-		heartBeats = 0;
 
 		outgoingMsg.sequence = 0;
-		outgoingMsg.rootid = 0xFFFF;
+		outgoingMsg.rootid = this.NODE_ID;
 		
 		logicalClock = new LogicalClock(this.CLOCK);
 		if(this.NODE_ID == 1){
@@ -138,14 +132,11 @@ public class FloodingNode extends Node implements TimerHandler {
 		addEntry(msg, processedMsg.getEventTime());
 		updateClockRate();
 		
-		if( msg.rootid < outgoingMsg.rootid &&
-	            //after becoming the root, a node ignores messages that advertise the old root (it may take
-	            //some time for all nodes to timeout and discard the old root) 
-	            !(heartBeats < IGNORE_ROOT_MSG && outgoingMsg.rootid == NODE_ID)){
+		if(msg.rootid < outgoingMsg.rootid){
 			outgoingMsg.rootid = msg.rootid;
 			outgoingMsg.sequence = msg.sequence;
 		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
-			outgoingMsg.sequence = msg.sequence;
+			outgoingMsg.sequence = msg.sequence;		
 		}
 		else {
 			return;
@@ -188,13 +179,7 @@ public class FloodingNode extends Node implements TimerHandler {
 		
 		localTime = CLOCK.getValue();
 		globalTime = local2Global();
-
-		if( heartBeats >= ROOT_TIMEOUT ) {
-            heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
-            outgoingMsg.rootid = NODE_ID;
-            outgoingMsg.sequence++; // maybe set it to zero?
-		}
-		
+	
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.localTime = new UInt32(localTime);
 		outgoingMsg.multiplier = (float) logicalClock.getRate();
@@ -208,8 +193,6 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		if (outgoingMsg.rootid == NODE_ID)
 			++outgoingMsg.sequence;
-		
-		++heartBeats;
 	}
 
 	@Override
@@ -222,13 +205,26 @@ public class FloodingNode extends Node implements TimerHandler {
 		return logicalClock.getValue();
 	}
 	
+	public UInt32 getNeighborClock(UInt32 timestamp, UInt32 base,float multiplier, float relativeRate,float rootRate){
+		int timePassed = CLOCK.getValue().subtract(timestamp).toInteger();
+		timePassed += (int) (((float)timePassed)*relativeRate);
+		int progress = timePassed + (int) (((float)timePassed)*multiplier);
+		progress = (int) (((float)progress)/(1.0+rootRate));
+		
+		return base.add(new UInt32(progress));
+	}
+	
 	public UInt32 gradientClock(){
 		UInt32 gclock = logicalClock.getValue();
 		int diffSum = 0;
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
-				UInt32 nclock = neighbors[i].getClock(CLOCK.getValue());
+				UInt32 nclock = getNeighborClock(neighbors[i].getTimestamp(), 
+												 neighbors[i].getRootClock(), 
+												 neighbors[i].getRate(),
+												 neighbors[i].getRelativeRate(),
+												 logicalClock.getRootRate()); 
 				diffSum += nclock.subtract(gclock).toInteger()/(this.numNeighbors+1);
 			}
 		}
@@ -242,8 +238,8 @@ public class FloodingNode extends Node implements TimerHandler {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
-		s += " " + local2Global().toString();
-		//s += " " + gradientClock().toString();
+		//s += " " + local2Global().toString();
+		s += " " + gradientClock().toString();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 		
 		s += " " + Float.floatToIntBits(logicalClock.getRate());
