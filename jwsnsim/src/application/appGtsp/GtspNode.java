@@ -171,13 +171,7 @@ public class GtspNode extends Node implements TimerHandler{
 		UInt32 currentTime = CLOCK.getValue();
 		s += " " + NODE_ID;
 		s += " " + logicalClock.getValue(currentTime).toString();
-		s += " 0";
 		s += " " + Float.floatToIntBits((float) logicalClock.rate);
-		s += " 0";
-		s += " 0";
-		s += " 0";
-//		s += " " + logicalClock.offset;
-//		s += " " + logicalClock.rate;
 		
 		return s;		
 	}
