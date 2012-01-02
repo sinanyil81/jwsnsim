@@ -2,6 +2,7 @@ package application;
 
 import application.appFcsa.FloodingApp;
 import application.appFtsp.FtspApp;
+import application.appGtsp.GtspApp;
 import application.appRateDetection.RateApp;
 
 public class Main {
@@ -82,8 +83,9 @@ public class Main {
 		try{
 //			for(int j = 1;j<=10;j++)
 //				for(int i = 10;i<=100;i+=10)
-			new application.appFcsa.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
-			new application.appGradient.FloodingApp(50,"GFCSA.txt",FloodingApp.LINE);
+			//new application.appFcsa.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
+			//new application.appGradient.FloodingApp(50,"GFCSA.txt",FloodingApp.LINE);
+			new application.appGtsp.GtspApp(20,"Gtsp.txt",GtspApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
