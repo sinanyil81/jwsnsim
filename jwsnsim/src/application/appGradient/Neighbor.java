@@ -9,6 +9,7 @@ public class Neighbor {
 	
 	public int id;
 	public float rate;
+	public float rootRate;
 	public float relativeRate;
 	
 	public UInt32 rootClock = new UInt32();
@@ -79,6 +80,7 @@ public class Neighbor {
 		int timePassed = currentTime.subtract(timestamp).toInteger();
 		timePassed += (int) (((float)timePassed)*relativeRate);
 		int progress = timePassed + (int) (((float)timePassed)*rate);
+		progress = (int) (((float)progress)/(1.0+rootRate));
 		
 		return rootClock.add(new UInt32(progress));
 	}

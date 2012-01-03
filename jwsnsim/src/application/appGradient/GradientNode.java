@@ -167,7 +167,7 @@ public class GradientNode extends Node implements TimerHandler {
 	}
 
 	private void updateClockOffset(UInt32 updateTime) {		
-		logicalClock.setValue(logicalClock.getValue(updateTime).add(getOffset(updateTime)));
+		logicalClock.setValue(getOffset(updateTime));
 		logicalClock.setUpdateLocalTime(updateTime);
 	}
 
@@ -234,7 +234,8 @@ public class GradientNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
-		s += " " + local2Global().toString();
+		//s += " " + local2Global().toString();
+		s += " " + logicalClock.getOffset();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 		
 		s += " " + Float.floatToIntBits(logicalClock.getRate());
