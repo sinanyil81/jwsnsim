@@ -12,7 +12,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class FloodingNode extends Node implements TimerHandler {
+public class GradientNode extends Node implements TimerHandler {
 
 	private static final int MAX_NEIGHBORS = 8;
 	
@@ -29,7 +29,7 @@ public class FloodingNode extends Node implements TimerHandler {
 	RadioPacket processedMsg = null;
 	FloodingMessage outgoingMsg = new FloodingMessage();
 
-	public FloodingNode(int id, Position position) {
+	public GradientNode(int id, Position position) {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
@@ -42,9 +42,10 @@ public class FloodingNode extends Node implements TimerHandler {
 		outgoingMsg.rootid = this.NODE_ID;
 		
 		logicalClock = new LogicalClock(this.CLOCK);
-		if(this.NODE_ID == 1){
-			logicalClock.setReference();
-		}
+
+//		if(this.NODE_ID == 1){
+//			logicalClock.setReference();
+//		}
 
 		for (int i = 0; i < neighbors.length; i++) {
 			neighbors[i] = new Neighbor();
@@ -112,7 +113,6 @@ public class FloodingNode extends Node implements TimerHandler {
 			neighbors[index].free = false;
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.multiplier;
-			neighbors[index].rootRate = msg.rootMultiplier;
 			neighbors[index].rootClock = new UInt32(msg.globalTime);			
 			neighbors[index].addNewEntry(msg.localTime,eventTime);
 			neighbors[index].timestamp = new UInt32(eventTime);
@@ -131,6 +131,7 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		addEntry(msg, processedMsg.getEventTime());
 		updateClockRate();
+		updateClockOffset(processedMsg.getEventTime());
 		
 		if(msg.rootid < outgoingMsg.rootid){
 			outgoingMsg.rootid = msg.rootid;
@@ -142,9 +143,32 @@ public class FloodingNode extends Node implements TimerHandler {
 			return;
 		}
 		
-		logicalClock.setValue(msg.globalTime);
-		logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
+//		logicalClock.setValue(msg.globalTime);
+//		logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
 		logicalClock.setRootRate(msg.rootMultiplier);
+	}
+		
+	public UInt32 getOffset(UInt32 time){
+		UInt32 offset = logicalClock.getOffset();
+		
+		UInt32 gclock = logicalClock.getValue(time);
+		int diffSum = 0;
+		
+		for (int i = 0; i < neighbors.length; i++) {
+			if(neighbors[i].free == false){
+				UInt32 nclock = neighbors[i].getClock(time);
+				diffSum += nclock.subtract(gclock).toInteger()/(this.numNeighbors+1);
+			}
+		}
+		
+		offset.add(diffSum);
+		
+		return offset;
+	}
+
+	private void updateClockOffset(UInt32 updateTime) {		
+		logicalClock.setValue(logicalClock.getValue(updateTime).add(getOffset(updateTime)));
+		logicalClock.setUpdateLocalTime(updateTime);
 	}
 
 	private void updateClockRate() {
@@ -204,42 +228,13 @@ public class FloodingNode extends Node implements TimerHandler {
 	public UInt32 local2Global() {		
 		return logicalClock.getValue();
 	}
-	
-	public UInt32 getNeighborClock(UInt32 timestamp, UInt32 base,float multiplier, float relativeRate,float rootRate){
-		int timePassed = CLOCK.getValue().subtract(timestamp).toInteger();
-		timePassed += (int) (((float)timePassed)*relativeRate);
-		int progress = timePassed + (int) (((float)timePassed)*multiplier);
-		progress = (int) (((float)progress)/(1.0+rootRate));
-		
-		return base.add(new UInt32(progress));
-	}
-	
-	public UInt32 gradientClock(){
-		UInt32 gclock = logicalClock.getValue();
-		int diffSum = 0;
-		
-		for (int i = 0; i < neighbors.length; i++) {
-			if(neighbors[i].free == false){
-				UInt32 nclock = getNeighborClock(neighbors[i].getTimestamp(), 
-												 neighbors[i].getRootClock(), 
-												 neighbors[i].getRate(),
-												 neighbors[i].getRelativeRate(),
-												 logicalClock.getRootRate()); 
-				diffSum += nclock.subtract(gclock).toInteger()/(this.numNeighbors+1);
-			}
-		}
-		
-		gclock.add(diffSum);
-		
-		return gclock;
-	}
 
 	public String toString() {
 		String s = Simulator.getInstance().getSecond().toString(10);
 
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
-		s += " " + gradientClock().toString();
+		s += " " + local2Global().toString();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 		
 		s += " " + Float.floatToIntBits(logicalClock.getRate());

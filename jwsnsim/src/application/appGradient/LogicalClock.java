@@ -48,6 +48,22 @@ public class LogicalClock {
 		value = new UInt32(currentTime);
 	}
     
+    public UInt32 getOffset(){
+		return new UInt32(value);
+	}
+    
+	public UInt32 getValue(UInt32 local){
+		if(isReference){
+			return local;
+		}
+		
+		int timePassed = local.subtract(updateLocalTime).toInteger();
+		int progress = timePassed + (int)(((float)timePassed)*rate);
+		progress = (int) (((float)progress)/(1.0+rootRate));
+		
+		return value.add(new UInt32(progress));
+	}
+    
 	public UInt32 getValue(){
 		if(isReference){
 			return clock.getValue();
