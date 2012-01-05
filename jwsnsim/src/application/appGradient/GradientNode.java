@@ -108,7 +108,8 @@ public class GradientNode extends Node implements TimerHandler {
 			neighbors[index].free = false;
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.multiplier;
-			neighbors[index].rootClock = new UInt32(msg.globalTime);			
+			neighbors[index].rootClock = new UInt32(msg.globalTime);
+			neighbors[index].rootRate = msg.rootMultiplier;
 			neighbors[index].addNewEntry(msg.localTime,eventTime);
 			neighbors[index].timestamp = new UInt32(eventTime);
 			if(found){
@@ -181,6 +182,10 @@ public class GradientNode extends Node implements TimerHandler {
 		
 		logicalClock.setRate(rateSum/(float)(numNeighbors+1));	
 		
+		if (outgoingMsg.rootid == NODE_ID){
+			logicalClock.setRootRate(logicalClock.getRate());
+		}
+		
 		this.numNeighbors = numNeighbors;
 	}
 
@@ -239,13 +244,13 @@ public class GradientNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
 		//s += " " + local2Global().toString();
-		//s += " " + logicalClock.getRTValue().toString();
 		s += " " + logicalClock.getRTValue().toString();
+		//s += " " + logicalClock.getValue().toString();
 		//s += " " + logicalClock.getOffset().toLong();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 		
-		//s += " " + Float.floatToIntBits(logicalClock.getRate());
-		s += " " + CLOCK.getValue().toString();
+		s += " " + Float.floatToIntBits(logicalClock.getRate());
+		//s += " " + CLOCK.getValue().toString();
 		//s += " " + logicalClock.getRootRate();
 
 		return s;
