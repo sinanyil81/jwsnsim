@@ -1,6 +1,5 @@
 package application.appGradient;
 
-import sim.clock.Clock;
 import sim.type.UInt32;
 
 public class GradientClock {
@@ -11,12 +10,7 @@ public class GradientClock {
   	private float rootRate = 0;
     private UInt32 rootOffset = new UInt32();
     private UInt32 updateLocalTime = new UInt32();    
-    private Clock clock;
-    
-    public GradientClock(Clock clock){
-    	this.clock = clock;
-    }
-           
+               
 	public UInt32 getOffset() {
 		return new UInt32(offset);
 	}
@@ -52,20 +46,10 @@ public class GradientClock {
 	public void setUpdateLocalTime(UInt32 updateLocalTime) {
 		this.updateLocalTime = new UInt32(updateLocalTime);
 	}
-	
+
 	public void setValue(UInt32 value) {
 		this.value = new UInt32(value);
-	}
-	
-	public UInt32 getValue(){
-		int timePassed = clock.getValue().subtract(updateLocalTime).toInteger();
-		float r = (rate -rootRate)/(1.0f + rootRate);
-		
-		timePassed  += (int)(((float)timePassed)*r);
-
-		UInt32 val = value.add(offset);
-		return val.add(new UInt32(timePassed));
-	}
+	}	
 
 	public UInt32 getValue(UInt32 local){
 		int timePassed = local.subtract(updateLocalTime).toInteger();
@@ -77,8 +61,8 @@ public class GradientClock {
 		return val.add(new UInt32(timePassed));
 	}
 	
-	public UInt32 getRTValue(){
-		UInt32 time = getValue();
+	public UInt32 getRTValue(UInt32 local){
+		UInt32 time = getValue(local);
 		return time.subtract(rootOffset);
 	}
 }
