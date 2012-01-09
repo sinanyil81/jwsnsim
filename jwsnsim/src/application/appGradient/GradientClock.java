@@ -49,7 +49,17 @@ public class GradientClock {
 
 	public void setValue(UInt32 value) {
 		this.value = new UInt32(value);
-	}	
+	}
+	
+	public void update(UInt32 local){
+		int timePassed = local.subtract(updateLocalTime).toInteger();
+		float r = (rate -rootRate)/(1.0f + rootRate);
+		
+		timePassed  += (int)(((float)timePassed)*r);
+
+		value = value.add(timePassed);
+		this.updateLocalTime = new UInt32(local);
+	}
 
 	public UInt32 getValue(UInt32 local){
 		int timePassed = local.subtract(updateLocalTime).toInteger();
