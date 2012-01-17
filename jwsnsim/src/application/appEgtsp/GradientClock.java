@@ -54,7 +54,6 @@ public class GradientClock {
 	public void update(UInt32 local){
 		int timePassed = local.subtract(updateLocalTime).toInteger();
 		float r = (rate -rootRate)/(1.0f + rootRate);
-		r = rate;
 		
 		timePassed  += (int)(((float)timePassed)*r);
 
@@ -64,9 +63,7 @@ public class GradientClock {
 
 	public UInt32 getValue(UInt32 local){
 		int timePassed = local.subtract(updateLocalTime).toInteger();
-		float r = (rate -rootRate)/(1.0f + rootRate);
-		
-		r= rate;
+		float r = (rate -rootRate)/(1.0f + rootRate);	
 		
 		timePassed  += (int)(((float)timePassed)*r);
 

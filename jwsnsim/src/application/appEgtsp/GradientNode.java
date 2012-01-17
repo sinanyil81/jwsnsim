@@ -138,8 +138,15 @@ public class GradientNode extends Node implements TimerHandler {
 			return;
 		}
 		
-//		logicalClock.setValue(msg.globalTime);
-//		logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
+		UInt32 time = logicalClock.getValue(processedMsg.getEventTime());
+		int error = time.subtract(msg.globalTime).toInteger();
+		
+		if( error > 1000 || error < -1000){
+			logicalClock.setValue(msg.globalTime);
+			logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
+			logicalClock.setOffset(new UInt32());
+		}
+				
 		logicalClock.setRootRate(msg.rootMultiplier);
 		logicalClock.setRootOffset(msg.rootOffset);
 		
@@ -172,8 +179,9 @@ public class GradientNode extends Node implements TimerHandler {
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
 				UInt32 nclock = neighbors[i].getClock(localTime);
-				diff = nclock.subtract(time).toInteger()/(this.numNeighbors+1);
-				offset = offset.add(diff);
+				diff = nclock.subtract(time).toInteger();
+				if(Math.abs(diff) <= 500)
+					offset = offset.add(diff/(this.numNeighbors+1));								
 			}
 		}
 		
@@ -250,8 +258,8 @@ public class GradientNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
-		s += " " + local2Global().toString();
-		//s += " " + logicalClock.getRTValue().toString();
+		//s += " " + local2Global().toString();
+		s += " " + logicalClock.getRTValue(CLOCK.getValue()).toString();
 		//s += " " + logicalClock.getValue().toString();
 		//s += " " + logicalClock.getOffset().toLong();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
