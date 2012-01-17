@@ -41,13 +41,11 @@ public class FloodingApp extends Application implements TimerHandler{
 	}
 
 	private void createTopology(int topology) {
-//		nodes = new FloodingNode[NUMNODES];
-		nodes = new GradientNode[NUMNODES];	
+		nodes = new FloodingNode[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-//				nodes[i] = new FloodingNode(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new GradientNode(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new FloodingNode(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 	}

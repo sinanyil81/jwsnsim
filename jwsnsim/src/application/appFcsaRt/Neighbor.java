@@ -79,8 +79,8 @@ public class Neighbor {
 	public UInt32 getClock(UInt32 currentTime){
 		int timePassed = currentTime.subtract(timestamp).toInteger();
 		float r = relativeRate + rate + relativeRate * rate;
-		// r -= rootRate;
-		// r /= (1.0 + rootRate);
+		r -= rootRate;
+		 r /= (1.0 + rootRate);
 		
 		
 //		timePassed += (int) (((float)timePassed)*relativeRate);
