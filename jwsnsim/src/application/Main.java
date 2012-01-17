@@ -1,8 +1,8 @@
 package application;
 
+import application.appEgtsp.GtspApp;
 import application.appFcsa.FloodingApp;
 import application.appFtsp.FtspApp;
-import application.appGtsp.GtspApp;
 import application.appRateDetection.RateApp;
 
 public class Main {

@@ -1,4 +1,4 @@
-package application.appGtsp;
+package application.appEgtsp;
 
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;

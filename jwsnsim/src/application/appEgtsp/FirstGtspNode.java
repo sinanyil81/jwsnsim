@@ -1,4 +1,4 @@
-package application.appGtsp;
+package application.appEgtsp;
 
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -11,7 +11,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class GtspNode extends Node implements TimerHandler{
+public class FirstGtspNode extends Node implements TimerHandler{
 	
 	private static final int BEACON_RATE = 30000000;
 	private static final int MAX_NEIGHBOR = 2;
@@ -26,21 +26,29 @@ public class GtspNode extends Node implements TimerHandler{
     	
     	public int id = 0;
 
-    	UInt32 L_j; 
     	public int L_j_minus_L_i  = 0;   	
     	public double l_j = 1;
-    	public double x_j_over_h_i = 1;
-    	public UInt32 timestamp = new UInt32();
-    	    	
+
+    	/* timestamps in order to estimate relative hardware clock rate */
+    	public UInt32 x1 = new UInt32();
+    	public UInt32 y1 = new UInt32();
+    	public UInt32 x2 = new UInt32();
+    	public UInt32 y2 = new UInt32();
+    	
+    	double h_j_over_h_i = 1;    	
     	public boolean processed = true;    	
     }
     
     NeighborEntry neighbors[] = new NeighborEntry[MAX_NEIGHBOR];
     int numNeighbors = 0;
        
-    LogicalClock logicalClock = new LogicalClock();
+    UInt32 logicalClock = new UInt32();
+    long logicalClockOffset = 0;
+    double logicalClockRate = 1;
     
-	public GtspNode(int id, Position position) {
+    UInt32 updateLocalTime = new UInt32();    
+    
+	public FirstGtspNode(int id, Position position) {
 		super(id,position);
 		
 		CLOCK = new ConstantDriftClock();		
@@ -53,20 +61,29 @@ public class GtspNode extends Node implements TimerHandler{
 			neighbors[i] = new NeighborEntry();
 		}
 	}
+	
+	public UInt32 getLogicalClock(UInt32 currentTime){
+		long timePassed = currentTime.subtract(updateLocalTime).toLong();
+		long progress = (long)((double)timePassed*logicalClockRate) + logicalClockOffset;
 		
+		return logicalClock.add(new  UInt32(progress));
+	}
+	
 	private void copyMessage(GtspMessage message, NeighborEntry entry,UInt32 receiveTime){
 		entry.id = message.nodeid;
 		
-		UInt32 nodeLogicalClock = logicalClock.getValue(receiveTime);		
+		UInt32 nodeLogicalClock = getLogicalClock(receiveTime);		
 		entry.L_j_minus_L_i = (message.logicalClock.subtract(nodeLogicalClock)).toInteger();
 		entry.l_j = message.rate;
-							
-		if(entry.timestamp.toLong() != 0){
-			entry.x_j_over_h_i =(message.logicalClock.subtract(entry.L_j)).toDouble()/(receiveTime.subtract(entry.timestamp)).toDouble();
-		}
 		
-		entry.timestamp = receiveTime;
-		entry.L_j = message.logicalClock;
+		entry.x1 = new UInt32(entry.x2);
+		entry.y1 = new UInt32(entry.y2);
+		entry.x2 = new UInt32(receiveTime);
+		/* TODO entry.y2 = new UInt32(message.hardwareClock); */
+				
+		if(entry.x1.toLong() != 0 && entry.y1.toLong() != 0){
+			entry.h_j_over_h_i =(entry.y2.subtract(entry.y1)).toDouble()/(entry.x2.subtract(entry.x1)).toDouble();
+		}
 		
 		entry.processed = false;
 		entry.free = false;
@@ -96,23 +113,23 @@ public class GtspNode extends Node implements TimerHandler{
 		
 	private void updateLogicalClock(){
 		
-		double rateSum = logicalClock.rate;
-		long offsetSum = logicalClock.offset;
-		//long offsetSum = 0;
+		double rateSum = logicalClockRate;
+		long offsetSum = logicalClockOffset;
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors [i].processed == false && !neighbors [i].free){
-				rateSum += neighbors[i].x_j_over_h_i;
+				rateSum += neighbors[i].h_j_over_h_i*neighbors[i].l_j;
 				offsetSum += neighbors[i].L_j_minus_L_i;
 				neighbors [i].processed = true;
 			}
 		}
 		
 		UInt32 localTime = CLOCK.getValue();
-		logicalClock.value = logicalClock.getValue(localTime);
-		logicalClock.rate  = rateSum/(double)(numNeighbors+1);
-		logicalClock.offset =  offsetSum / (numNeighbors+1);
-		logicalClock.updateLocalTime = localTime;
+		logicalClock = getLogicalClock(localTime);
+		
+		logicalClockRate   = rateSum/(double)(numNeighbors+1);
+		logicalClockOffset = offsetSum / (numNeighbors+1);
+		updateLocalTime = localTime;
 	}
 	
     void processMsg()
@@ -145,13 +162,15 @@ public class GtspNode extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        UInt32 localTime;
+        UInt32 localTime, logicalTime;
 
         localTime = CLOCK.getValue();
+        logicalTime = getLogicalClock(localTime);
 
         outgoingMsg.nodeid = NODE_ID;
-        outgoingMsg.logicalClock = logicalClock.getValue(localTime);
-        outgoingMsg.rate = logicalClock.rate;
+        outgoingMsg.logicalClock = logicalTime;
+        /* TODO outgoingMsg.hardwareClock = localTime; */
+        outgoingMsg.rate = logicalClockRate;
         
         RadioPacket packet = new RadioPacket(new GtspMessage(outgoingMsg));
         packet.setSender(this);
@@ -170,8 +189,14 @@ public class GtspNode extends Node implements TimerHandler{
 		
 		UInt32 currentTime = CLOCK.getValue();
 		s += " " + NODE_ID;
-		s += " " + logicalClock.getValue(currentTime).toString();
-		s += " " + Float.floatToIntBits((float) logicalClock.rate);
+		s += " " + getLogicalClock(currentTime).toString();
+		s += " 0";
+		s += " " + Float.floatToIntBits((float) logicalClockRate);
+		s += " 0";
+		s += " 0";
+		s += " 0";
+		s += " " + logicalClockOffset;
+		s += " " + logicalClockRate;
 		
 		return s;		
 	}

@@ -164,8 +164,8 @@ public class GradientNode extends Node implements TimerHandler {
 	}
 
 	public UInt32 getOffset(UInt32 time,UInt32 localTime){
-		UInt32 offset = logicalClock.getOffset();
-		//UInt32 offset = new UInt32();
+		//UInt32 offset = logicalClock.getOffset();
+		UInt32 offset = new UInt32();
 		
 		int diff = 0;
 		
@@ -177,7 +177,8 @@ public class GradientNode extends Node implements TimerHandler {
 			}
 		}
 		
-		return offset;
+		
+		return offset.add(logicalClock.getOffset());
 	}
 
 	private float getClockRate() {

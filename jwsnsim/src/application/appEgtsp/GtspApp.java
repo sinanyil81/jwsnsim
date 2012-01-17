@@ -1,4 +1,4 @@
-package application.appGtsp;
+package application.appEgtsp;
 
 import application.Application;
 import application.Logger;
