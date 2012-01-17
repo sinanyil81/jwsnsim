@@ -1,4 +1,4 @@
-package application.appGradient;
+package application.appFcsaRt;
 
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
@@ -12,7 +12,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class GradientNode extends Node implements TimerHandler {
+public class FloodingNode extends Node implements TimerHandler {
 
 	private static final int MAX_NEIGHBORS = 8;
 	
@@ -23,13 +23,13 @@ public class GradientNode extends Node implements TimerHandler {
 	int numNeighbors = 0;
 
 	LeastSquares ls = new LeastSquares();
-	GradientClock logicalClock = new GradientClock();
+	LogicalClock logicalClock;
 	Timer timer0;
 
 	RadioPacket processedMsg = null;
-	GradientMessage outgoingMsg = new GradientMessage();
+	FloodingMessage outgoingMsg = new FloodingMessage();
 
-	public GradientNode(int id, Position position) {
+	public FloodingNode(int id, Position position) {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
@@ -37,10 +37,15 @@ public class GradientNode extends Node implements TimerHandler {
 		RADIO = new SimpleRadio(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
-		
+
 		outgoingMsg.sequence = 0;
 		outgoingMsg.rootid = this.NODE_ID;
 		
+		logicalClock = new LogicalClock(this.CLOCK);
+		if(this.NODE_ID == 1){
+			logicalClock.setReference();
+		}
+
 		for (int i = 0; i < neighbors.length; i++) {
 			neighbors[i] = new Neighbor();
 		}
@@ -86,7 +91,7 @@ public class GradientNode extends Node implements TimerHandler {
 		return freeItem;
 	}
 
-	private void addEntry(GradientMessage msg, UInt32 eventTime) {
+	private void addEntry(FloodingMessage msg, UInt32 eventTime) {
 
 		boolean found = false;
 				
@@ -107,8 +112,8 @@ public class GradientNode extends Node implements TimerHandler {
 			neighbors[index].free = false;
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.multiplier;
-			neighbors[index].rootClock = new UInt32(msg.globalTime);
 			neighbors[index].rootRate = msg.rootMultiplier;
+			neighbors[index].rootClock = new UInt32(msg.globalTime);			
 			neighbors[index].addNewEntry(msg.localTime,eventTime);
 			neighbors[index].timestamp = new UInt32(eventTime);
 			if(found){
@@ -122,12 +127,11 @@ public class GradientNode extends Node implements TimerHandler {
 	}
 
 	void processMsg() {
-		GradientMessage msg = (GradientMessage) processedMsg.getPayload();
-		
+		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
+
 		addEntry(msg, processedMsg.getEventTime());
+		updateClockRate();
 		
-		updateLogicalClock(processedMsg.getEventTime());			
-							
 		if(msg.rootid < outgoingMsg.rootid){
 			outgoingMsg.rootid = msg.rootid;
 			outgoingMsg.sequence = msg.sequence;
@@ -138,50 +142,12 @@ public class GradientNode extends Node implements TimerHandler {
 			return;
 		}
 		
-//		logicalClock.setValue(msg.globalTime);
-//		logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
+		logicalClock.setValue(msg.globalTime);
+		logicalClock.setUpdateLocalTime(processedMsg.getEventTime());
 		logicalClock.setRootRate(msg.rootMultiplier);
-		logicalClock.setRootOffset(msg.rootOffset);
-		
-	}
-		
-	private void updateLogicalClock(UInt32 eventTime) {
-		UInt32 time = logicalClock.getValue(eventTime);		
-		
-		float rate = getClockRate();			
-		UInt32 offset = getOffset(time,eventTime);
-		
-//		logicalClock.setValue(time);
-//		logicalClock.setUpdateLocalTime(eventTime);
-		
-		logicalClock.update(eventTime);
-		
-		logicalClock.setOffset(offset);
-		logicalClock.setRate(rate);
-		if (outgoingMsg.rootid == NODE_ID){
-			logicalClock.setRootRate(rate);
-		}
 	}
 
-	public UInt32 getOffset(UInt32 time,UInt32 localTime){
-		//UInt32 offset = logicalClock.getOffset();
-		UInt32 offset = new UInt32();
-		
-		int diff = 0;
-		
-		for (int i = 0; i < neighbors.length; i++) {
-			if(neighbors[i].free == false){
-				UInt32 nclock = neighbors[i].getClock(localTime);
-				diff = nclock.subtract(time).toInteger()/(this.numNeighbors+1);
-				offset = offset.add(diff);
-			}
-		}
-		
-		
-		return offset.add(logicalClock.getOffset());
-	}
-
-	private float getClockRate() {
+	private void updateClockRate() {
 		float rateSum = (float) logicalClock.getRate();
 		int numNeighbors = 0;
 		
@@ -192,9 +158,9 @@ public class GradientNode extends Node implements TimerHandler {
 			}
 		}
 		
-		this.numNeighbors = numNeighbors;
+		logicalClock.setRate(rateSum/(float)(numNeighbors+1));	
 		
-		return rateSum/(float)(numNeighbors+1);		
+		this.numNeighbors = numNeighbors;
 	}
 
 	@Override
@@ -220,13 +186,7 @@ public class GradientNode extends Node implements TimerHandler {
 		outgoingMsg.rootMultiplier = (float) logicalClock.getRootRate();
 		outgoingMsg.globalTime = new UInt32(globalTime);
 		
-		if (outgoingMsg.rootid == NODE_ID){
-			logicalClock.setRootOffset(new UInt32(globalTime.subtract(localTime)));
-		}
-		
-		outgoingMsg.rootOffset = logicalClock.getRootOffset();
-				
-		RadioPacket packet = new RadioPacket(new GradientMessage(outgoingMsg));
+		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);	
@@ -242,7 +202,36 @@ public class GradientNode extends Node implements TimerHandler {
 	}
 
 	public UInt32 local2Global() {		
-		return logicalClock.getValue(CLOCK.getValue());
+		return logicalClock.getValue();
+	}
+	
+	public UInt32 getNeighborClock(UInt32 timestamp, UInt32 base,float multiplier, float relativeRate,float rootRate){
+		int timePassed = CLOCK.getValue().subtract(timestamp).toInteger();
+		timePassed += (int) (((float)timePassed)*relativeRate);
+		int progress = timePassed + (int) (((float)timePassed)*multiplier);
+		progress = (int) (((float)progress)/(1.0+rootRate));
+		
+		return base.add(new UInt32(progress));
+	}
+	
+	public UInt32 gradientClock(){
+		UInt32 gclock = logicalClock.getValue();
+		int diffSum = 0;
+		
+		for (int i = 0; i < neighbors.length; i++) {
+			if(neighbors[i].free == false){
+				UInt32 nclock = getNeighborClock(neighbors[i].getTimestamp(), 
+												 neighbors[i].getRootClock(), 
+												 neighbors[i].getRate(),
+												 neighbors[i].getRelativeRate(),
+												 logicalClock.getRootRate()); 
+				diffSum += nclock.subtract(gclock).toInteger()/(this.numNeighbors+1);
+			}
+		}
+		
+		gclock.add(diffSum);
+		
+		return gclock;
 	}
 
 	public String toString() {
@@ -250,14 +239,10 @@ public class GradientNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
-		s += " " + local2Global().toString();
-		//s += " " + logicalClock.getRTValue().toString();
-		//s += " " + logicalClock.getValue().toString();
-		//s += " " + logicalClock.getOffset().toLong();
+		s += " " + gradientClock().toString();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 		
 		s += " " + Float.floatToIntBits(logicalClock.getRate());
-		//s += " " + CLOCK.getValue().toString();
 		//s += " " + logicalClock.getRootRate();
 
 		return s;

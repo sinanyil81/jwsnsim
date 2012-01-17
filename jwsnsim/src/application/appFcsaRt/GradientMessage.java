@@ -1,8 +1,8 @@
-package application.appGradient;
+package application.appFcsaRt;
 
 import sim.type.UInt32;
 
-public class FloodingMessage {
+public class GradientMessage {
 	
 	/* node's perspective */
 	public int nodeid = -1;
@@ -13,13 +13,14 @@ public class FloodingMessage {
 	/* flooded data */
 	public int rootid = -1;
 	public float rootMultiplier = 0;
+	public UInt32 rootOffset = new UInt32();
 	public int sequence = -1;
 	
-	public FloodingMessage() {
+	public GradientMessage() {
 		
 	}
 		
-	public FloodingMessage(FloodingMessage msg){
+	public GradientMessage(GradientMessage msg){
 		this.nodeid = msg.nodeid;
 		this.rootid = msg.rootid;
 		this.localTime = new UInt32(msg.localTime);
@@ -27,5 +28,6 @@ public class FloodingMessage {
 		this.sequence = msg.sequence;
 		this.multiplier = msg.multiplier;
 		this.rootMultiplier = msg.rootMultiplier;
+		this.rootOffset = msg.rootOffset;
 	}
 }
