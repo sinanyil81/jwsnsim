@@ -90,7 +90,7 @@ public class LeastSquares {
 		String s = "";
 		
 		long divisor = getWeightDivisor(table, tableEntries);
-		
+/*		
 		for(int i = 0; i <= table.length-1; ++i){
 			s += table[i].x.toLong() + " ";
 		}
@@ -101,7 +101,7 @@ public class LeastSquares {
 			s += table[i].y + " ";
 		}
 		
-		s += "\n";
+		s += "\n";*/
 		
 		for(int i = 0; i <= table.length-1; ++i){
 			double sum = 0;
@@ -112,10 +112,14 @@ public class LeastSquares {
 				double weight = ((double)a2/(double)divisor);
 				//weight /= (double)a;
 					
-				s += "("+i+","+j+")" + "=" + weight + "\n";
+				s += "("+i+","+j+")" + "=" + weight ;
 				
-				if(i!=j)
-					sum += weight;					
+				if(i!=j){
+					sum += weight;
+					s += " " + weight/(double)a;
+				}				
+				
+				s += "\n";
 			}	
 			
 			s += sum + "\n";
