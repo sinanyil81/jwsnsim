@@ -73,6 +73,45 @@ public class LeastSquares {
         meanX = new UInt32(newMeanX);
 	}
 	
+	private long getWeightDivisor(RegressionEntry table[], int tableEntries){
+		long sum = 0;
+		
+		for(int i = 0; i <= table.length-2; ++i){
+			for(int j = i; j <= table.length-1; ++j){
+				int a = (table[i].x.subtract(table[j].x)).toInteger();
+				sum += (long)a * a;				
+			}			
+		}
+		
+		return sum;		
+	}
+	
+	public String getSlopeWeights(RegressionEntry table[], int tableEntries){
+		String s = "";
+		
+		long divisor = getWeightDivisor(table, tableEntries);
+				
+		for(int i = 0; i <= table.length-1; ++i){
+			double sum = 0;
+			for(int j = 0; j <= table.length-1; ++j){
+				int a = (table[i].x.subtract(table[j].x)).toInteger();
+				long a2 = (long)a * a;
+								
+				double weight = ((double)a2/(double)divisor);
+				//weight /= (double)a;
+					
+				s += "("+i+","+j+")" + "=" + weight + "\n";
+				
+				if(i!=j)
+					sum += weight;					
+			}	
+			
+			s += sum + "\n";
+		}
+		
+		return s;
+	}
+	
 	public float getSlope() {
 		return slope;
 	}
