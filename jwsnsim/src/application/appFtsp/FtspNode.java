@@ -237,6 +237,10 @@ public class FtspNode extends Node implements TimerHandler{
 		s += " " + local2Global().toString();
 		s += " " + Float.floatToIntBits(ls.getSlope());
 		
+		if (this.NODE_ID == 20){
+			s += "\n";
+			s += ls.getSlopeWeights(table, tableEntries);
+		}
 		return s;		
 	}
 }
