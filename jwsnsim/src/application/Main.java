@@ -14,7 +14,7 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		//ftspSimulations();
+		ftspSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
@@ -22,7 +22,7 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		gradientSimulations();
+		//gradientSimulations();
 		/*------------------------------------------*/		
 	}		
 
@@ -52,7 +52,7 @@ public class Main {
 //					
 //				}					
 //			}
-			new application.appFtsp.FtspApp(20,"LSAverage.txt",FtspApp.LINE);
+			new application.appFtsp.FtspApp(20,"FTSP.txt",FtspApp.LINE);
 //			new application.appRate.FloodingApp(40,"Rate.txt",FtspApp.LINE);
 //			new application.appFcsa.FloodingApp(40,"Fcsa.txt",FloodingApp.LINE);
 		}
@@ -81,10 +81,11 @@ public class Main {
 	 */
 	public static void gradientSimulations(){
 		try{
-//			for(int j = 1;j<=10;j++)
+			for(int i = 20;i<=100;i+=20)
+				new application.appEgtsp.GradientApp(i,"EGTSPR_"+i+".txt",GradientApp.RING);
 //				for(int i = 10;i<=100;i+=10)
-			new application.appFcsaRt.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
-			new application.appEgtsp.GradientApp(50,"EGTSP.txt",GradientApp.LINE);
+//			new application.appFcsaRt.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
+
 //			new application.appGtsp.GtspApp(20,"Gtsp.txt",GtspApp.LINE);
 		}
 		catch (Exception e) {
