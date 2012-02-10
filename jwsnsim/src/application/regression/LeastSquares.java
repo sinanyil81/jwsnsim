@@ -90,33 +90,35 @@ public class LeastSquares {
 		String s = "";
 		
 		long divisor = getWeightDivisor(table, tableEntries);
-/*		
+		
 		for(int i = 0; i <= table.length-1; ++i){
-			s += table[i].x.toLong() + " ";
+			s += "("+i+"=" + table[i].x.toLong() + ") ";
 		}
 		
 		s += "\n";
 		
 		for(int i = 0; i <= table.length-1; ++i){
-			s += table[i].y + " ";
+			s += "("+i+"="  + table[i].y + ") ";
 		}
 		
-		s += "\n";*/
+		s += "\n";
 		
 		for(int i = 0; i <= table.length-1; ++i){
 			double sum = 0;
 			for(int j = 0; j <= table.length-1; ++j){
 				int a = (table[i].x.subtract(table[j].x)).toInteger();
+				int b = table[i].y - table[j].y;
 				long a2 = (long)a * a;
 								
 				double weight = ((double)a2/(double)divisor);
+				double slope = (double)b/(double)a;
 				//weight /= (double)a;
 					
-				s += "("+i+","+j+")" + "=" + weight ;
+				s += "("+i+","+j+") " + "weight=" + weight + " slope=" + slope;
 				
 				if(i!=j){
 					sum += weight;
-					s += " " + weight/(double)a;
+					s += " contribution=" + weight*slope + " ls-slope="+this.slope;
 				}				
 				
 				s += "\n";
