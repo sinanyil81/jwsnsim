@@ -15,6 +15,7 @@ public class FloodingApp extends Application implements TimerHandler{
 
 	public static final int LINE = 0;
 	public static final int RING = 1;
+	public static final int GRID = 2;
 	
 	private int PERIOD = 20000000;
 	int NUMNODES = 20;
@@ -47,6 +48,18 @@ public class FloodingApp extends Application implements TimerHandler{
 			for(int i=0;i<NUMNODES;i++){
 				nodes[i] = new FloodingNode(i+1,new Position(i*5,i*5,0));
 			}			
+		}
+		else if(topology == GRID){
+			
+			int j = (int) Math.sqrt(NUMNODES);
+			int id = 0;
+			
+			for(int i = 0;i<j;i++){
+				for(int k = 0;k<j;k++){
+					nodes[id] = new FloodingNode(id+1,new Position(k*10,i*10,0));
+					id++;
+				}				
+			}
 		}
 	}
 
