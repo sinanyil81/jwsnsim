@@ -14,11 +14,11 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		ftspSimulations();
+		// ftspSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
-		//fcsaSimulations();
+		fcsaSimulations();
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
@@ -69,7 +69,18 @@ public class Main {
 //			for(int j = 1;j<=10;j++)
 //				for(int i = 10;i<=100;i+=10)
 //					new application.appFlooding.FloodingApp(i,"FloodingSimLine"+i+"#"+j,FloodingApp.LINE);
-			new application.appFcsa.FloodingApp(20,"FCSA.txt",FloodingApp.LINE);
+			
+			/* tests for different topologies */
+			//new application.appFcsa.FloodingApp(16,"FCSA_LINE_16.txt",FloodingApp.LINE);
+			//new application.appFcsa.FloodingApp(16,"FCSA_GRID_16.txt",FloodingApp.GRID);
+			//new application.appFcsa.FloodingApp(64,"FCSA_GRID_64.txt",FloodingApp.GRID);
+			//new application.appFcsa.FloodingApp(256,"FCSA_GRID_256.txt",FloodingApp.GRID);
+			//new application.appFcsa.FloodingApp(1024,"FCSA_GRID_1024.txt",FloodingApp.GRID);
+			
+			//new application.appFcsa.FloodingApp(6,"FCSA_LINE_6.txt",FloodingApp.LINE);
+			//new application.appFcsa.FloodingApp(14,"FCSA_LINE_14.txt",FloodingApp.LINE);
+			//new application.appFcsa.FloodingApp(30,"FCSA_LINE_30.txt",FloodingApp.LINE);
+			new application.appFcsa.FloodingApp(62,"FCSA_LINE_62.txt",FloodingApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
