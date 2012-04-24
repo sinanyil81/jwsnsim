@@ -8,6 +8,7 @@ import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
+import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 
 
@@ -46,6 +47,18 @@ public class GradientApp extends Application implements TimerHandler{
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
 				nodes[i] = new GradientNode(i+1,new Position(i*5,i*5,0));
+			}			
+		}
+		
+		if(topology == RING){
+			
+			double oneStep = 360.0 / NUMNODES;
+			double radius = SimpleRadio.MAX_DISTANCE/Math.toRadians(oneStep); 
+					
+			for(int i = 0; i< NUMNODES;i++){
+				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
+											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
+				nodes[i] = new GradientNode(i+1,pos);
 			}			
 		}
 	}
