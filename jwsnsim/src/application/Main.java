@@ -18,13 +18,18 @@ public class Main {
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
-		fcsaSimulations();
+		//fcsaSimulations();
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
 		//gradientSimulations();
-		/*------------------------------------------*/		
+		/*------------------------------------------*/
+		
+		/*------------------------------------------*/
+		theoricSimulations();
+		/*------------------------------------------*/
 	}		
+
 
 	public static void rateSimulations(){
 
@@ -74,13 +79,13 @@ public class Main {
 			//new application.appFcsa.FloodingApp(16,"FCSA_LINE_16.txt",FloodingApp.LINE);
 			//new application.appFcsa.FloodingApp(16,"FCSA_GRID_16.txt",FloodingApp.GRID);
 			//new application.appFcsa.FloodingApp(64,"FCSA_GRID_64.txt",FloodingApp.GRID);
-			//new application.appFcsa.FloodingApp(256,"FCSA_GRID_256.txt",FloodingApp.GRID);
+			new application.appFcsa.FloodingApp(256,"FCSA_GRID_256.txt",FloodingApp.GRID);
 			//new application.appFcsa.FloodingApp(1024,"FCSA_GRID_1024.txt",FloodingApp.GRID);
 			
 			//new application.appFcsa.FloodingApp(6,"FCSA_LINE_6.txt",FloodingApp.LINE);
 			//new application.appFcsa.FloodingApp(14,"FCSA_LINE_14.txt",FloodingApp.LINE);
 			//new application.appFcsa.FloodingApp(30,"FCSA_LINE_30.txt",FloodingApp.LINE);
-			new application.appFcsa.FloodingApp(62,"FCSA_LINE_62.txt",FloodingApp.LINE);
+			//new application.appFcsa.FloodingApp(62,"FCSA_LINE_62.txt",FloodingApp.LINE);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -102,5 +107,16 @@ public class Main {
 		catch (Exception e) {
 			e.printStackTrace();
 		}									
-	}	
+	}
+	
+	private static void theoricSimulations() {
+		try{
+			new application.appTheoric.GradientApp(20,"gradient.txt",GradientApp.LINE);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
+	}
+
 }
