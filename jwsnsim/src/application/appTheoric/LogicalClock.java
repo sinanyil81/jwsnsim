@@ -33,4 +33,8 @@ public class LogicalClock {
 		update();
 		return value;
 	}
+	
+	public void setValue(double val){
+		value = val;
+	}
 }

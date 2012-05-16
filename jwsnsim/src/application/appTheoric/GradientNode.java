@@ -16,7 +16,7 @@ public class GradientNode implements TimerHandler{
 	public static final double kappa = 53;
 	public static final double epsilon = 0;
 //	private static final double sigma = 2;
-	public static final int PERIOD = 2^17;	
+	public static final int PERIOD = 1024*128;	
 		
 	private int id;
 	
@@ -29,9 +29,10 @@ public class GradientNode implements TimerHandler{
 	
 	Vector<GradientNode> neighbors = new Vector<GradientNode>();
 
-	public GradientNode(int id) {
+	public GradientNode(int id,double clockVal) {
 		this.id = id;
 		hardwareClock.start();
+		logicalClock.setValue(clockVal);
 		sendTimer.startPeriodic(PERIOD);
 	}
 	

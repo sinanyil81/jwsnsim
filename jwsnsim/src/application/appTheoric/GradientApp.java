@@ -6,14 +6,13 @@ import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
-import sim.simulator.Simulator;
 
 public class GradientApp extends Application implements TimerHandler{
 
 	public static final int LINE = 0;
 	public static final int RING = 1;
 	
-	private int PERIOD = 20000000;
+	private int PERIOD = 1024*32;
 	public int NUMNODES = 20;
 	GradientNode[] nodes = null;
 	
@@ -39,7 +38,7 @@ public class GradientApp extends Application implements TimerHandler{
 		if(topology == LINE){
 		
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new GradientNode(i+1);
+				nodes[i] = new GradientNode(i+1,i*10000);
 			}			
 			
 			for(int i=1;i<NUMNODES;i++){
@@ -60,7 +59,7 @@ public class GradientApp extends Application implements TimerHandler{
 	@Override
 	public void fireEvent(Timer timer) {
 		log();
-		timer.startOneshot((int) (PERIOD + ((Simulator.random.nextInt() % 4) + 1)*2^15));
+		timer.startOneshot(PERIOD);
 	}
 
 	private void log() {
