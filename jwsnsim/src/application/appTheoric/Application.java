@@ -5,8 +5,13 @@ public abstract class Application {
 	
 	public void run(){
 		
-		while(Simulator.getInstance().getTime().getTimeHigh()*32 < MAXSECOND){
+		while(true){
 			Simulator.getInstance().tick();
+			
+			SimTime t = Simulator.getInstance().getTime(); 
+			long second = t.getTimeHigh()/32/1024; 
+			if(second > MAXSECOND)
+				break;
 		}
 		
 		Simulator.getInstance().reset();

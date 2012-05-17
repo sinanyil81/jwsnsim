@@ -1,6 +1,5 @@
 package application.appTheoric;
 
-import application.Application;
 import application.Logger;
 
 public class GradientApp extends Application implements TimerHandler{
@@ -12,7 +11,7 @@ public class GradientApp extends Application implements TimerHandler{
 	public int NUMNODES = 20;
 	GradientNode[] nodes = null;
 	
-	HardwareClock clock = new HardwareClock(1.0);
+	HardwareClock clock = new HardwareClock(0.0);
 	Timer timer = new Timer(clock,this);
 	Logger logger;
 
