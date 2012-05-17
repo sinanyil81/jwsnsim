@@ -2,10 +2,6 @@ package application.appTheoric;
 
 import application.Application;
 import application.Logger;
-import sim.clock.Clock;
-import sim.clock.ConstantDriftClock;
-import sim.clock.Timer;
-import sim.clock.TimerHandler;
 
 public class GradientApp extends Application implements TimerHandler{
 
@@ -16,7 +12,7 @@ public class GradientApp extends Application implements TimerHandler{
 	public int NUMNODES = 20;
 	GradientNode[] nodes = null;
 	
-	Clock clock = new ConstantDriftClock(1.0);
+	HardwareClock clock = new HardwareClock(1.0);
 	Timer timer = new Timer(clock,this);
 	Logger logger;
 

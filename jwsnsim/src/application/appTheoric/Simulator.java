@@ -19,6 +19,7 @@ public class Simulator {
 	
 	protected Simulator(){
 		events = new Vector<Event>();
+		clocks = new Vector<Clock>();
 	}
 
 	public static Simulator getInstance() {

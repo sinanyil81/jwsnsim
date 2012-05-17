@@ -20,6 +20,11 @@ public class HardwareClock implements Clock {
 		drift /= 1000000.0;
 		Simulator.getInstance().register(this);
 	}
+	
+	public HardwareClock(double drift){
+		this.drift = drift;
+		Simulator.getInstance().register(this);
+	}
 		
 	public void progress(double amount){
 		
