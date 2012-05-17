@@ -1,7 +1,7 @@
 package application.appTheoric;
 
 public abstract class Application {
-	public static long MAXSECOND = 150000;
+	public static long MAXSECOND = 500000;
 	
 	public void run(){
 		

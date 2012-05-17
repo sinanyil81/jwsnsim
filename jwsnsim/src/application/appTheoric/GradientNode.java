@@ -87,7 +87,7 @@ public class GradientNode implements TimerHandler{
 	public String toString(){
 		String s ="";
 		
-		s += Simulator.getInstance().getTime().getTimeHigh()*32;		
+		s += Simulator.getInstance().getTime().getTimeHigh()/32/1024;		
 		s += " " + id;
 		s += " " + logicalClock.getValue().toString();
 		s += " 0";
