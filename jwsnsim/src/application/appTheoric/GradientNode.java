@@ -3,10 +3,6 @@ package application.appTheoric;
 import java.util.Iterator;
 import java.util.Vector;
 
-import sim.clock.Timer;
-import sim.clock.TimerHandler;
-import sim.simulator.Simulator;
-
 public class GradientNode implements TimerHandler{
 	
 	/**
@@ -32,7 +28,7 @@ public class GradientNode implements TimerHandler{
 	public GradientNode(int id,double clockVal) {
 		this.id = id;
 		hardwareClock.start();
-		logicalClock.setValue(clockVal);
+		logicalClock.setValue(new SimTime(clockVal));
 		sendTimer.startPeriodic(PERIOD);
 	}
 	
@@ -42,14 +38,13 @@ public class GradientNode implements TimerHandler{
 	}
 	
 	public void sendMessage(){
-		double value = logicalClock.getValue();
 		for (Iterator<GradientNode> iterator = neighbors.iterator(); iterator.hasNext();) {
 			GradientNode node = (GradientNode) iterator.next();
-			node.receiveMessage(this, value);			
+			node.receiveMessage(this, new SimTime(logicalClock.getValue()));			
 		}		
 	}
 	
-	public void receiveMessage(GradientNode node, double value){
+	public void receiveMessage(GradientNode node, SimTime value){
 		estimateLayer.updateEstimate(node, value);
 		adjustRate();
 	}
@@ -63,18 +58,23 @@ public class GradientNode implements TimerHandler{
 	}
 
 	private void adjustRate() {
-		double max = estimateLayer.getMaximumEstimate();
-		double min = estimateLayer.getMinimumEstimate();
-		double value = logicalClock.getValue();
+		SimTime max = estimateLayer.getMaximumEstimate();
+		SimTime min = estimateLayer.getMinimumEstimate();
+		SimTime value = logicalClock.getValue();
 		
-		/* adjust rates */ 
-		if( (max > 0) && (min > 0) ){			
-			
-			double a = Math.floor((max-value)/kappa -0.25);
-			double b = Math.floor((value-min)/kappa +0.25);
-			
-			logicalClock.setMult((a>=b) ? beta : 1);
+		double ahead = 0;
+		double behind = 0;
+		
+		if(max!=null && min !=null){
+			ahead = max.sub(value).toDouble();
+			behind = value.sub(min).toDouble();	
 		}
+		
+		
+		double a = Math.floor(ahead/kappa -0.25);
+		double b = Math.floor(behind/kappa +0.25);
+			
+		logicalClock.setMult((a>=b) ? beta : 1);
 		
 		if(logicalClock.getMult() !=1){
 			checkTimer.startOneshot(1);
@@ -85,10 +85,11 @@ public class GradientNode implements TimerHandler{
 	}
 	
 	public String toString(){
-		String s = Simulator.getInstance().getSecond().toString(10);
+		String s ="";
 		
+		s += Simulator.getInstance().getTime().getTimeHigh()*32;		
 		s += " " + id;
-		s += " " + (long)logicalClock.getValue();
+		s += " " + logicalClock.getValue().toString();
 		s += " 0";
 		s += " 0";
 		s += " 0";

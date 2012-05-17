@@ -5,17 +5,16 @@ public class EstimateLayer {
 	
 	class Neighbor{
 		public GradientNode node;
-		public double estimate;
-		public double timestamp;
+		public SimTime estimate = new SimTime();
+		public SimTime timestamp = new SimTime();
 		
 		public Neighbor(){
 			node = null;
-			estimate = 0;
-			timestamp = 0;
 		}
 		
-		public double getEstimate(double t){
-			return estimate + t - timestamp;
+		public SimTime getEstimate(SimTime t){
+			
+			return estimate.add(t.sub(timestamp));
 		}
 	}
 
@@ -40,7 +39,7 @@ public class EstimateLayer {
 		}
 	}
 	
-	public void updateEstimate(GradientNode node, double value){
+	public void updateEstimate(GradientNode node, SimTime value){
 		for (int i = 0; i < neighbors.length; i++) {
 			if( neighbors[i].node == node ){
 				neighbors[i].estimate = value;
@@ -53,14 +52,14 @@ public class EstimateLayer {
 	private void findMinimumEstimate() {
 		
 		minNeighbor = -1;
-		double t = clock.read();
+		SimTime t = clock.read();
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].node != null ){
 				if(minNeighbor == -1){
 					minNeighbor = i;	
 				}				
-				else if(neighbors[i].getEstimate(t) < neighbors[minNeighbor].getEstimate(t)){
+				else if(neighbors[i].getEstimate(t).compareTo(neighbors[minNeighbor].getEstimate(t)) ==-1){
 					minNeighbor = i;
 				}
 			}
@@ -70,39 +69,39 @@ public class EstimateLayer {
 	private void findMaximumEstimate() {
 		maxNeighbor = -1;
 		
-		double t = clock.read();
+		SimTime t = clock.read();
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].node != null){
 				if(maxNeighbor == -1){
 					maxNeighbor = i;	
 				}				
-				else if(neighbors[i].getEstimate(t) > neighbors[maxNeighbor].getEstimate(t)){
+				else if(neighbors[i].getEstimate(t).compareTo(neighbors[maxNeighbor].getEstimate(t)) ==1 ){
 					maxNeighbor = i;
 				}
 			}
 		}
 	}
 	
-	public double getMaximumEstimate(){
+	public SimTime getMaximumEstimate(){
 		findMaximumEstimate();
-		double t = clock.read();
+		SimTime t = clock.read();
 		
 		if(maxNeighbor != -1){
 			return neighbors[maxNeighbor].getEstimate(t);
 		}
 		
-		return -1;
+		return null;
 	}
 	
-	public double getMinimumEstimate(){
+	public SimTime getMinimumEstimate(){
 		findMinimumEstimate();
-		double t = clock.read();
+		SimTime t = clock.read();
 		
 		if(minNeighbor != -1){
 			return neighbors[minNeighbor].getEstimate(t);	
 		}
 		
-		return -1;
+		return null;
 	}
 }

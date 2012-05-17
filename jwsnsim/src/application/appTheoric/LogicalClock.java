@@ -1,11 +1,11 @@
 package application.appTheoric;
 
 public class LogicalClock {
-	double value = 0;
+	SimTime value = new SimTime();
 	double mult = 1;
 	
 	private HardwareClock clock;	
-	double lastReadTime = 0;
+	SimTime lastReadTime = new SimTime();
 				
 	public LogicalClock(HardwareClock clock){
 		this.clock= clock;
@@ -21,20 +21,18 @@ public class LogicalClock {
 	}
 	
 	private void update(){
-		double readTime = clock.read();
-		double diff = readTime - lastReadTime;
+		double diff = clock.read().sub(lastReadTime).toDouble();
 
-		value += diff*mult;
-		
-		lastReadTime = readTime;
+		value = value.add(new SimTime(diff*mult));		
+		lastReadTime = clock.read();
 	}		
 	
-	public double getValue(){
+	public SimTime getValue(){
 		update();
 		return value;
 	}
 	
-	public void setValue(double val){
+	public void setValue(SimTime val){
 		value = val;
 	}
 }
