@@ -4,6 +4,7 @@ import application.appEgtsp.GradientApp;
 import application.appFcsa.FloodingApp;
 import application.appFtsp.FtspApp;
 import application.appRateDetection.RateApp;
+import application.appTheoric.SimTime;
 
 public class Main {
 	
@@ -23,10 +24,6 @@ public class Main {
 		
 		/*------------------------------------------*/
 		//gradientSimulations();
-		/*------------------------------------------*/
-		
-		/*------------------------------------------*/
-		theoricSimulations();
 		/*------------------------------------------*/
 	}		
 
@@ -107,16 +104,6 @@ public class Main {
 		catch (Exception e) {
 			e.printStackTrace();
 		}									
-	}
-	
-	private static void theoricSimulations() {
-		try{
-			new application.appTheoric.GradientApp(20,"gradient.txt",GradientApp.LINE);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}	
-		
 	}
 
 }
