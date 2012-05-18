@@ -39,6 +39,27 @@ public class SelfNode extends Node implements TimerHandler {
 
 		outgoingMsg.sequence = 0;
 	}
+	
+	private int computeBestOffset(){
+		int skew = 0;
+		double minCriticality = criticality;  
+
+		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+				.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			if(minCriticality > msg.criticality){
+				UInt32 neighborClock = msg.clock;
+				UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+				skew = myClock.subtract(neighborClock).toInteger();
+				minCriticality = msg.criticality;
+			}
+		}
+		
+		return skew;
+	}
 
 	private void computeCriticality() {
 
@@ -61,6 +82,8 @@ public class SelfNode extends Node implements TimerHandler {
 		if(num > 0){
 			this.criticality =totalSkew/(double)num;
 		}
+		
+		if(NODE_ID == 1) System.out.println("NODE "+ NODE_ID+" c:"+criticality);
 	}
 
 	void decide() {
@@ -78,15 +101,27 @@ public class SelfNode extends Node implements TimerHandler {
 			}
 		}
 
-		if (isMostCritical && (Math.abs(criticality) > 0)) {
+		if (isMostCritical && (Math.abs(criticality) > TOLERANCE)) {
+			
 			if (criticality > 0.0) {
 				logicalClock.rate.adjustValue(Feedback.DECREASE);
 			} else if (criticality < 0.0) {
 				logicalClock.rate.adjustValue(Feedback.INCREASE);
 			}
+			
+			int skew =computeBestOffset();
+			UInt32 local = CLOCK.getValue();
+			logicalClock.setValue(logicalClock.getValue(local).add(skew));
+			logicalClock.updateLocalTime = local;	
 		} else {
 			if (Math.abs(criticality) < TOLERANCE) {
 				logicalClock.rate.adjustValue(Feedback.GOOD);
+			}
+			else{
+				int skew =computeBestOffset();
+				UInt32 local = CLOCK.getValue();
+				logicalClock.setValue(logicalClock.getValue(local).add(skew));
+				logicalClock.updateLocalTime = local;	
 			}
 		}
 	}
