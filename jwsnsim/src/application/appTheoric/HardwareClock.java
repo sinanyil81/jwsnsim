@@ -18,7 +18,7 @@ public class HardwareClock implements Clock {
 	public HardwareClock(){
 		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);  
 		drift /= 1000000.0;
-		System.out.println("HW: "+ drift);
+		System.out.println(String.valueOf(drift));
 		Simulator.getInstance().register(this);
 	}
 	
