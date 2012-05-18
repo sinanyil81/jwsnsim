@@ -95,7 +95,7 @@ public class SelfNode extends Node implements TimerHandler {
 			RadioPacket packet = iterator.next();
 			SelfMessage msg = (SelfMessage) packet.getPayload();
 
-			if (Math.abs(criticality) < Math.abs(msg.criticality)) {
+			if (Math.abs(criticality) <= Math.abs(msg.criticality)) {
 				isMostCritical = false;
 				break;
 			}
