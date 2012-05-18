@@ -85,45 +85,90 @@ public class SelfNode extends Node implements TimerHandler {
 		
 		if(NODE_ID == 1) System.out.println("NODE "+ NODE_ID+" c:"+criticality);
 	}
-
-	void decide() {
-		boolean isMostCritical = true;
-		computeCriticality();
-
+	
+	private int findMostCriticalNeighbor(){
+		int mostCriticalNeighbor = NODE_ID;
+		double maxCriticality = criticality;
+				
 		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
 				.hasNext();) {
 			RadioPacket packet = iterator.next();
 			SelfMessage msg = (SelfMessage) packet.getPayload();
 
-			if (Math.abs(criticality) <= Math.abs(msg.criticality)) {
-				isMostCritical = false;
-				break;
+			if (Math.abs(maxCriticality) <= Math.abs(msg.criticality)) {
+				maxCriticality = msg.criticality;
+				mostCriticalNeighbor = msg.nodeid;				
 			}
 		}
+		
+		return mostCriticalNeighbor;
+	}
 
-		if (isMostCritical && (Math.abs(criticality) > TOLERANCE)) {
+	void decide() {
+//		boolean isMostCritical = true;
+//		computeCriticality();
+//
+//		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+//				.hasNext();) {
+//			RadioPacket packet = iterator.next();
+//			SelfMessage msg = (SelfMessage) packet.getPayload();
+//
+//			if (Math.abs(criticality) <= Math.abs(msg.criticality)) {
+//				isMostCritical = false;
+//				break;
+//			}
+//		}
+		
+		computeCriticality();
+		if(findMostCriticalNeighbor()!= NODE_ID){
+			RadioPacket p = packets.get(findMostCriticalNeighbor());
+			SelfMessage msg = (SelfMessage)p.getPayload();
 			
-			if (criticality > 0.0) {
-				logicalClock.rate.adjustValue(Feedback.DECREASE);
-			} else if (criticality < 0.0) {
-				logicalClock.rate.adjustValue(Feedback.INCREASE);
-			}
+			UInt32 neighborClock = msg.clock;
+			UInt32 myClock = logicalClock.getValue(p.getEventTime());
+
+			int skew = myClock.subtract(neighborClock).toInteger();
 			
-			int skew =computeBestOffset();
-			UInt32 local = CLOCK.getValue();
-			logicalClock.setValue(logicalClock.getValue(local).add(skew));
-			logicalClock.updateLocalTime = local;	
-		} else {
-			if (Math.abs(criticality) < TOLERANCE) {
-				logicalClock.rate.adjustValue(Feedback.GOOD);
+			if(Math.abs(skew)> TOLERANCE){
+				if (skew > 0) {
+					logicalClock.rate.adjustValue(Feedback.DECREASE);
+				} else if (skew < 0) {
+					logicalClock.rate.adjustValue(Feedback.INCREASE);
+				}								
 			}
 			else{
-				int skew =computeBestOffset();
-				UInt32 local = CLOCK.getValue();
-				logicalClock.setValue(logicalClock.getValue(local).add(skew));
-				logicalClock.updateLocalTime = local;	
-			}
+				logicalClock.rate.adjustValue(Feedback.GOOD);
+			}		
 		}
+		
+		int bestOffset =computeBestOffset();
+		UInt32 local = CLOCK.getValue();
+		logicalClock.setValue(logicalClock.getValue(local).add(bestOffset));
+		logicalClock.updateLocalTime = local;	
+		
+//		if (isMostCritical && (Math.abs(criticality) > TOLERANCE)) {
+//			
+//			if (criticality > 0.0) {
+//				logicalClock.rate.adjustValue(Feedback.DECREASE);
+//			} else if (criticality < 0.0) {
+//				logicalClock.rate.adjustValue(Feedback.INCREASE);
+//			}
+//			
+//			int skew =computeBestOffset();
+//			UInt32 local = CLOCK.getValue();
+//			logicalClock.setValue(logicalClock.getValue(local).add(skew));
+//			logicalClock.updateLocalTime = local;	
+//		} else {
+//			if (Math.abs(criticality) < TOLERANCE) {
+//				logicalClock.rate.adjustValue(Feedback.GOOD);
+//			}
+//			else{
+//				int skew =computeBestOffset();
+//				UInt32 local = CLOCK.getValue();
+//				logicalClock.setValue(logicalClock.getValue(local).add(skew));
+//				logicalClock.updateLocalTime = local;	
+//			}
+//		}
 	}
 
 	@Override
