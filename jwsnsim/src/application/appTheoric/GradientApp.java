@@ -33,7 +33,7 @@ public class GradientApp extends Application implements TimerHandler{
 		if(topology == LINE){
 		
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new GradientNode(i+1,i*GradientNode.kappa);
+				nodes[i] = new GradientNode(i+1,i*5*GradientNode.kappa);
 			}			
 			
 			for(int i=1;i<NUMNODES;i++){
@@ -43,7 +43,25 @@ public class GradientApp extends Application implements TimerHandler{
 			for(int i=0;i<NUMNODES-1;i++){
 				nodes[i].addNeighbor(nodes[i+1]);
 			}
-		}		
+		}
+		else if(topology == RING){
+		
+			for(int i=0;i<NUMNODES;i++){
+				nodes[i] = new GradientNode(i+1,i*5*GradientNode.kappa);
+			}			
+			
+			for(int i=1;i<NUMNODES;i++){
+				nodes[i].addNeighbor(nodes[i-1]);
+			}
+			
+			nodes[0].addNeighbor(nodes[19]);
+			
+			for(int i=0;i<NUMNODES-1;i++){
+				nodes[i].addNeighbor(nodes[i+1]);
+			}
+			
+			nodes[19].addNeighbor(nodes[0]);
+		}
 	}
 
 	@Override
