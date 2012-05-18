@@ -103,6 +103,24 @@ public class SelfNode extends Node implements TimerHandler {
 		
 		return mostCriticalNeighbor;
 	}
+	
+	private int findLeastCriticalNeighbor(){
+		int leastCriticalNeighbor = NODE_ID;
+		double minCriticality = criticality;
+				
+		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+				.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			if (Math.abs(minCriticality) >= Math.abs(msg.criticality)) {
+				minCriticality = msg.criticality;
+				leastCriticalNeighbor = msg.nodeid;				
+			}
+		}
+		
+		return leastCriticalNeighbor;
+	}
 
 	void decide() {
 //		boolean isMostCritical = true;
@@ -120,8 +138,10 @@ public class SelfNode extends Node implements TimerHandler {
 //		}
 		
 		computeCriticality();
-		if(findMostCriticalNeighbor()!= NODE_ID){
-			RadioPacket p = packets.get(findMostCriticalNeighbor());
+		//if(findMostCriticalNeighbor()!= NODE_ID){
+		if(findLeastCriticalNeighbor()!= NODE_ID){
+			//RadioPacket p = packets.get(findMostCriticalNeighbor());
+			RadioPacket p = packets.get(findLeastCriticalNeighbor());
 			SelfMessage msg = (SelfMessage)p.getPayload();
 			
 			UInt32 neighborClock = msg.clock;
