@@ -25,7 +25,22 @@ public class Main {
 		/*------------------------------------------*/
 		//gradientSimulations();
 		/*------------------------------------------*/
+		
+		/*------------------------------------------*/
+		selfSimulations();
+		/*------------------------------------------*/
 	}		
+
+
+	private static void selfSimulations() {
+		try{			
+			new application.appSelf.SelfApp(20,"Self.txt",RateApp.LINE);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
+	}
 
 
 	public static void rateSimulations(){

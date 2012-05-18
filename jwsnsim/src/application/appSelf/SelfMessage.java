@@ -5,10 +5,10 @@ import sim.type.UInt32;
 public class SelfMessage {
 	public int nodeid = -1;
 	public UInt32 clock = new UInt32();
-	public float criticality; // 0 - 100
+	public double criticality; // 0 - 100
 	public int sequence = -1;
 
-	public SelfMessage(int nodeid, UInt32 clock, float criticality, int sequence) {
+	public SelfMessage(int nodeid, UInt32 clock, double criticality, int sequence) {
 		this.nodeid = nodeid;
 		this.clock = new UInt32(clock);
 		this.criticality = criticality;

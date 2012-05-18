@@ -3,7 +3,7 @@ package application;
 import sim.simulator.Simulator;
 
 public abstract class Application {
-	public static long MAXSECOND = 150000;
+	public static long MAXSECOND = 100000;
 	
 	public void run(){
 		
