@@ -8,9 +8,9 @@ public class GradientNode implements TimerHandler{
 	/**
 	 * Gradient Clock Synchronization Parameters
 	 */
-	public static final double beta = 1.0013;
-	public static final double kappa = 766;
-	public static final double epsilon = 0.00008;
+	public static final double beta = 1.000987;
+	public static final double kappa = 581.47226;
+	public static final double epsilon = 0.0000610;
 //	private static final double sigma = 2;
 	public static final int PERIOD = 1024*128;	
 		

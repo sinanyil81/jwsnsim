@@ -47,7 +47,7 @@ public class GradientApp extends Application implements TimerHandler{
 		else if(topology == RING){
 		
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new GradientNode(i+1,i*5*GradientNode.kappa);
+				nodes[i] = new GradientNode(i+1,(i%2)*(4*GradientNode.kappa));
 			}			
 			
 			for(int i=1;i<NUMNODES;i++){
