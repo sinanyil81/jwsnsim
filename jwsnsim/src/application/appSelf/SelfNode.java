@@ -21,6 +21,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
 	private static final double TOLERANCE = 30.0;
+	private static final double OFFSET_TOLERANCE = 60.0;
 
 	LogicalClock logicalClock = new LogicalClock();
 	double criticality = 0.0;
@@ -41,8 +42,8 @@ public class SelfNode extends Node implements TimerHandler {
 		timer0 = new Timer(CLOCK, this);
 
 		outgoingMsg.sequence = 0;
-		
-		System.out.println("Node:"+this.NODE_ID+":"+CLOCK.getDrift());
+
+		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
 
 	private void computeCriticality() {
@@ -56,9 +57,9 @@ public class SelfNode extends Node implements TimerHandler {
 			SelfMessage msg = (SelfMessage) packet.getPayload();
 
 			UInt32 neighborClock = msg.clock;
-			
+
 			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-					
+
 			totalSkew += myClock.subtract(neighborClock).toDouble();
 
 			num += 1;
@@ -117,22 +118,31 @@ public class SelfNode extends Node implements TimerHandler {
 			UInt32 myClock = logicalClock.getValue(p.getEventTime());
 			double skew = myClock.subtract(neighborClock).toInteger();
 
-			if (this.criticality > TOLERANCE) {
+			double control_skew = this.criticality;
+
+			if (control_skew > TOLERANCE) {
 				double exValue = logicalClock.rate.getCurrentValue();
 				logicalClock.rate.adjustValue(Feedback.DECREASE);
 				this.lastFeedback = Feedback.DECREASE;
 				double newValue = logicalClock.rate.getCurrentValue();
-				if (newValue == exValue) {
-					System.out.println("***********************************");
-					
+				// if (newValue == exValue) {
+				if (skew > (OFFSET_TOLERANCE)) {
+					System.out.println("NODE:" + this.NODE_ID
+							+ "***********************************");
+					logicalClock.addOffset(computeBestOffset());
+					//logicalClock.addOffset(computeAverageOffset());
 				}
-			} else if (this.criticality < (-1) * TOLERANCE) {
+			} else if (control_skew < (-1.0) * TOLERANCE) {
 				double exValue = logicalClock.rate.getCurrentValue();
 				logicalClock.rate.adjustValue(Feedback.INCREASE);
 				this.lastFeedback = Feedback.INCREASE;
 				double newValue = logicalClock.rate.getCurrentValue();
-				if (newValue == exValue) {
-					System.out.println("***********************************");
+				// if (newValue == exValue) {
+				if (skew < (OFFSET_TOLERANCE)) {
+					System.out.println("NODE:" + this.NODE_ID
+							+ "***********************************");
+					logicalClock.addOffset(computeBestOffset());
+					//logicalClock.addOffset(computeAverageOffset());
 				}
 			} else {
 				if (!this.lastFeedback.equals(Feedback.GOOD)) {
@@ -141,36 +151,46 @@ public class SelfNode extends Node implements TimerHandler {
 					System.out.println("GOOD GOOD GOOD");
 				}
 			}
-		} 
-		
-//		int mostCriticalNeighbor = findMostCriticalNeighbor();
-//		if (leastCriticalNeighbor != NODE_ID) {
-//			 int bestOffset =computeBestOffset();
-//			 UInt32 local = CLOCK.getValue();
-//			 logicalClock.setValue(logicalClock.getValue(local).add(bestOffset));
-//			 logicalClock.updateLocalTime = local;
-//		}
+		}
+	}
+
+	private int computeBestOffset() {
+		int skew = 0;
+
+		int leastCriticalNeighbor = findLeastCriticalNeighbor();
+		RadioPacket packet = this.packets.get(leastCriticalNeighbor);
+		SelfMessage msg = (SelfMessage) (packet.getPayload());
+		UInt32 neighborClock = msg.clock;
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+		skew = -myClock.subtract(neighborClock).toInteger();
+
+		return skew;
 	}
 	
-	private int computeBestOffset(){
-		int skew = 0;
-		double minCriticality = criticality;  
+	private int computeAverageOffset() {
+		double totalSkew = 0.0;
+		int num = 0;
 
 		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
 				.hasNext();) {
 			RadioPacket packet = iterator.next();
 			SelfMessage msg = (SelfMessage) packet.getPayload();
 
-			if(minCriticality > msg.criticality){
-				UInt32 neighborClock = msg.clock;
-				UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+			UInt32 neighborClock = msg.clock;
 
-				skew = myClock.subtract(neighborClock).toInteger();
-				minCriticality = msg.criticality;
-			}
+			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+			totalSkew += myClock.subtract(neighborClock).toDouble();
+
+			num += 1;
+		}
+
+		if (num > 0) {
+			totalSkew /= (double) num;
 		}
 		
-		return skew;
+		return (int)totalSkew; 
 	}
 
 	@Override

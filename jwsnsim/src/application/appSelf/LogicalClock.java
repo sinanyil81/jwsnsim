@@ -16,6 +16,11 @@ public class LogicalClock {
 	public void setValue(UInt32 currentTime) {
 		value = new UInt32(currentTime);
 	}
+	
+	public void addOffset(int offset) {
+		System.out.println("OFFSET:"+offset);
+		value = value.add(offset);
+	}
 
 	public UInt32 getValue(UInt32 currentTime) {
 		int timePassed = currentTime.subtract(updateLocalTime).toInteger();
