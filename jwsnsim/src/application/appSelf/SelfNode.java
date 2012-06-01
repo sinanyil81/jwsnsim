@@ -3,6 +3,8 @@ package application.appSelf;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -27,6 +29,7 @@ public class SelfNode extends Node implements TimerHandler {
 	RadioPacket processedMsg = null;
 	SelfMessage outgoingMsg = new SelfMessage();
 	Hashtable<Integer, RadioPacket> packets = new Hashtable<Integer, RadioPacket>();
+	private Feedback lastFeedback = Feedback.INCREASE;
 
 	public SelfNode(int id, Position position) {
 		super(id, position);
@@ -38,6 +41,115 @@ public class SelfNode extends Node implements TimerHandler {
 		timer0 = new Timer(CLOCK, this);
 
 		outgoingMsg.sequence = 0;
+		
+		System.out.println("Node:"+this.NODE_ID+":"+CLOCK.getDrift());
+	}
+
+	private void computeCriticality() {
+
+		double totalSkew = 0.0;
+		int num = 0;
+
+		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+				.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			UInt32 neighborClock = msg.clock;
+			
+			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+					
+			totalSkew += myClock.subtract(neighborClock).toDouble();
+
+			num += 1;
+		}
+
+		double delta = 1.0;// logicalClock.rate.getCurrentDelta();
+		if (num > 0) {
+			this.criticality = (totalSkew / (double) num) * delta;
+		}
+	}
+
+	private int findMostCriticalNeighbor() {
+		int mostCriticalNeighbor = NODE_ID;
+		double maxCriticality = criticality;
+
+		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+				.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			if (Math.abs(maxCriticality) <= Math.abs(msg.criticality)) {
+				maxCriticality = msg.criticality;
+				mostCriticalNeighbor = msg.nodeid;
+			}
+		}
+
+		return mostCriticalNeighbor;
+	}
+
+	private int findLeastCriticalNeighbor() {
+		int leastCriticalNeighbor = NODE_ID;
+		double minCriticality = criticality;
+
+		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
+				.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			if (Math.abs(minCriticality) >= Math.abs(msg.criticality)) {
+				minCriticality = msg.criticality;
+				leastCriticalNeighbor = msg.nodeid;
+			}
+		}
+
+		return leastCriticalNeighbor;
+	}
+
+	void decide() {
+		computeCriticality();
+		int leastCriticalNeighbor = findLeastCriticalNeighbor();
+		if (leastCriticalNeighbor != NODE_ID) {
+			RadioPacket p = packets.get(leastCriticalNeighbor);
+			SelfMessage msg = (SelfMessage) p.getPayload();
+
+			UInt32 neighborClock = msg.clock;
+			UInt32 myClock = logicalClock.getValue(p.getEventTime());
+			double skew = myClock.subtract(neighborClock).toInteger();
+
+			if (this.criticality > TOLERANCE) {
+				double exValue = logicalClock.rate.getCurrentValue();
+				logicalClock.rate.adjustValue(Feedback.DECREASE);
+				this.lastFeedback = Feedback.DECREASE;
+				double newValue = logicalClock.rate.getCurrentValue();
+				if (newValue == exValue) {
+					System.out.println("***********************************");
+					
+				}
+			} else if (this.criticality < (-1) * TOLERANCE) {
+				double exValue = logicalClock.rate.getCurrentValue();
+				logicalClock.rate.adjustValue(Feedback.INCREASE);
+				this.lastFeedback = Feedback.INCREASE;
+				double newValue = logicalClock.rate.getCurrentValue();
+				if (newValue == exValue) {
+					System.out.println("***********************************");
+				}
+			} else {
+				if (!this.lastFeedback.equals(Feedback.GOOD)) {
+					logicalClock.rate.adjustValue(Feedback.GOOD);
+					this.lastFeedback = Feedback.GOOD;
+					System.out.println("GOOD GOOD GOOD");
+				}
+			}
+		} 
+		
+//		int mostCriticalNeighbor = findMostCriticalNeighbor();
+//		if (leastCriticalNeighbor != NODE_ID) {
+//			 int bestOffset =computeBestOffset();
+//			 UInt32 local = CLOCK.getValue();
+//			 logicalClock.setValue(logicalClock.getValue(local).add(bestOffset));
+//			 logicalClock.updateLocalTime = local;
+//		}
 	}
 	
 	private int computeBestOffset(){
@@ -61,146 +173,16 @@ public class SelfNode extends Node implements TimerHandler {
 		return skew;
 	}
 
-	private void computeCriticality() {
-
-		double totalSkew = 0.0;
-		int num = 0;
-
-		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
-				.hasNext();) {
-			RadioPacket packet = iterator.next();
-			SelfMessage msg = (SelfMessage) packet.getPayload();
-
-			UInt32 neighborClock = msg.clock;
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-
-			totalSkew += myClock.subtract(neighborClock).toDouble();
-			
-			num += 1;
-		}
-		
-		if(num > 0){
-			this.criticality =totalSkew/(double)num;
-		}
-		
-		if(NODE_ID == 1) System.out.println("NODE "+ NODE_ID+" c:"+criticality);
-	}
-	
-	private int findMostCriticalNeighbor(){
-		int mostCriticalNeighbor = NODE_ID;
-		double maxCriticality = criticality;
-				
-		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
-				.hasNext();) {
-			RadioPacket packet = iterator.next();
-			SelfMessage msg = (SelfMessage) packet.getPayload();
-
-			if (Math.abs(maxCriticality) <= Math.abs(msg.criticality)) {
-				maxCriticality = msg.criticality;
-				mostCriticalNeighbor = msg.nodeid;				
-			}
-		}
-		
-		return mostCriticalNeighbor;
-	}
-	
-	private int findLeastCriticalNeighbor(){
-		int leastCriticalNeighbor = NODE_ID;
-		double minCriticality = criticality;
-				
-		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
-				.hasNext();) {
-			RadioPacket packet = iterator.next();
-			SelfMessage msg = (SelfMessage) packet.getPayload();
-
-			if (Math.abs(minCriticality) >= Math.abs(msg.criticality)) {
-				minCriticality = msg.criticality;
-				leastCriticalNeighbor = msg.nodeid;				
-			}
-		}
-		
-		return leastCriticalNeighbor;
-	}
-
-	void decide() {
-//		boolean isMostCritical = true;
-//		computeCriticality();
-//
-//		for (Iterator<RadioPacket> iterator = packets.values().iterator(); iterator
-//				.hasNext();) {
-//			RadioPacket packet = iterator.next();
-//			SelfMessage msg = (SelfMessage) packet.getPayload();
-//
-//			if (Math.abs(criticality) <= Math.abs(msg.criticality)) {
-//				isMostCritical = false;
-//				break;
-//			}
-//		}
-		
-		computeCriticality();
-		//if(findMostCriticalNeighbor()!= NODE_ID){
-		if(findLeastCriticalNeighbor()!= NODE_ID){
-			//RadioPacket p = packets.get(findMostCriticalNeighbor());
-			RadioPacket p = packets.get(findLeastCriticalNeighbor());
-			SelfMessage msg = (SelfMessage)p.getPayload();
-			
-			UInt32 neighborClock = msg.clock;
-			UInt32 myClock = logicalClock.getValue(p.getEventTime());
-
-			int skew = myClock.subtract(neighborClock).toInteger();
-			
-			if(Math.abs(skew)> TOLERANCE){
-				if (skew > 0) {
-					logicalClock.rate.adjustValue(Feedback.DECREASE);
-				} else if (skew < 0) {
-					logicalClock.rate.adjustValue(Feedback.INCREASE);
-				}								
-			}
-			else{
-				logicalClock.rate.adjustValue(Feedback.GOOD);
-			}		
-		}
-		
-		int bestOffset =computeBestOffset();
-		UInt32 local = CLOCK.getValue();
-		logicalClock.setValue(logicalClock.getValue(local).add(bestOffset));
-		logicalClock.updateLocalTime = local;	
-		
-//		if (isMostCritical && (Math.abs(criticality) > TOLERANCE)) {
-//			
-//			if (criticality > 0.0) {
-//				logicalClock.rate.adjustValue(Feedback.DECREASE);
-//			} else if (criticality < 0.0) {
-//				logicalClock.rate.adjustValue(Feedback.INCREASE);
-//			}
-//			
-//			int skew =computeBestOffset();
-//			UInt32 local = CLOCK.getValue();
-//			logicalClock.setValue(logicalClock.getValue(local).add(skew));
-//			logicalClock.updateLocalTime = local;	
-//		} else {
-//			if (Math.abs(criticality) < TOLERANCE) {
-//				logicalClock.rate.adjustValue(Feedback.GOOD);
-//			}
-//			else{
-//				int skew =computeBestOffset();
-//				UInt32 local = CLOCK.getValue();
-//				logicalClock.setValue(logicalClock.getValue(local).add(skew));
-//				logicalClock.updateLocalTime = local;	
-//			}
-//		}
-	}
-
 	@Override
 	public void receiveMessage(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 		packets.put(msg.nodeid, packet);
-		
+
 		UInt32 local = CLOCK.getValue();
 		logicalClock.setValue(logicalClock.getValue(local));
 		logicalClock.updateLocalTime = local;
 	}
-	
+
 	@Override
 	public void fireEvent(Timer timer) {
 		decide();
@@ -212,7 +194,7 @@ public class SelfNode extends Node implements TimerHandler {
 		UInt32 localTime, globalTime;
 
 		localTime = CLOCK.getValue();
-		globalTime = logicalClock.getValue(localTime);	
+		globalTime = logicalClock.getValue(localTime);
 
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
@@ -231,8 +213,6 @@ public class SelfNode extends Node implements TimerHandler {
 		timer0.startPeriodic(BEACON_RATE
 				+ ((Simulator.random.nextInt() % 100) + 1) * 10000);
 	}
-	
-	
 
 	public UInt32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
@@ -243,7 +223,15 @@ public class SelfNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-		s += " " + Float.floatToIntBits((float) ((1.0+logicalClock.rate.getCurrentValue()) * (1.0+CLOCK.getDrift()))) ;
+		s += " "
+				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+						.getCurrentValue()) * (1.0 + CLOCK.getDrift())));
+		if (NODE_ID < 10) {
+			System.out.println("0" + NODE_ID + " t:"
+					+ local2Global().toString());
+		} else {
+			System.out.println(NODE_ID + " t:" + local2Global().toString());
+		}
 
 		return s;
 	}
