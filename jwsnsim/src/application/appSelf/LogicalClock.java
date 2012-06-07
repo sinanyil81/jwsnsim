@@ -9,7 +9,7 @@ public class LogicalClock {
 	public UInt32 value = new UInt32();
 
 	public AdaptiveValueTracker rate = new StandardAdaptiveValueTrackerFactory()
-			.newAdaptiveValueTracker(-0.00005, 0.00005, 0.0, 0.0000001, false);
+			.newAdaptiveValueTracker(-0.00005, 0.00005, 0.0, 0.000000005, false);
 
 	UInt32 updateLocalTime = new UInt32();
 

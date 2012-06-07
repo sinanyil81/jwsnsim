@@ -21,7 +21,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
 	private static final double TOLERANCE = 30.0;
-	private static final double OFFSET_TOLERANCE = 60.0;
+	private static final double OFFSET_TOLERANCE = 0.0;
 
 	LogicalClock logicalClock = new LogicalClock();
 	double criticality = 0.0;
@@ -145,11 +145,11 @@ public class SelfNode extends Node implements TimerHandler {
 					//logicalClock.addOffset(computeAverageOffset());
 				}
 			} else {
-				if (!this.lastFeedback.equals(Feedback.GOOD)) {
+				//if (!this.lastFeedback.equals(Feedback.GOOD)) {
 					logicalClock.rate.adjustValue(Feedback.GOOD);
 					this.lastFeedback = Feedback.GOOD;
 					System.out.println("GOOD GOOD GOOD");
-				}
+				//}
 			}
 		}
 	}
