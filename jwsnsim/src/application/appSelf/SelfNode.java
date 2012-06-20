@@ -43,7 +43,9 @@ public class SelfNode extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
 
-	
+	/*
+	 * Consider the neighbors whose logical clocks are ahead and behind the most.
+	 */
 	private void computeCriticality() {		
 		double skewToTheFastestNeighbor = 0.0;
 		double skewToTheSlowestNeighbor = 0.0;		
@@ -70,6 +72,12 @@ public class SelfNode extends Node implements TimerHandler {
 		this.criticality = skewToTheFastestNeighbor + skewToTheSlowestNeighbor;
 	}
 	
+	/*
+	 * If we are much more ahead from the neighbor whose logical clock is behind the most
+	 * than we must slow down. If we are much more behind from the neighbor whose logical 
+	 * clock is ahead the most, than we must speed up. Otherwise, we must preserve our
+	 * speed. 
+	 */
 	void adjustRate() {
 		computeCriticality();
 
@@ -109,10 +117,35 @@ public class SelfNode extends Node implements TimerHandler {
 
 		return -averageSkew;
 	}
+	
+	private int getMaxOffset(){
+		int maxSkew = 0;
+
+		for (Iterator<RadioPacket> iterator = packets.values()
+				.iterator(); iterator.hasNext();) {
+			RadioPacket packet = iterator.next();
+			SelfMessage msg = (SelfMessage) packet.getPayload();
+
+			UInt32 neighborClock = msg.clock;
+			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+			int skew = myClock.subtract(neighborClock).toInteger();
+			
+			if(skew < 0 && skew < maxSkew)
+				maxSkew = skew;
+		}
+
+		return -maxSkew;
+	}
 
 	private void adjustOffset() {
 		int averageOffset = computeAverageOffset();
-		logicalClock.addOffset(averageOffset);		
+		
+		if(Math.abs(averageOffset) > 2000){
+			logicalClock.addOffset(getMaxOffset());
+		}
+		else {
+			logicalClock.addOffset(averageOffset);
+		}
 	}
 
 	private void updateLogicalClock() {
@@ -125,15 +158,16 @@ public class SelfNode extends Node implements TimerHandler {
 	public void receiveMessage(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 		packets.put(msg.nodeid, packet);
-
-		updateLogicalClock();
 	}
 
 	@Override
 	public void fireEvent(Timer timer) {		
+		
 		updateLogicalClock();
+		
 		adjustRate();
 		adjustOffset();
+		
 		packets.clear();
 		
 		sendMsg();
