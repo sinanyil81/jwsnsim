@@ -140,6 +140,7 @@ public class SelfNode extends Node implements TimerHandler {
 	private void adjustOffset() {
 		int averageOffset = computeAverageOffset();
 		
+		/* check if offset is so large or not...*/
 		if(Math.abs(averageOffset) > 2000){
 			logicalClock.addOffset(getMaxOffset());
 		}
