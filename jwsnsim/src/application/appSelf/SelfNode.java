@@ -13,21 +13,21 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
-import fr.irit.smac.util.adaptivevaluetracker.Feedback;
+import fr.irit.smac.util.avt.Feedback;
 
 public class SelfNode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
-	private static final double TOLERANCE = 10;
+	private static final double TOLERANCE = 1.0;
 
-	LogicalClock logicalClock = new LogicalClock();	
+	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
 	RadioPacket processedMsg = null;
 	SelfMessage outgoingMsg = new SelfMessage();
 	
+	double criticality = 0.0;	
 	Hashtable<Integer, RadioPacket> packets = new Hashtable<Integer, RadioPacket>();
-	double criticality = 0.0;
 
 	public SelfNode(int id, Position position) {
 		super(id, position);
@@ -43,55 +43,39 @@ public class SelfNode extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
 
-	/*
-	 * Consider the neighbors whose logical clocks are ahead and behind the most.
-	 */
-	private void computeCriticality() {		
-		double skewToTheFastestNeighbor = 0.0;
-		double skewToTheSlowestNeighbor = 0.0;		
-		
-		for (Iterator<RadioPacket> iterator = packets.values()
-				.iterator(); iterator.hasNext();) {
-			RadioPacket packet = iterator.next();
-			SelfMessage msg = (SelfMessage) packet.getPayload();
+	private void computeCriticality(RadioPacket packet) {
+		SelfMessage msg = (SelfMessage) packet.getPayload();
 
-			UInt32 neighborClock = msg.clock;
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			
-			double skew = myClock.subtract(neighborClock).toDouble();
-			
-			if(skew > 0.0 && skew > skewToTheSlowestNeighbor){
-				skewToTheSlowestNeighbor = skew;
-			}
-			
-			if(skew < 0.0 && skew < skewToTheFastestNeighbor){
-				skewToTheFastestNeighbor = skew;
-			}
-		}
-		
-		this.criticality = skewToTheFastestNeighbor + skewToTheSlowestNeighbor;
+		UInt32 neighborClock = msg.clock;
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+		this.criticality = myClock.subtract(neighborClock).toDouble();
 	}
-	
-	/*
-	 * If we are much more ahead from the neighbor whose logical clock is behind the most
-	 * than we must slow down. If we are much more behind from the neighbor whose logical 
-	 * clock is ahead the most, than we must speed up. Otherwise, we must preserve our
-	 * speed. 
-	 */
-	void adjustRate() {
-		computeCriticality();
 
-		if (this.criticality > TOLERANCE) { /* we are too much ahead from the slowest */
-			logicalClock.rate.adjustValue(Feedback.DECREASE);
-		} else if (this.criticality < (-1.0) * TOLERANCE) { /* we are too much behind from the fastest */
-			logicalClock.rate.adjustValue(Feedback.INCREASE);
+	/**
+	 * This method is only called when a message received.
+	 */
+	void decide(RadioPacket packet) {
+		computeCriticality(packet);
+		
+		/* update logical clock before changing its rate 
+		 * or offset!!!
+		 */
+		logicalClock.update(CLOCK.getValue());
+		
+		double control_skew = this.criticality;
+		if (control_skew > TOLERANCE) {		
+			logicalClock.rate.adjustValue(Feedback.LOWER);
+			logicalClock.addOffset(computeAverageOffset());
+		} else if (control_skew < (-1.0) * TOLERANCE) {
+			logicalClock.rate.adjustValue(Feedback.GREATER);
+			logicalClock.addOffset(computeAverageOffset());
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
-		}		
+		}
 	}
-	
 
-	private int computeAverageOffset(){
+	private int computeAverageOffset() {
 		int averageSkew = 0;
 
 		double totalSkew = 0.0;
@@ -117,61 +101,19 @@ public class SelfNode extends Node implements TimerHandler {
 
 		return -averageSkew;
 	}
-	
-	private int getMaxOffset(){
-		int maxSkew = 0;
-
-		for (Iterator<RadioPacket> iterator = packets.values()
-				.iterator(); iterator.hasNext();) {
-			RadioPacket packet = iterator.next();
-			SelfMessage msg = (SelfMessage) packet.getPayload();
-
-			UInt32 neighborClock = msg.clock;
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			int skew = myClock.subtract(neighborClock).toInteger();
-			
-			if(skew < 0 && skew < maxSkew)
-				maxSkew = skew;
-		}
-
-		return -maxSkew;
-	}
-
-	private void adjustOffset() {
-		int averageOffset = computeAverageOffset();
 		
-		/* check if offset is so large or not...*/
-		if(Math.abs(averageOffset) > 2000){
-			logicalClock.addOffset(getMaxOffset());
-		}
-		else {
-			logicalClock.addOffset(averageOffset);
-		}
-	}
-
-	private void updateLogicalClock() {
-		UInt32 local = CLOCK.getValue();
-		logicalClock.setValue(logicalClock.getValue(local));
-		logicalClock.updateLocalTime = local;
-	}
-
 	@Override
 	public void receiveMessage(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 		packets.put(msg.nodeid, packet);
+		
+		decide(packet);
 	}
 
 	@Override
-	public void fireEvent(Timer timer) {		
-		
-		updateLogicalClock();
-		
-		adjustRate();
-		adjustOffset();
-		
-		packets.clear();
-		
+	public void fireEvent(Timer timer) {
 		sendMsg();
+		packets.clear();
 	}
 
 	private void sendMsg() {
@@ -208,13 +150,7 @@ public class SelfNode extends Node implements TimerHandler {
 		s += " " + local2Global().toString();
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-						.getCurrentValue()) * (1.0 + CLOCK.getDrift())));
-//		if (NODE_ID < 10) {
-//			System.out.println("0" + NODE_ID + " t:"
-//					+ local2Global().toString());
-//		} else {
-//			System.out.println(NODE_ID + " t:" + local2Global().toString());
-//		}
+						.getValue()) * (1.0 + CLOCK.getDrift())));
 
 		return s;
 	}
