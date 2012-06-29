@@ -22,9 +22,6 @@ public class SelfNode extends Node implements TimerHandler {
 
 	RadioPacket processedMsg = null;
 	SelfMessage outgoingMsg = new SelfMessage();
-	
-	double criticality = 0.0;	
-	int offset = 0;
 
 	public SelfNode(int id, Position position) {
 		super(id, position);
@@ -40,56 +37,40 @@ public class SelfNode extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
 
-	private void computeCriticality(RadioPacket packet) {
+	private void adjustRate(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
 		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
 
-		this.criticality = myClock.subtract(neighborClock).toDouble();
-	}
-	
-	private void computeOffset(RadioPacket packet) {
-		SelfMessage msg = (SelfMessage) packet.getPayload();
-
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-
-		int skew = -(myClock.subtract(neighborClock).toInteger())/2;
-		this.offset = skew;
-	}
-
-	/**
-	 * This method is only called when a message received.
-	 */
-	void decide(RadioPacket packet) {
-		computeCriticality(packet);
-		computeOffset(packet);
+		double criticality = myClock.subtract(neighborClock).toDouble()/2.0;
 		
-		
-		/* update logical clock before changing its rate 
-		 * or offset!!!
-		 */
-		logicalClock.update(CLOCK.getValue());
-		
-		double control_skew = this.criticality;
-		int control_offset = this.offset;
-		
-		if (control_skew > TOLERANCE) {		
-			logicalClock.rate.adjustValue(Feedback.LOWER);
-			logicalClock.addOffset(control_offset);
-		} else if (control_skew < (-1.0) * TOLERANCE) {
+		if (criticality > TOLERANCE) {		
+			logicalClock.rate.adjustValue(Feedback.LOWER);			
+		} else if (criticality < (-1.0) * TOLERANCE) {
 			logicalClock.rate.adjustValue(Feedback.GREATER);
-			logicalClock.addOffset(control_offset);
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
-		}
+		}	
 	}
+	
+	private void adjustOffset(RadioPacket packet) {
+		SelfMessage msg = (SelfMessage) packet.getPayload();
 
+		UInt32 neighborClock = msg.clock;
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+		int skew = -(myClock.subtract(neighborClock).toInteger())/2;	
 		
+		logicalClock.setOffset(logicalClock.getOffset() + skew);
+	}		
+
 	@Override
 	public void receiveMessage(RadioPacket packet) {	
-		decide(packet);
+		logicalClock.update(packet.getEventTime());
+		
+		adjustRate(packet);
+		adjustOffset(packet);	
 	}
 
 	@Override

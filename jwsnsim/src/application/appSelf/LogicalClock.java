@@ -6,30 +6,34 @@ import sim.type.UInt32;
 
 public class LogicalClock {
 
-	public UInt32 value = new UInt32();
+	private UInt32 value = new UInt32();
+	private UInt32 offset = new UInt32();
 
-	public AVT rate = new AVTBuilder().upperBound(0.000100).lowerBound(0.000030).deltaMin(0.000000001).isDeterministicDelta(true).deltaMax(0.000060).startValue(0.000070).build();
+	public AVT rate = new AVTBuilder().upperBound(0.000100).lowerBound(0.000030).deltaMin(0.000000001).isDeterministicDelta(true).deltaMax(0.0001).startValue(0.000070).build();
 			
 	UInt32 updateLocalTime = new UInt32();
 	
-	public void update(UInt32 localTime) {
-		setValue(getValue(localTime));
-		updateLocalTime = localTime;
+	public int getOffset() {
+		return offset.toInteger();
 	}
 
-	public void setValue(UInt32 currentTime) {
-		value = new UInt32(currentTime);
+	public void setOffset(int offset) {
+		this.offset = new UInt32(offset);
 	}
 	
-	public void addOffset(int offset) {
-		value = value.add(offset);
+	public void update(UInt32 local){
+		int timePassed = local.subtract(updateLocalTime).toInteger();
+		timePassed  += (int) (((float) timePassed) * rate.getValue());
+
+		value = value.add(timePassed);
+		this.updateLocalTime = new UInt32(local);
 	}
 
-	public UInt32 getValue(UInt32 currentTime) {
-		int timePassed = currentTime.subtract(updateLocalTime).toInteger();
-		int progress = timePassed
-				+ (int) (((float) timePassed) * rate.getValue());
+	public UInt32 getValue(UInt32 local) {
+		int timePassed = local.subtract(updateLocalTime).toInteger();
+		timePassed  += (int) (((float) timePassed) * rate.getValue());
 
-		return value.add(new UInt32(progress));
+		UInt32 val = value.add(offset);
+		return val.add(new UInt32(timePassed));
 	}
 }
