@@ -7,18 +7,15 @@ import sim.type.UInt32;
 public class LogicalClock {
 
 	private UInt32 value = new UInt32();
-	private UInt32 offset = new UInt32();
 
 	public AVT rate = new AVTBuilder().upperBound(0.000100).lowerBound(0.000030).deltaMin(0.000000001).isDeterministicDelta(true).deltaMax(0.0001).startValue(0.000070).build();
+	public AVT offset = new AVTBuilder().upperBound(1000).lowerBound(-1000).deltaMin(1).isDeterministicDelta(true).deltaMax(100).startValue(0).build();
 			
 	UInt32 updateLocalTime = new UInt32();
 	
-	public int getOffset() {
-		return offset.toInteger();
-	}
-
-	public void setOffset(int offset) {
-		this.offset = new UInt32(offset);
+	public void setValue(UInt32 value,UInt32 local) {
+		this.value = new UInt32(value);
+		this.updateLocalTime = new UInt32(local);
 	}
 	
 	public void update(UInt32 local){
@@ -33,7 +30,7 @@ public class LogicalClock {
 		int timePassed = local.subtract(updateLocalTime).toInteger();
 		timePassed  += (int) (((float) timePassed) * rate.getValue());
 
-		UInt32 val = value.add(offset);
+		UInt32 val = value.add(new UInt32((int)offset.getValue()));
 		return val.add(new UInt32(timePassed));
 	}
 }

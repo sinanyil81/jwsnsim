@@ -10,6 +10,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
+import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
 
 public class SelfNode extends Node implements TimerHandler {
@@ -20,7 +21,6 @@ public class SelfNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
 	SelfMessage outgoingMsg = new SelfMessage();
 
 	public SelfNode(int id, Position position) {
@@ -37,7 +37,7 @@ public class SelfNode extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
 
-	private void adjustRate(RadioPacket packet) {
+	private void adjustClock(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
@@ -45,32 +45,35 @@ public class SelfNode extends Node implements TimerHandler {
 
 		double criticality = myClock.subtract(neighborClock).toDouble()/2.0;
 		
-		if (criticality > TOLERANCE) {		
-			logicalClock.rate.adjustValue(Feedback.LOWER);			
-		} else if (criticality < (-1.0) * TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.GREATER);
-		} else {
-			logicalClock.rate.adjustValue(Feedback.GOOD);
-		}	
-	}
-	
-	private void adjustOffset(RadioPacket packet) {
-		SelfMessage msg = (SelfMessage) packet.getPayload();
-
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-
-		int skew = -(myClock.subtract(neighborClock).toInteger())/2;	
-		
-		logicalClock.setOffset(logicalClock.getOffset() + skew);
-	}		
-
-	@Override
-	public void receiveMessage(RadioPacket packet) {	
 		logicalClock.update(packet.getEventTime());
 		
-		adjustRate(packet);
-		adjustOffset(packet);	
+		if (criticality > TOLERANCE) {		
+			logicalClock.rate.adjustValue(Feedback.LOWER);	
+		} else if (criticality < (-1.0) * TOLERANCE) {
+			logicalClock.rate.adjustValue(Feedback.GREATER);			
+		} else {
+			logicalClock.rate.adjustValue(Feedback.GOOD);
+		}
+		
+		if(criticality < -1000.0){
+			logicalClock.setValue(neighborClock, packet.getEventTime());
+			logicalClock.offset = new AVTBuilder().upperBound(1000).lowerBound(-1000).deltaMin(1).isDeterministicDelta(true).deltaMax(100).startValue(0).build();			
+		}
+		else{
+			if (criticality > TOLERANCE) {		
+				logicalClock.offset.adjustValue(Feedback.LOWER);	
+			} else if (criticality < (-1.0) * TOLERANCE) {
+				logicalClock.offset.adjustValue(Feedback.GREATER);			
+			} else {
+				logicalClock.offset.adjustValue(Feedback.GOOD);
+			}
+		}
+	}
+	
+
+	@Override
+	public void receiveMessage(RadioPacket packet) {				
+		adjustClock(packet);			
 	}
 
 	@Override
@@ -110,9 +113,12 @@ public class SelfNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
+//		s += " "
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+//						.getValue()) * (1.0 + CLOCK.getDrift())));
+		
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-						.getValue()) * (1.0 + CLOCK.getDrift())));
+				+ Float.floatToIntBits((float)logicalClock.offset.getValue());
 
 		return s;
 	}
