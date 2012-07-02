@@ -19,12 +19,10 @@ public class Simulator {
 	
 	private Vector<Node> nodes = null;
 	private Vector<Event> events = null;
-	private Vector<Clock> clocks = null;
 	
 	protected Simulator(){
 		events = new Vector<Event>();
 		nodes = new Vector<Node>();
-		clocks = new Vector<Clock>();
 	}
 
 	public static Simulator getInstance() {
@@ -45,14 +43,6 @@ public class Simulator {
 	
 	public Vector<Node> getNodes(){
 		return nodes;
-	}
-	
-	public void register(Clock clock){
-		clocks.add(clock);
-	}
-	
-	public void unregister(Clock clock){
-		clocks.removeElement(clock);
 	}
 	
 	public void register(Event event) {
@@ -77,28 +67,19 @@ public class Simulator {
 		
 		if(eventToFire != null){
 			SimTime future = eventToFire.getEventTime();
-			progressClocks(future.sub(simTime).toDouble());
 			simTime = future;				
 			
 			eventToFire.signalEvent();
 		}			
 	}
 	
-	public void progressClocks(double d){
-		for (Iterator<Clock> iterator = clocks.iterator(); iterator.hasNext();) {
-			Clock clock = (Clock) iterator.next();
-			clock.progress(d);
-		}
-	}
 	
 	public void reset(){
 		events.removeAllElements();
 		nodes.removeAllElements();
-		clocks.removeAllElements();
 		
 		events = new Vector<Event>();
 		nodes = new Vector<Node>();	
-		clocks = new Vector<Clock>();
 		
 		simTime = new SimTime();
 		//random.setSeed(SIMULATOR_SEED);
