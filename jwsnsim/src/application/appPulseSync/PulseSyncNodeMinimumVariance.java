@@ -64,18 +64,12 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	public void receiveMessage(RadioPacket packet) {		
 		processedMsg = packet;
 		processMsg();
-		
-		if(ROOT_ID != NODE_ID)
-			sendMsg();
 	}
 
 	@Override
 	public void fireEvent(Timer timer) {
         
-		/* only root sends on timer */
-		if( ROOT_ID == NODE_ID ) {
-           sendMsg();
-        }
+        sendMsg();
 	}
 
 	private void sendMsg() {
@@ -163,6 +157,8 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
+            /* for sending data */
+            timer0.startOneshot(1);
         }
         else{
         	return;
