@@ -1,5 +1,6 @@
 package sim.clock;
 
+import sim.simulator.SimTime;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 /**
@@ -27,15 +28,16 @@ public class ConstantDriftClock implements Clock {
 	/** is started? */
 	private boolean started = false;
 	
+	/* last read time */
+	private SimTime lastRead = new SimTime();
+	
 	public ConstantDriftClock(){
 		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);  
 		drift /= 1000000.0;
-		Simulator.getInstance().register(this);
 	}
 	
 	public ConstantDriftClock(double drift){ 
 		this.drift = drift;
-		Simulator.getInstance().register(this);
 	}
 	
 	public void progress(double amount){
@@ -53,6 +55,10 @@ public class ConstantDriftClock implements Clock {
 	}
 	
 	public UInt32 getValue(){
+		SimTime currentTime = Simulator.getInstance().getTime();
+		progress(currentTime.sub(lastRead).toDouble());
+		lastRead = currentTime;
+		
 		return new UInt32((long)clock);
 	}
 
@@ -66,6 +72,7 @@ public class ConstantDriftClock implements Clock {
 
 	@Override
 	public void start() {
-		started = true;		
+		started = true;	
+		lastRead = Simulator.getInstance().getTime();
 	}
 }
