@@ -40,7 +40,7 @@ public class ConstantDriftClock implements Clock {
 		this.drift = drift;
 	}
 	
-	public void progress(double amount){
+	private void progress(double amount){
 		
 		if(!started)
 			return;
