@@ -1,10 +1,8 @@
 package sim.simulator;
 
-import java.math.BigInteger;
-
 public class Event implements Comparable<Event> {
 
-	private BigInteger eventTime = BigInteger.ZERO;
+	private SimTime eventTime = new SimTime();
 	private EventObserver observer = null;
 	
 	public Event(EventObserver observer){
@@ -12,8 +10,8 @@ public class Event implements Comparable<Event> {
 	}
 	
 	public void register(int numTicks){
-		eventTime = BigInteger.valueOf(numTicks);
-		eventTime = eventTime.add(Simulator.getInstance().getRealTime());
+		eventTime = new SimTime(numTicks);
+		eventTime = eventTime.add(Simulator.getInstance().getTime());
 		Simulator.getInstance().register(this);		
 	}
 	
@@ -21,13 +19,13 @@ public class Event implements Comparable<Event> {
 		Simulator.getInstance().unregister(this);		
 	}
 	
-	public BigInteger getEventTime(){
+	public SimTime getEventTime(){
 		return eventTime;
 	}
 	
 	@Override
 	public int compareTo(Event arg0) {		
-		return (eventTime.subtract(arg0.getEventTime())).intValue();	
+		return eventTime.compareTo(arg0.getEventTime());	
 	}
 
 	public void signalEvent() {

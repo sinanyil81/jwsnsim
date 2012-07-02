@@ -3,6 +3,7 @@ package application;
 import application.appEgtsp.GradientApp;
 import application.appFcsa.FloodingApp;
 import application.appFtsp.FtspApp;
+import application.appPulseSync.PulseSyncApp;
 import application.appRateDetection.RateApp;
 import application.appTheoric.SimTime;
 
@@ -15,7 +16,11 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		// ftspSimulations();
+		//ftspSimulations();
+		/*------------------------------------------*/
+		
+		/*------------------------------------------*/
+		pulseSyncSimulations();
 		/*------------------------------------------*/	
 			
 		/*------------------------------------------*/
@@ -27,9 +32,21 @@ public class Main {
 		/*------------------------------------------*/
 		
 		/*------------------------------------------*/
-		selfSimulations();
+		//selfSimulations();
 		/*------------------------------------------*/
 	}		
+
+
+	private static void pulseSyncSimulations() {
+
+		try{			
+			new application.appPulseSync.PulseSyncApp(20,"PulseSyncMV.txt",PulseSyncApp.LINE);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
+	}
 
 
 	private static void selfSimulations() {

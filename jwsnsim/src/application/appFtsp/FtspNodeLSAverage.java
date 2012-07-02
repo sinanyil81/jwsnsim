@@ -349,7 +349,7 @@ public class FtspNodeLSAverage extends Node implements TimerHandler{
 	}
 	
 	public String toString(){
-		String s = Simulator.getInstance().getSecond().toString(10);
+		String s = "" + Simulator.getInstance().getSecond();
 		
 		s += " " + NODE_ID;
 		s += " " + myLocal2Global().toString();

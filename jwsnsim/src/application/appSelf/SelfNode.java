@@ -102,7 +102,7 @@ public class SelfNode extends Node implements TimerHandler {
 	}
 
 	public String toString() {
-		String s = Simulator.getInstance().getSecond().toString(10);
+		String s = "" + Simulator.getInstance().getSecond();
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();

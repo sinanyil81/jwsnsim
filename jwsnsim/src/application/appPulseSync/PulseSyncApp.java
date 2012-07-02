@@ -41,13 +41,13 @@ public class PulseSyncApp extends Application implements TimerHandler{
 	}
 
 	private void createTopology(int topology) {
-//		nodes = new PulseSyncNode[NUMNODES];
-		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];	
+		nodes = new PulseSyncNode[NUMNODES];
+//		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];	
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-//				nodes[i] = new PulseSyncNode(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new PulseSyncNode(i+1,new Position(i*5,i*5,0));
+//				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 	}

@@ -1,6 +1,5 @@
 package sim.simulator;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -16,7 +15,7 @@ public class Simulator {
 //	static public Random random = new Random();
 	
 	private static Simulator simulator = null;
-	private BigInteger realTime = BigInteger.ZERO;
+	private SimTime simTime = new SimTime();
 	
 	private Vector<Node> nodes = null;
 	private Vector<Event> events = null;
@@ -77,9 +76,10 @@ public class Simulator {
 		}
 		
 		if(eventToFire != null){
-			BigInteger future = eventToFire.getEventTime();
-			progressClocks((future.subtract(realTime)).doubleValue());
-			realTime = future;		
+			SimTime future = eventToFire.getEventTime();
+			progressClocks(future.sub(simTime).toDouble());
+			simTime = future;				
+			
 			eventToFire.signalEvent();
 		}			
 	}
@@ -100,20 +100,15 @@ public class Simulator {
 		nodes = new Vector<Node>();	
 		clocks = new Vector<Clock>();
 		
-		realTime = BigInteger.ZERO;
+		simTime = new SimTime();
 		//random.setSeed(SIMULATOR_SEED);
 	}
 	
-	public void setRealTime(BigInteger value){
-		realTime = value;
+	public SimTime getTime(){
+		return simTime;
 	}
 	
-	public BigInteger getRealTime(){
-		return realTime;
+	public long getSecond(){
+		return getTime().getTimeHigh()/1024/1024;
 	}
-	
-	public BigInteger getSecond(){
-		return realTime.divide(BigInteger.valueOf(1000000));
-	}
-	
 }

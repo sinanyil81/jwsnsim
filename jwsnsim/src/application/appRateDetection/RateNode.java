@@ -176,7 +176,7 @@ public class RateNode extends Node implements TimerHandler {
 	}
 
 	public String toString() {
-		String s = Simulator.getInstance().getSecond().toString(10);
+		String s = "" + Simulator.getInstance().getSecond();
 
 		s += " " + NODE_ID;
 		//s += " " + Float.floatToIntBits(1.0f + (float)CLOCK.getDrift());
