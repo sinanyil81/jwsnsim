@@ -66,9 +66,7 @@ public class Simulator {
 		}
 		
 		if(eventToFire != null){
-			SimTime future = eventToFire.getEventTime();
-			simTime = future;				
-			
+			simTime = eventToFire.getEventTime();						
 			eventToFire.signalEvent();
 		}			
 	}
