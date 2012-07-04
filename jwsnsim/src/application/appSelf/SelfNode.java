@@ -46,6 +46,8 @@ public class SelfNode extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toDouble()/2.0;		
 	}
 	
+	double max=0, min=0;
+	
 	private void adjustClock(RadioPacket packet) {
 		
 		double criticality = calculateCriticality(packet);
@@ -59,11 +61,7 @@ public class SelfNode extends Node implements TimerHandler {
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
 		}	
-		
-//		UInt32 offset = logicalClock.getOffset();
-//		offset = offset.add((int)-criticality/2);
-//		logicalClock.setOffset(offset);
-		
+			
 		UInt32 offset = logicalClock.getOffset();
 		offset = offset.add((int)-criticality);
 		logicalClock.setOffset(offset);
