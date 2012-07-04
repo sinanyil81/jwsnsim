@@ -60,7 +60,13 @@ public class SelfNode extends Node implements TimerHandler {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
 		}	
 		
-		logicalClock.addOffset((int)-criticality);
+//		UInt32 offset = logicalClock.getOffset();
+//		offset = offset.add((int)-criticality/2);
+//		logicalClock.setOffset(offset);
+		
+		UInt32 offset = logicalClock.getOffset();
+		offset = offset.add((int)-criticality);
+		logicalClock.setOffset(offset);
 	}
 	
 

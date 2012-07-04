@@ -12,9 +12,13 @@ public class LogicalClock {
 	public UInt32 offset = new UInt32();
 			
 	UInt32 updateLocalTime = new UInt32();
+		
+	public void setOffset(UInt32 offset) {
+		this.offset = new UInt32(offset);
+	}
 	
-	public void addOffset(int offset) {
-		this.offset = this.offset.add(offset);
+	public UInt32 getOffset() {
+		return new UInt32(offset);
 	}
 	
 	public void update(UInt32 local){
