@@ -36,4 +36,10 @@ public class LogicalClock {
 		UInt32 val = value.add(offset);
 		return val.add(new UInt32(timePassed));
 	}
+	
+	public void setValue(UInt32 time,UInt32 local) {
+		value = new UInt32(time);
+		offset = new UInt32();
+		this.updateLocalTime = new UInt32(local);
+	}	
 }
