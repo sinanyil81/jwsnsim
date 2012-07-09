@@ -34,6 +34,8 @@ public class Main {
 		/*------------------------------------------*/
 		  selfSimulations();
 		/*------------------------------------------*/
+		
+//		pulseSync();
 	}
 
 	private static void pulseSyncSimulations() {
@@ -62,6 +64,15 @@ public class Main {
 							PulseSyncApp.GRID);
 				}
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void pulseSync() {
+
+		try {
+			new application.appPulseSync.PulseSyncApp(20, "NewPulse.txt", PulseSyncApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
