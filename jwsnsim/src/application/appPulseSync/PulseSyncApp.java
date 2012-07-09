@@ -44,12 +44,14 @@ public class PulseSyncApp extends Application implements TimerHandler{
 
 	private void createTopology(int topology) {
 //		nodes = new PulseSyncNode[NUMNODES];
-		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];	
+//		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];
+		nodes = new PulseSyncNodeNew[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
 //				nodes[i] = new PulseSyncNode(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
+//				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new PulseSyncNodeNew(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 		else if(topology == RING){
@@ -61,7 +63,8 @@ public class PulseSyncApp extends Application implements TimerHandler{
 				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
 											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
 //				nodes[i] = new PulseSyncNode(i+1,pos);
-				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,pos);
+//				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,pos);
+				nodes[i] = new PulseSyncNodeNew(i+1,pos);
 			}			
 		}
 		else if(topology == GRID){
@@ -72,7 +75,8 @@ public class PulseSyncApp extends Application implements TimerHandler{
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
 //					nodes[id] = new PulseSyncNode(id+1,new Position(k*10,i*10,0));
-					nodes[id] = new PulseSyncNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
+//					nodes[id] = new PulseSyncNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
+					nodes[id] = new PulseSyncNodeNew(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}
