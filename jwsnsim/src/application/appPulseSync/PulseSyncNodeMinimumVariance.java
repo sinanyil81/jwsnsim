@@ -38,6 +38,9 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	
     RadioPacket processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
+    
+    UInt32 pulse;
+    UInt32 pulseTime;
 
 	public PulseSyncNodeMinimumVariance(int id, Position position) {
 		super(id,position);
@@ -76,8 +79,15 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
         UInt32 localTime, globalTime;
 
         localTime = CLOCK.getValue();
-        globalTime = new UInt32(localTime);
-        globalTime = ls.calculateY(globalTime);
+        
+        if(NODE_ID != ROOT_ID){
+        	UInt32 elapsed = localTime.subtract(pulseTime);
+        	elapsed = elapsed.add(elapsed.multiply(ls.getSlope()));               	        		
+        	globalTime = pulse.add(elapsed);
+        }
+        else{
+            globalTime = new UInt32(localTime);        	
+        }
 
         outgoingMsg.rootid = ROOT_ID;
         outgoingMsg.nodeid = NODE_ID;
@@ -157,6 +167,10 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
+            
+            pulse = new UInt32(msg.clock);
+            pulseTime = processedMsg.getEventTime();
+            
             /* for sending data */
             timer0.startOneshot(1);
         }

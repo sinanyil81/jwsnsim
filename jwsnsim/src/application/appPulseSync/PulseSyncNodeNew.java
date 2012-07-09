@@ -38,6 +38,9 @@ public class PulseSyncNodeNew extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
 
+	private UInt32 pulse;
+	private UInt32 elapsed;
+	
 	public PulseSyncNodeNew(int id, Position position) {
 		super(id,position);
 		
@@ -74,18 +77,14 @@ public class PulseSyncNodeNew extends Node implements TimerHandler{
         localTime = CLOCK.getValue();
         
         if(NODE_ID != ROOT_ID){
-        	globalTime = localTime.subtract(receiveTime);
-        	valueToSend = valueToSend.add(globalTime);
-        	globalTime = globalTime.multiply(ls.getSlope());
-        	valueToSend = valueToSend.add(globalTime);
-        	globalTime = new UInt32(valueToSend);
+        	int el = localTime.subtract(elapsed).toInteger();
+        	el += (int)(ls.getSlope()*el);        	        		
+        	globalTime = pulse.add(el);        	        	
         }
         else{
         	globalTime = new UInt32(localTime);
-        	globalTime = ls.calculateY(globalTime);
         }
                 
-
         outgoingMsg.rootid = ROOT_ID;
         outgoingMsg.nodeid = NODE_ID;
         
@@ -172,9 +171,6 @@ public class PulseSyncNodeNew extends Node implements TimerHandler{
         numEntries = 0;
 	}
 	
-	private UInt32 valueToSend;
-	private UInt32 receiveTime;
-	
     void processMsg()
     {
         PulseSyncMessage msg = (PulseSyncMessage)processedMsg.getPayload();
@@ -182,8 +178,8 @@ public class PulseSyncNodeNew extends Node implements TimerHandler{
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
             
-            valueToSend = new UInt32(msg.clock);
-            receiveTime = processedMsg.getTimestamp();
+            pulse = new UInt32(msg.clock);
+            elapsed = processedMsg.getEventTime();
             
             /* for sending data */
             timer0.startOneshot(1);
