@@ -69,7 +69,7 @@ public class FtspApp extends Application implements TimerHandler{
 				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
 											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
 //				nodes[i] = new FtspNode(i+1,pos);
-				nodes[i] = new FtspNodeMinimumVariance(i+1,pos);
+//				nodes[i] = new FtspNodeMinimumVariance(i+1,pos);
 			}			
 		}
 		else if(topology == GRID){
