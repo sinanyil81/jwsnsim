@@ -12,56 +12,59 @@ public class Main {
 	public static void main(String[] args) {
 
 		/*------------------------------------------*/
-		// rateSimulations();
+//			rateSimulations();
 		/*------------------------------------------*/
 
 		/*------------------------------------------*/
-//		ftspSimulations();
+//			ftspSimulations();
 		/*------------------------------------------*/
 
 		/*------------------------------------------*/
-//		pulseSyncSimulations();
+//			pulseSyncSimulations();
 		/*------------------------------------------*/
 
 		/*------------------------------------------*/
-		// fcsaSimulations();
+//		 	fcsaSimulations();
 		/*------------------------------------------*/
 
 		/*------------------------------------------*/
-		// gradientSimulations();
+//			gradientSimulations();
 		/*------------------------------------------*/
 
 		/*------------------------------------------*/
-		  selfSimulations();
-		/*------------------------------------------*/
-		
-//		pulseSync();
+			selfSimulations();
+		/*------------------------------------------*/	
 	}
 
 	private static void pulseSyncSimulations() {
 
 		try {
-			for (int i = 10; i <= 40; i += 10) {
-				for (int j = 1; j <= 3; j++) {
-					new application.appPulseSync.PulseSyncApp(i,
-							"sims/pulse/_PulseSyncLine_" + i + "_" + j + "_" + ".txt",
-							PulseSyncApp.LINE);
-				}
-			}
+//			for (int i = 10; i <= 50; i += 10) {
+//				for (int j = 1; j <= 5; j++) {
+//					new application.appPulseSync.PulseSyncApp(i,
+//							"sims/pulse/_PulseSyncLine_" + i + "_" + j + "_" + ".txt",
+//							PulseSyncApp.LINE);
+//				}
+//			}
+//			
+//			System.gc();
 
-			for (int i = 20; i <= 80; i += 20) {
-				for (int j = 1; j <= 3; j++) {
-					new application.appPulseSync.PulseSyncApp(i,
-							"sims/pulse/_PulseSyncRing_" + i + "_" + j + "_" + ".txt",
-							PulseSyncApp.RING);
-				}
-			}
+//			for (int i = 20; i <= 120; i += 20) {
+//				for (int j = 1; j <= 5; j++) {
+//					new application.appPulseSync.PulseSyncApp(i,
+//							"sims/pulse/PulseSyncRing_" + i + "_" + j + "_" + ".txt",
+//							PulseSyncApp.RING);
+//				}
+//			}
+			
+//			System.gc();
 
-			for (int i = 6; i < 26; i = i + 5) {
-				for (int j = 1; j <= 3; j++) {
+			for (int i = 6; i < 31; i = i + 5) {
+				for (int j = 1; j <= 5; j++) {
 					new application.appPulseSync.PulseSyncApp(i * i,
 							"sims/pulse/_PulseSyncGrid_" + i + "_" + j + "_" + ".txt",
 							PulseSyncApp.GRID);
+					System.gc();
 				}
 			}
 		} catch (Exception e) {
@@ -103,27 +106,31 @@ public class Main {
 	public static void ftspSimulations() {
 
 		try {
-			for (int i = 10; i <= 40; i += 10) {
-				for (int j = 1; j <= 3; j++) {
+			for (int i = 10; i <= 50; i += 10) {
+				for (int j = 1; j <= 5; j++) {
 					new application.appFtsp.FtspApp(i, "sims/ftsp/_FtspLine_"
 							+ i + "_" + j + "_" + ".txt", FtspApp.LINE);
 				}
 			}
+			
+			System.gc();
 
-			for (int i = 20; i <= 80; i += 20) {
-				for (int j = 1; j <= 3; j++) {
-					new application.appFtsp.FtspApp(i, "sims/ftsp/_FtspRing_"
-							+ i + "_" + j + "_" + ".txt", FtspApp.RING);
-				}
-			}
+//			for (int i = 20; i <= 80; i += 20) {
+//				for (int j = 1; j <= 3; j++) {
+//					new application.appFtsp.FtspApp(i, "sims/ftsp/_FtspRing_"
+//							+ i + "_" + j + "_" + ".txt", FtspApp.RING);
+//				}
+//			}
 
-			for (int i = 6; i < 26; i = i + 5) {
-				for (int j = 1; j <= 3; j++) {
+			for (int i = 6; i < 31; i = i + 5) {
+				for (int j = 1; j <= 5; j++) {
 					new application.appFtsp.FtspApp(i * i,
 							"sims/ftsp/_FtspSyncGrid_" + i + "_" + j + "_" + ".txt",
 							FtspApp.GRID);
 				}
 			}
+			
+			System.gc();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
