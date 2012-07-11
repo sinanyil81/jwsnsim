@@ -182,7 +182,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
             pulseTime = processedMsg.getEventTime();
             
             /* for sending data */
-            timer0.startOneshot(1);
+            timer0.startOneshot(1000000);
         }
         else{
         	return;

@@ -125,8 +125,8 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
          if( is_synced() && (Math.abs(timeError) > ENTRY_THROWOUT_LIMIT) )
          {
              if (++numErrors > 3);
-//                 clearTable();
-//             return; // don't incorporate a bad reading
+                 clearTable();
+             return; // don't incorporate a bad reading
          }
 
          numErrors = 0;
@@ -172,7 +172,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
             pulseTime = processedMsg.getEventTime();
             
             /* for sending data */
-            timer0.startOneshot(1);
+            timer0.startOneshot(1000000);
         }
         else{
         	return;
