@@ -10,6 +10,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
+import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
 
@@ -20,6 +21,14 @@ public class SelfNode extends Node implements TimerHandler {
 
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
+
+	public AVT skew_multiplier = new AVTBuilder().upperBound(1.00)
+			.lowerBound(0.50).startValue(0.95).isDeterministicDelta(true)
+			.deltaMin(0.05)
+			.deltaMax(0.20)
+			.build();
+
+	private int previousSkewPositive = 0;	
 
 	SelfMessage outgoingMsg = new SelfMessage();
 
@@ -36,46 +45,77 @@ public class SelfNode extends Node implements TimerHandler {
 
 		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
 	}
-	
-	double calculateCriticality(RadioPacket packet){
+
+	double calculateSkew(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
 		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
 
-		return myClock.subtract(neighborClock).toDouble()/2.0;		
+		return myClock.subtract(neighborClock).toDouble();
 	}
-	
+
 	private void adjustClock(RadioPacket packet) {
-		
-		double criticality = calculateCriticality(packet);
-		
+
+		double skew = calculateSkew(packet);
+
 		logicalClock.update(packet.getEventTime());
-		
-		if (criticality > TOLERANCE) {		
-			logicalClock.rate.adjustValue(Feedback.LOWER);	
-		} else if (criticality < (-1.0) * TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.GREATER);			
+
+		if (skew > TOLERANCE) {
+			logicalClock.rate.adjustValue(Feedback.LOWER);
+			adjustOffset(skew);
+		} else if (skew < (-1.0) * TOLERANCE) {
+			logicalClock.rate.adjustValue(Feedback.GREATER);
+			adjustOffset(skew);
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
 		}
-		
-		if(criticality < -500.0){
-			UInt32 value = logicalClock.getValue(packet.getEventTime());
-			value = value.add((int)(-criticality*2.0));
-			logicalClock.setValue(value, packet.getEventTime());
-		}
-		else{
-			UInt32 offset = logicalClock.getOffset();
-			offset = offset.add((int)-criticality);
-			logicalClock.setOffset(offset);	
+	}
+
+	private void adjustOffset(double skew) {
+		UInt32 offset = logicalClock.getOffset();
+		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
+		logicalClock.setOffset(offset);
+		//
+		if (previousSkewPositive == 0) {
+			if (skew > 0.0) {
+				skew_multiplier.adjustValue(Feedback.GREATER);
+				previousSkewPositive = 1;
+			} else if (skew < 0.0) {
+				skew_multiplier.adjustValue(Feedback.GREATER);
+				previousSkewPositive = -1;
+			} else {
+				skew_multiplier.adjustValue(Feedback.GOOD);
+				previousSkewPositive = 0;
+			}
+		} else if (previousSkewPositive == 1) {
+			if (skew > 0.0) { // positive
+				skew_multiplier.adjustValue(Feedback.GREATER);
+				previousSkewPositive = 1;
+			} else if (skew < 0.0) {
+				skew_multiplier.adjustValue(Feedback.LOWER);
+				previousSkewPositive = -1;
+			} else {
+				skew_multiplier.adjustValue(Feedback.GOOD);
+				previousSkewPositive = 0;
+			}
+		} else if (previousSkewPositive == -1) {
+			if (skew > 0.0) { // positive
+				skew_multiplier.adjustValue(Feedback.LOWER);
+				previousSkewPositive = 1;
+			} else if (skew < 0.0) { // negative
+				skew_multiplier.adjustValue(Feedback.GREATER);
+				previousSkewPositive = -1;
+			} else {
+				skew_multiplier.adjustValue(Feedback.GOOD);
+				previousSkewPositive = 0;
+			}
 		}
 	}
-	
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {				
-		adjustClock(packet);			
+	public void receiveMessage(RadioPacket packet) {
+		adjustClock(packet);		
 	}
 
 	@Override
@@ -91,6 +131,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
+		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;
 
 		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
