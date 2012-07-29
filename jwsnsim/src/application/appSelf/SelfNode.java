@@ -36,6 +36,10 @@ public class SelfNode extends Node implements TimerHandler {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
+		
+		/* to start clock with a random value */
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 
@@ -57,8 +61,8 @@ public class SelfNode extends Node implements TimerHandler {
 
 	private void adjustClock(RadioPacket packet) {
 
-		double skew = calculateSkew(packet);
-
+		double skew = calculateSkew(packet);	
+		
 		logicalClock.update(packet.getEventTime());
 
 		if (skew > TOLERANCE) {
@@ -73,6 +77,7 @@ public class SelfNode extends Node implements TimerHandler {
 	}
 
 	private void adjustOffset(double skew) {
+									
 		UInt32 offset = logicalClock.getOffset();
 		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
 		logicalClock.setOffset(offset);
@@ -156,9 +161,12 @@ public class SelfNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
+//		s += " "
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+//						.getValue()) * (1.0 + CLOCK.getDrift())));
+		
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-						.getValue()) * (1.0 + CLOCK.getDrift())));
+			+ Float.floatToIntBits((float) (skew_multiplier.getValue()));
 
 		return s;
 	}
