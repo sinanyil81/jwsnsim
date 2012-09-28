@@ -22,11 +22,13 @@ public class SelfNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	public AVT skew_multiplier = new AVTBuilder().upperBound(1.00)
-			.lowerBound(0.50).startValue(0.95).isDeterministicDelta(true)
-			.deltaMin(0.05)
-			.deltaMax(0.20)
-			.build();
+//	public AVT skew_multiplier = new AVTBuilder().upperBound(1.00)
+//			.lowerBound(0.50).startValue(0.95).isDeterministicDelta(true)
+//			.deltaMin(0.05)
+//			.deltaMax(0.20)
+//			.build();
+	
+	public AvtSimple skew_multiplier = new AvtSimple(0.50f, 1.0f, 0.95f, 0.05f, 0.20f); 
 
 	private int previousSkewPositive = 0;	
 
@@ -66,15 +68,21 @@ public class SelfNode extends Node implements TimerHandler {
 		logicalClock.update(packet.getEventTime());
 
 		if (skew > TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.LOWER);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
 			adjustOffset(skew);
 		} else if (skew < (-1.0) * TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.GREATER);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
 			adjustOffset(skew);
 		} else {
-			logicalClock.rate.adjustValue(Feedback.GOOD);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 		}
 	}
+	
+//	private void adjustOffset(double skew) {
+//		UInt32 offset = logicalClock.getOffset();
+//		offset = offset.add((int) -(skew *0.5));
+//		logicalClock.setOffset(offset);	
+//	}
 
 	private void adjustOffset(double skew) {
 									
@@ -84,35 +92,35 @@ public class SelfNode extends Node implements TimerHandler {
 		//
 		if (previousSkewPositive == 0) {
 			if (skew > 0.0) {
-				skew_multiplier.adjustValue(Feedback.GREATER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
 				previousSkewPositive = 1;
 			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(Feedback.GREATER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
 				previousSkewPositive = -1;
 			} else {
-				skew_multiplier.adjustValue(Feedback.GOOD);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
 				previousSkewPositive = 0;
 			}
 		} else if (previousSkewPositive == 1) {
 			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(Feedback.GREATER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
 				previousSkewPositive = 1;
 			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(Feedback.LOWER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
 				previousSkewPositive = -1;
 			} else {
-				skew_multiplier.adjustValue(Feedback.GOOD);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
 				previousSkewPositive = 0;
 			}
 		} else if (previousSkewPositive == -1) {
 			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(Feedback.LOWER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
 				previousSkewPositive = 1;
 			} else if (skew < 0.0) { // negative
-				skew_multiplier.adjustValue(Feedback.GREATER);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
 				previousSkewPositive = -1;
 			} else {
-				skew_multiplier.adjustValue(Feedback.GOOD);
+				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
 				previousSkewPositive = 0;
 			}
 		}
@@ -167,6 +175,7 @@ public class SelfNode extends Node implements TimerHandler {
 		
 		s += " "
 			+ Float.floatToIntBits((float) (skew_multiplier.getValue()));
+		
 
 		return s;
 	}
