@@ -17,6 +17,7 @@ public class FtspApp extends Application implements TimerHandler{
 	public static final int LINE = 0;
 	public static final int RING = 1;
 	public static final int GRID = 2;
+	public static final int DENSE = 3;
 	
 	private int PERIOD = 20000000;
 	int NUMNODES = 20;
@@ -41,20 +42,51 @@ public class FtspApp extends Application implements TimerHandler{
 		
 		run();
 	}
+	
+	public FtspApp(int numNodes,String logFile,int topology,double density) throws Exception {
+		logger = new Logger(logFile);		
+		this.NUMNODES = numNodes;
+			
+		createTopology(topology,density);
+			
+		for(int i=0;i<NUMNODES;i++){
+			nodes[i].on();
+		}
+		
+		clock.start();
+		timer.startOneshot(PERIOD);
+		
+		run();
+	}
+	
+	private void createTopology(int topology,double density) {
+		nodes = new FtspNode[NUMNODES];	
+//		nodes = new FtspNodeMinimumVariance[NUMNODES];
+		
+		if(topology == DENSE){
+							
+			for(int i = 0; i< NUMNODES;i++){
+				nodes[i] = new FtspNode(i+1,new Position(i*density,i*density,0));
+//				nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*density,i*density,0));
+			}			
+		}
+	}
+
+	
 
 	private void createTopology(int topology) {
-//		nodes = new FtspNode[NUMNODES];	
+		nodes = new FtspNode[NUMNODES];	
 //		nodes = new FtspNodeWithoutDiscontinuity[NUMNODES];
-		nodes = new FtspNodeMinimumVariance[NUMNODES];
+//		nodes = new FtspNodeMinimumVariance[NUMNODES];
 //		nodes = new FtspNodeAverage[NUMNODES];
 //		nodes = new FtspNodeLSAverage[NUMNODES];
 //		nodes = new FtspNodeMedian[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-//				nodes[i] = new FtspNode(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new FtspNode(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeWithoutDiscontinuity(i+1,new Position(i*5,i*5,0));
-				nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
+//				nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeAverage(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeLSAverage(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new FtspNodeMedian(i+1,new Position(i*5,i*5,0));
@@ -79,11 +111,18 @@ public class FtspApp extends Application implements TimerHandler{
 			
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
-//					nodes[id] = new FtspNode(id+1,new Position(k*10,i*10,0));
-					nodes[id] = new FtspNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
+					nodes[id] = new FtspNode(id+1,new Position(k*10,i*10,0));
+//					nodes[id] = new FtspNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}
+		}
+		else if(topology == DENSE){
+							
+			for(int i = 0; i< NUMNODES;i++){
+				nodes[i] = new FtspNode(i+1,new Position(i*0.5,i*0.5,0));
+//				nodes[i] = new FtspNodeMinimumVariance(i+1,new Position(i*0.5,i*0.5,0));
+			}			
 		}
 	}
 

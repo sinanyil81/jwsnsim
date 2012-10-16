@@ -85,6 +85,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         localTime = CLOCK.getValue();
         globalTime = new UInt32(localTime);
         globalTime = ls.calculateY(globalTime);
+//        globalTime = globalTime.add(correction);
 
         // we need to periodically update the reference point for the root
         // to avoid wrapping the 32-bit (localTime - localAverage) value
@@ -194,15 +195,20 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 //			 " Node:" + NODE_ID + 
 //			 " Diff:" + timeError);
         	
-        	if(timeError != 0 ){ 
+        	if(timeError > 0 ){ 
         		
-        		int offset = timeError/2;
+        		correction = timeError;
+//        		if(correction > 200)
+//        			correction = 0;
         		
-        		ls.setMeanY(ls.getMeanY()+offset);
+//        		int offset = timeError/2;
+//        		int offset = timeError;
         		
-        		offset = (int)((float)offset/ls.getSlope());
-        		ls.setMeanX(ls.getMeanX().subtract(new UInt32(offset)));
-        		        		
+//        		ls.setMeanY(ls.getMeanY()+offset);
+        		
+//        		offset = (int)((float)offset/ls.getSlope());
+//        		ls.setMeanX(ls.getMeanX().subtract(new UInt32(offset)));
+//        		        		
         		y2 = local2Global(localTime);
         		
         		int error =y1.subtract(y2).toInteger(); 
@@ -261,14 +267,17 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	public UInt32 local2Global() {
 		UInt32 local = CLOCK.getValue();		
 		UInt32 time = ls.calculateY(local);
-		
-		return time;
+				
+		return time.add(correction);
+//		return time;
 	}
 	
 	public UInt32 local2Global(UInt32 now) {
 		UInt32 time = ls.calculateY(now);
 		
-		return time;
+		return time.add(correction);
+		
+//		return time;
 	}
 	
 	public String toString(){
