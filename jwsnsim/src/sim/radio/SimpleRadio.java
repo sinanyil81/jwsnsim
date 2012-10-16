@@ -127,13 +127,13 @@ public class SimpleRadio extends Radio implements EventObserver{
 		this.neighbors = new Node[i];
         System.arraycopy( neighbors, 0,this.neighbors, 0, i );
         
-        System.out.println("---------------------------------");
-        System.out.print(node.getID() + "'s neighbors: ");
-        for (int j = 0; j < this.neighbors.length; j++) {
-        	System.out.print(this.neighbors[j].getID() + " ");
-		}
-        System.out.println("");
-        System.out.println("---------------------------------");
+//        System.out.println("---------------------------------");
+//        System.out.print(node.getID() + "'s neighbors: ");
+//        for (int j = 0; j < this.neighbors.length; j++) {
+//        	System.out.print(this.neighbors[j].getID() + " ");
+//		}
+//        System.out.println("");
+//        System.out.println("---------------------------------");
         
 	}
 	
