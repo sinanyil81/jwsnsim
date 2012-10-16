@@ -2,6 +2,8 @@ package application.appPulseSync;
 
 import application.Application;
 import application.Logger;
+import application.appFtsp.FtspNode;
+import application.appFtsp.FtspNodeMinimumVariance;
 import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -17,6 +19,7 @@ public class PulseSyncApp extends Application implements TimerHandler{
 	public static final int LINE = 0;
 	public static final int RING = 1;
 	public static final int GRID = 2;
+	public static final int DENSE = 3;
 	
 	private int PERIOD = 20000000;
 	int NUMNODES = 20;
@@ -41,14 +44,43 @@ public class PulseSyncApp extends Application implements TimerHandler{
 		
 		run();
 	}
+	
+	public PulseSyncApp(int numNodes,String logFile,int topology,double density) throws Exception {
+		logger = new Logger(logFile);		
+		this.NUMNODES = numNodes;
+			
+		createTopology(topology,density);
+			
+		for(int i=0;i<NUMNODES;i++){
+			nodes[i].on();
+		}
+		
+		clock.start();
+		timer.startOneshot(PERIOD);
+		
+		run();
+	}
+	
+	private void createTopology(int topology,double density) {
+		nodes = new PulseSyncNode[NUMNODES];	
+//		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];
+		
+		if(topology == DENSE){
+							
+			for(int i = 0; i< NUMNODES;i++){
+				nodes[i] = new PulseSyncNode(i+1,new Position(i*density,i*density,0));
+//				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*density,i*density,0));
+			}			
+		}
+	}
 
 	private void createTopology(int topology) {
-//		nodes = new PulseSyncNode[NUMNODES];
-		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];
+		nodes = new PulseSyncNode[NUMNODES];
+//		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-//				nodes[i] = new PulseSyncNode(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new PulseSyncNode(i+1,new Position(i*5,i*5,0));
 //				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*5,i*5,0));
 			}			
 		}
@@ -60,7 +92,7 @@ public class PulseSyncApp extends Application implements TimerHandler{
 			for(int i = 0; i< NUMNODES;i++){
 				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
 											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
-//				nodes[i] = new PulseSyncNode(i+1,pos);
+				nodes[i] = new PulseSyncNode(i+1,pos);
 //				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,pos);
 			}			
 		}
@@ -71,9 +103,9 @@ public class PulseSyncApp extends Application implements TimerHandler{
 			
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
-//					nodes[id] = new PulseSyncNode(id+1,new Position(k*10,i*10,0));
-					nodes[id] = new PulseSyncNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
-					id++;
+					nodes[id] = new PulseSyncNode(id+1,new Position(k*10,i*10,0));
+//					nodes[id] = new PulseSyncNodeMinimumVariance(id+1,new Position(k*10,i*10,0));
+//					id++;
 				}				
 			}
 		}
