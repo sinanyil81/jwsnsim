@@ -169,12 +169,10 @@ public class SelfNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-//		s += " "
-//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-//						.getValue()) * (1.0 + CLOCK.getDrift())));
-		
 		s += " "
-			+ Float.floatToIntBits((float) (skew_multiplier.getValue()));
+				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+						.getValue()) * (1.0 + CLOCK.getDrift())));
+		
 		
 
 		return s;
