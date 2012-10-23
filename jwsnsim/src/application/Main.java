@@ -39,34 +39,23 @@ public class Main {
 	private static void pulseSyncSimulations() {
 
 		try {
-//			for (int i = 10; i <= 50; i += 10) {
-//				for (int j = 1; j <= 5; j++) {
-//					new application.appPulseSync.PulseSyncApp(i,
-//							"sims/pulse/_PulseSyncLine_" + i + "_" + j + "_" + ".txt",
-//							PulseSyncApp.LINE);
-//				}
-//			}
+			for (int i = 10; i <= 100; i += 10) {
+				for (int j = 1; j <= 5; j++) {
+					new application.appPulseSync.PulseSyncApp(i,"PulseSyncLine_" + i + "_" + j + "_" + ".txt",
+							PulseSyncApp.LINE);
+				}
+			}
 //			
 //			System.gc();
 
-//			for (int i = 20; i <= 120; i += 20) {
+//			for (int i = 6; i < 31; i = i + 5) {
 //				for (int j = 1; j <= 5; j++) {
-//					new application.appPulseSync.PulseSyncApp(i,
-//							"sims/pulse/PulseSyncRing_" + i + "_" + j + "_" + ".txt",
-//							PulseSyncApp.RING);
+//					new application.appPulseSync.PulseSyncApp(i * i,
+//							"sims/pulse/_PulseSyncGrid_" + i + "_" + j + "_" + ".txt",
+//							PulseSyncApp.GRID);
+//					System.gc();
 //				}
 //			}
-			
-//			System.gc();
-
-			for (int i = 6; i < 31; i = i + 5) {
-				for (int j = 1; j <= 5; j++) {
-					new application.appPulseSync.PulseSyncApp(i * i,
-							"sims/pulse/_PulseSyncGrid_" + i + "_" + j + "_" + ".txt",
-							PulseSyncApp.GRID);
-					System.gc();
-				}
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -142,31 +131,24 @@ public class Main {
 	 */
 	public static void fcsaSimulations() {
 		try {
-			// for(int j = 1;j<=10;j++)
-			// for(int i = 10;i<=100;i+=10)
-			// new
-			// application.appFlooding.FloodingApp(i,"FloodingSimLine"+i+"#"+j,FloodingApp.LINE);
+			for(int j = 1;j<=5;j++)
+				for(int i = 10;i<=100;i+=10)
+					new application.appFcsa.FloodingApp(i,"FCSALine_"+i+"#"+j,FloodingApp.LINE);
 
-			/* tests for different topologies */
-			// new
-			// application.appFcsa.FloodingApp(16,"FCSA_LINE_16.txt",FloodingApp.LINE);
-			// new
-			// application.appFcsa.FloodingApp(16,"FCSA_GRID_16.txt",FloodingApp.GRID);
-			// new
-			// application.appFcsa.FloodingApp(64,"FCSA_GRID_64.txt",FloodingApp.GRID);
-			new application.appFcsa.FloodingApp(256, "FCSA_GRID_256.txt",
-					FloodingApp.GRID);
-			// new
-			// application.appFcsa.FloodingApp(1024,"FCSA_GRID_1024.txt",FloodingApp.GRID);
+//			for(int j = 1;j<=5;j++){
+//				new application.appFcsa.FloodingApp(16,"FCSA_GRID_4x4_"+j+".txt",FloodingApp.GRID);
+//				new application.appFcsa.FloodingApp(6,"FCSA_LINE_6_"+j+".txt",FloodingApp.LINE);
+//				
+//				new application.appFcsa.FloodingApp(64,"FCSA_GRID_8x8_"+j+".txt",FloodingApp.GRID);
+//				new application.appFcsa.FloodingApp(14,"FCSA_LINE_14_"+j+".txt",FloodingApp.LINE);
+//				
+//				new application.appFcsa.FloodingApp(256,"FCSA_GRID_16x16_"+j+".txt",FloodingApp.GRID);
+//				new application.appFcsa.FloodingApp(30,"FCSA_LINE_30_"+j+".txt",FloodingApp.LINE);
+//				
+//				new application.appFcsa.FloodingApp(1024,"FCSA_GRID_32x32_"+j+".txt",FloodingApp.GRID);
+//				new application.appFcsa.FloodingApp(62,"FCSA_LINE_62_"+j+".txt",FloodingApp.LINE);		
+//			}
 
-			// new
-			// application.appFcsa.FloodingApp(6,"FCSA_LINE_6.txt",FloodingApp.LINE);
-			// new
-			// application.appFcsa.FloodingApp(14,"FCSA_LINE_14.txt",FloodingApp.LINE);
-			// new
-			// application.appFcsa.FloodingApp(30,"FCSA_LINE_30.txt",FloodingApp.LINE);
-			// new
-			// application.appFcsa.FloodingApp(62,"FCSA_LINE_62.txt",FloodingApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,14 +159,9 @@ public class Main {
 	 */
 	public static void gradientSimulations() {
 		try {
-			for (int i = 20; i <= 100; i += 20)
-				new application.appEgtsp.GradientApp(i, "EGTSPR_" + i + ".txt",
-						GradientApp.RING);
-			// for(int i = 10;i<=100;i+=10)
-			// new
-			// application.appFcsaRt.FloodingApp(50,"FCSA.txt",FloodingApp.LINE);
-
-			// new application.appGtsp.GtspApp(20,"Gtsp.txt",GtspApp.LINE);
+			for(int j = 1;j<=5;j++)
+				for(int i = 80;i<=100;i+=10)
+					new application.appEgtsp.GradientApp(i,"GTSPLine_"+i+"#"+j,GradientApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

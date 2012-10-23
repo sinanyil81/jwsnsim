@@ -10,9 +10,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
-import fr.irit.smac.util.avt.AVT;
-import fr.irit.smac.util.avt.AVTBuilder;
-import fr.irit.smac.util.avt.Feedback;
 
 public class SelfNode extends Node implements TimerHandler {
 
