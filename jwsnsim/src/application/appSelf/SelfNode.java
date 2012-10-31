@@ -30,6 +30,7 @@ public class SelfNode extends Node implements TimerHandler {
 	private int previousSkewPositive = 0;	
 
 	SelfMessage outgoingMsg = new SelfMessage();
+	Averager averager = new Averager();
 
 	public SelfNode(int id, Position position) {
 		super(id, position);
@@ -58,22 +59,54 @@ public class SelfNode extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toDouble();
 	}
 
+	int counter = 0;
+	
 	private void adjustClock(RadioPacket packet) {
 
 		double skew = calculateSkew(packet);	
 		
-		logicalClock.update(packet.getEventTime());
+//		if( skew < -1000.0 && counter< 2){
+//			logicalClock.setValue(((SelfMessage) packet.getPayload()).clock,packet.getEventTime());
+//			logicalClock.setOffset(new UInt32());
+//			
+//			//logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//			counter++;
+//			if(this.NODE_ID == 1)
+//				System.out.println("fuck "+this.NODE_ID);
+//		}
+//		else{
+			logicalClock.update(packet.getEventTime());
 
-		if (skew > TOLERANCE) {
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
-			adjustOffset(skew);
-		} else if (skew < (-1.0) * TOLERANCE) {
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
-			adjustOffset(skew);
-		} else {
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			if (skew > TOLERANCE) {
+				logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
+				adjustOffset(skew);
+			} else if (skew < (-1.0) * TOLERANCE) {
+				logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
+				adjustOffset(skew);
+			} else {
+				logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			}		
+//		}			
+	}
+	
+	private void adjustOffset(double skew) {
+//		averager.update(skew);
+			
+		if (skew < 0){
+			UInt32 offset = logicalClock.getOffset();
+			offset = offset.add((int)-skew);		
+			logicalClock.setOffset(offset);
 		}
 	}
+	
+//	private void adjustOffset(double skew) {
+//		averager.update(skew);
+//			
+//		UInt32 offset = logicalClock.getOffset();
+//		offset = offset.add(-(int)(averager.getAverage()*0.5));		
+//		logicalClock.setOffset(offset);
+//	
+//	}
 	
 //	private void adjustOffset(double skew) {
 //		UInt32 offset = logicalClock.getOffset();
@@ -81,47 +114,47 @@ public class SelfNode extends Node implements TimerHandler {
 //		logicalClock.setOffset(offset);	
 //	}
 
-	private void adjustOffset(double skew) {
+//	private void adjustOffset(double skew) {
 									
-		UInt32 offset = logicalClock.getOffset();
-		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
-		logicalClock.setOffset(offset);
-		//
-		if (previousSkewPositive == 0) {
-			if (skew > 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		} else if (previousSkewPositive == 1) {
-			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		} else if (previousSkewPositive == -1) {
-			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) { // negative
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		}
-	}
+//		UInt32 offset = logicalClock.getOffset();
+//		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
+//		logicalClock.setOffset(offset);
+//		//
+//		if (previousSkewPositive == 0) {
+//			if (skew > 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		} else if (previousSkewPositive == 1) {
+//			if (skew > 0.0) { // positive
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		} else if (previousSkewPositive == -1) {
+//			if (skew > 0.0) { // positive
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) { // negative
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		}
+//	}
 
 	@Override
 	public void receiveMessage(RadioPacket packet) {
@@ -148,6 +181,8 @@ public class SelfNode extends Node implements TimerHandler {
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);
+		
+		averager = new Averager();
 	}
 
 	@Override
