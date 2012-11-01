@@ -32,6 +32,10 @@ public class AvtSimple {
     	return value;
     }
     
+    public float getDelta(){
+    	return delta;
+    }
+    
     void increaseDelta(){
     	delta = delta * INCREASE_FACTOR;    
     	

@@ -24,9 +24,20 @@ public class SelfNode2 extends Node implements TimerHandler {
 	SelfMessage outgoingMsg = new SelfMessage();
 
 	Averager averager = new Averager();
+	
+	class NeighborData{
+		public UInt32 clock;
+		public UInt32 timestamp;
+		public float rate;
+		
+		public NeighborData(UInt32 clock, UInt32 timestamp,float rate){
+			this.clock = new UInt32(clock);
+			this.timestamp = new UInt32(timestamp);
+			this.rate = rate;
+		}
+	}
 
-	Hashtable<Integer, UInt32> neighbors = new Hashtable<Integer, UInt32>();
-	UInt32 lastBroadcastTime = new UInt32();
+	Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 	
 //	OffsetAvt offsetAvt = new OffsetAvt(0.00001f, 100000.0f);
 	public AvtSimple skew_multiplier = new AvtSimple(0.50f, 1.0f, 0.95f, 0.05f, 0.20f);
@@ -52,26 +63,30 @@ public class SelfNode2 extends Node implements TimerHandler {
 
 	int calculateProgressDifference(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
+		NeighborData neighbor = neighbors.get(msg.nodeid);
 
-		UInt32 receivedProgress = msg.progress;
-
-		UInt32 currentTimestamp = packet.getEventTime();
-		UInt32 previousTimestamp = neighbors.get(msg.nodeid);
-
-		if (previousTimestamp != null) {
-			UInt32 difference = currentTimestamp.subtract(previousTimestamp);
+		if(neighbor != null){
+			UInt32 currentClock = msg.hardwareClock;
+			UInt32 previousClock = neighbor.clock;
+			UInt32 difference = currentClock.subtract(previousClock);
+			UInt32 neighborProgress = difference.add(difference.multiply(neighbor.rate));
+			
+			UInt32 currentTimestamp = packet.getEventTime();
+			UInt32 previousTimestamp = neighbor.timestamp;
+			difference = currentTimestamp.subtract(previousTimestamp);
 			UInt32 myProgress = difference.add(difference
 					.multiply(logicalClock.rate.getValue()));
-
-			return myProgress.subtract(receivedProgress).toInteger();
+			
+			return myProgress.subtract(neighborProgress).toInteger();
 		}
-
+		
 		return 0;
 	}
 
 	private void adjustClockSpeed(RadioPacket packet) {
 
 		int difference = calculateProgressDifference(packet);
+//		System.out.println(this.NODE_ID + " " + difference);
 
 		if (difference > TOLERANCE) {
 			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
@@ -82,53 +97,53 @@ public class SelfNode2 extends Node implements TimerHandler {
 		}
 	}
 	
-	private void adjustClockOffset(RadioPacket packet) {
-		SelfMessage msg = (SelfMessage) packet.getPayload();
-
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-
-		double skew = myClock.subtract(neighborClock).toDouble();
-
-		if (previousSkewPositive == 0) {
-			if (skew > 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		} else if (previousSkewPositive == 1) {
-			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		} else if (previousSkewPositive == -1) {
-			if (skew > 0.0) { // positive
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
-				previousSkewPositive = 1;
-			} else if (skew < 0.0) { // negative
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
-				previousSkewPositive = -1;
-			} else {
-				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
-				previousSkewPositive = 0;
-			}
-		}
-		
-		UInt32 offset = logicalClock.getOffset();
-		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
-		logicalClock.setOffset(offset);
-	}
+//	private void adjustClockOffset(RadioPacket packet) {
+//		SelfMessage msg = (SelfMessage) packet.getPayload();
+//
+//		UInt32 neighborClock = msg.clock;
+//		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+//
+//		double skew = myClock.subtract(neighborClock).toDouble();
+//
+//		if (previousSkewPositive == 0) {
+//			if (skew > 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		} else if (previousSkewPositive == 1) {
+//			if (skew > 0.0) { // positive
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		} else if (previousSkewPositive == -1) {
+//			if (skew > 0.0) { // positive
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_LOWER);
+//				previousSkewPositive = 1;
+//			} else if (skew < 0.0) { // negative
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GREATER);
+//				previousSkewPositive = -1;
+//			} else {
+//				skew_multiplier.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//				previousSkewPositive = 0;
+//			}
+//		}
+//		
+//		UInt32 offset = logicalClock.getOffset();
+//		offset = offset.add((int) -(skew * skew_multiplier.getValue()));
+//		logicalClock.setOffset(offset);
+//	}
 	
 //	private void adjustClockOffset(RadioPacket packet) {
 //		SelfMessage msg = (SelfMessage) packet.getPayload();
@@ -156,20 +171,19 @@ public class SelfNode2 extends Node implements TimerHandler {
 //		logicalClock.setOffset(offsetAvt.getValue());
 //	}
 
-//	private void adjustClockOffset(RadioPacket packet) {
-//		SelfMessage msg = (SelfMessage) packet.getPayload();
-//
-//		UInt32 neighborClock = msg.clock;
-//		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-//
-//		int skew = myClock.subtract(neighborClock).toInteger();
-//		averager.update(skew);
-//
-//		UInt32 offset = logicalClock.getOffset();
-//		offset = offset.add(-(int) (averager.getAverage() * 0.5));
-//		logicalClock.setOffset(offset);
-//
-//	}
+	private void adjustClockOffset(RadioPacket packet) {
+		SelfMessage msg = (SelfMessage) packet.getPayload();
+
+		UInt32 neighborClock = msg.clock;
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+		int skew = myClock.subtract(neighborClock).toInteger();
+		averager.update(skew);
+
+		UInt32 offset = logicalClock.getOffset();
+		offset = offset.add(-(int) (averager.getAverage() * 0.5));
+		logicalClock.setOffset(offset);
+	}
 
 	@Override
 	public void receiveMessage(RadioPacket packet) {
@@ -181,19 +195,13 @@ public class SelfNode2 extends Node implements TimerHandler {
 
 		/* store local receipt time */
 		SelfMessage msg = (SelfMessage) packet.getPayload();
-		neighbors.put(msg.nodeid, packet.getEventTime());
+		neighbors.remove(msg.nodeid);
+		neighbors.put(msg.nodeid, new NeighborData(msg.hardwareClock,packet.getEventTime(),msg.rateMultiplier));
 	}
 
 	@Override
 	public void fireEvent(Timer timer) {
 		sendMsg();
-	}
-
-	public UInt32 calculateProgress(UInt32 currentBroadcastTime) {
-		UInt32 difference = currentBroadcastTime.subtract(lastBroadcastTime);
-
-		return difference
-				.add(difference.multiply(logicalClock.rate.getValue()));
 	}
 
 	private void sendMsg() {
@@ -207,14 +215,13 @@ public class SelfNode2 extends Node implements TimerHandler {
 		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;
 
-		outgoingMsg.progress = calculateProgress(localTime);
+		outgoingMsg.hardwareClock = new UInt32(localTime);
+		outgoingMsg.rateMultiplier = logicalClock.rate.getValue();
 
 		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);
-
-		lastBroadcastTime = new UInt32(localTime);
 
 		averager = new Averager();
 	}
@@ -238,6 +245,8 @@ public class SelfNode2 extends Node implements TimerHandler {
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
 						.getValue()) * (1.0 + CLOCK.getDrift())));
+		
+//		+ Float.floatToIntBits((float) logicalClock.rate.getDelta());
 
 		return s;
 	}
