@@ -15,7 +15,7 @@ import sim.type.UInt32;
 public class ConstantDriftClock implements Clock {
 
 	/** Clock specific constants */
-	private static final int MEAN_DRIFT = 70;
+	private static final int MEAN_DRIFT = 50;
 	private static final int DRIFT_VARIANCE = 100;
 	private static double MAX_CLOCK =  4294967295.0;	
 	
@@ -32,7 +32,10 @@ public class ConstantDriftClock implements Clock {
 	private SimTime lastRead = new SimTime();
 	
 	public ConstantDriftClock(){
-		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);  
+		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);
+		if(drift > 100)
+			drift -= 100;
+		
 		drift /= 1000000.0;
 	}
 	
