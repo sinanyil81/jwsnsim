@@ -72,7 +72,8 @@ public class Main {
 
 	private static void selfSimulations() {
 		try {
-			new application.appSelf.SelfApp(20, "Self.txt", RateApp.LINE);
+//			new application.appSelf.SelfApp(20, "Self.txt", RateApp.LINE);
+			new application.appFcsa.FloodingApp(20,"Self.txt",FloodingApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
