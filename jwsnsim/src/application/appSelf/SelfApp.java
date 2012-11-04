@@ -84,6 +84,28 @@ public class SelfApp extends Application implements TimerHandler{
 			}
 		}
 	}
+	
+	private void createTopology3(int topology) {
+		nodes = new SelfNode3[NUMNODES];	
+		
+		if(topology == LINE){
+			for(int i=0;i<NUMNODES;i++){
+				nodes[i] = new SelfNode3(i+1,new Position(i*5,i*5,0));
+			}			
+		}
+		else if(topology == GRID){
+			
+			int j = (int) Math.sqrt(NUMNODES);
+			int id = 0;
+			
+			for(int i = 0;i<j;i++){
+				for(int k = 0;k<j;k++){
+					nodes[id] = new SelfNode3(id+1,new Position(k*10,i*10,0));
+					id++;
+				}				
+			}
+		}
+	}
 
 
 	@Override

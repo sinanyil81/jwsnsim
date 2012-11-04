@@ -15,12 +15,10 @@ public class SelfNode3 extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
 
-	LogicalClock2 logicalClock = new LogicalClock2();
+	LogicalClock3 logicalClock = new LogicalClock3();
 	Timer timer0;
 
 	SelfMessage outgoingMsg = new SelfMessage();
-
-	Averager averager = new Averager();
 	ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter();
 
 	public SelfNode3(int id, Position position) {
@@ -38,66 +36,35 @@ public class SelfNode3 extends Node implements TimerHandler {
 
 		outgoingMsg.sequence = 0;
 
-		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
+		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
 	private void adjustClockSpeed(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
-		speedAdapter.adjust(msg.nodeid, msg.clock, packet.getEventTime(), msg.rateMultiplier);
+		speedAdapter.adjust(msg.nodeid, msg.hardwareClock, packet.getEventTime(), msg.rateMultiplier);
 		logicalClock.rate = speedAdapter.getSpeed();
 	}
 	
-
-//	private void adjustClockOffset(RadioPacket packet) {
-//		SelfMessage msg = (SelfMessage) packet.getPayload();
-//
-//		UInt32 neighborClock = msg.clock;
-//		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-//
-//		int skew = myClock.subtract(neighborClock).toInteger();
-//				
-//		if( skew < -1000 || skew > 1000){
-//			logicalClock.setValue(msg.clock,packet.getEventTime());
-//			logicalClock.setOffset(new UInt32());
-//			
-//			return;
-//		}
-//		
-//		if (skew > TOLERANCE) {
-//			offsetAvt.adjustValue(AvtSimple.FEEDBACK_LOWER);
-//		} else if (skew < -TOLERANCE) {
-//			offsetAvt.adjustValue(AvtSimple.FEEDBACK_GREATER);
-//		} else {
-//			offsetAvt.adjustValue(AvtSimple.FEEDBACK_GOOD);
-//		}
-//		
-//		logicalClock.setOffset(offsetAvt.getValue());
-//	}
-	UInt32 lastOffset = new UInt32();
-
 	private void adjustClockOffset(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
+
+		UInt32 neighborClock = msg.clock;
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+
+		int skew = myClock.subtract(neighborClock).toInteger();
 		
-		if(msg.sequence > outgoingMsg.sequence){
-			
-			logicalClock.setValue(msg.clock, packet.getEventTime());
-			outgoingMsg.sequence = msg.sequence;
-		}
-		
-//		UInt32 neighborClock = msg.clock;
-//		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-//
-//		int skew = myClock.subtract(neighborClock).toInteger();
-//		averager.update(skew);
+		UInt32 offset = logicalClock.getOffset();
+		offset = offset.add((int) -(skew *0.5));
+		logicalClock.setOffset(offset);	
 	}
 
 	@Override
 	public void receiveMessage(RadioPacket packet) {
-//		/* update logical clock */
+		/* update logical clock */
 //		logicalClock.update(packet.getEventTime());
 
 		adjustClockSpeed(packet);
-		adjustClockOffset(packet);
+//		adjustClockOffset(packet);
 	}
 
 	@Override
@@ -113,12 +80,8 @@ public class SelfNode3 extends Node implements TimerHandler {
 
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
-//		outgoingMsg.offset = logicalClock.getOffset();
-		
-		if(this.NODE_ID == 1){
-			logicalClock.setValue(globalTime, localTime);
-			outgoingMsg.sequence++;
-		}
+		outgoingMsg.offset = logicalClock.getOffset();
+		outgoingMsg.sequence++;
 
 		outgoingMsg.hardwareClock = new UInt32(localTime);
 		outgoingMsg.rateMultiplier = logicalClock.rate;
@@ -127,9 +90,6 @@ public class SelfNode3 extends Node implements TimerHandler {
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);
-
-		averager = new Averager();
-//		lastOffset = logicalClock.getOffset();
 	}
 
 	@Override
@@ -149,10 +109,13 @@ public class SelfNode3 extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK.getDrift())));
-		
-//		+ Float.floatToIntBits((float) logicalClock.rate.getDelta());
+				+ Float.floatToIntBits((float) ((1.0 + speedAdapter.getSpeed()) * (1.0 + CLOCK.getDrift())));
 
+		
+//		s += " "
+//				+ Float.floatToIntBits(speedAdapter.getSpeed());
+
+		
 		return s;
 	}
 }

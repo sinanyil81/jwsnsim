@@ -36,17 +36,15 @@ public class SelfNode2 extends Node implements TimerHandler {
 
 		outgoingMsg.sequence = 0;
 
-		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
+		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
 	private void adjustClockSpeed(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
-		speedAdapter.adjust(msg.nodeid, msg.clock, packet.getEventTime(), msg.rateMultiplier);
+		speedAdapter.adjust(msg.nodeid, msg.hardwareClock, packet.getEventTime(), msg.rateMultiplier);
 		logicalClock.rate = speedAdapter.getSpeed();
 	}
 	
-	UInt32 lastOffset = new UInt32();
-
 	private void adjustClockOffset(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 		
@@ -109,6 +107,9 @@ public class SelfNode2 extends Node implements TimerHandler {
 		s += " " + local2Global().toString();
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK.getDrift())));
+		
+//		s += " "
+//				+ Float.floatToIntBits((float) speedAdapter.rate.getAdvancedAVT().getDeltaManager().getDelta());
 		
 		return s;
 	}

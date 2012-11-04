@@ -66,29 +66,12 @@ public class AvtSimple {
 		}
     }
     
-    float min(float a,float b){
-    	if(a<b) 
-    		return a;
-    		
-    	return b;
-    }
-    
-    float max(float a,float b){
-    	if(a>b) 
-    		return a;
-    		
-    	return b;
-    }
-    
     public void adjustValue(int feedback)
     {    	
-    	// 1 - Updates the delta value
 		updateDelta(feedback);
 
-		// 2 - Adjust the current value
 		if (feedback != FEEDBACK_GOOD) {
-			value = min(upperBound,max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1 : -1)));
-			/* feedback -1 Sinan ?? */
+			value = Math.min(upperBound,Math.max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1.0f : -1.0f)));
 		}
 		
 		lastFeedback = feedback;

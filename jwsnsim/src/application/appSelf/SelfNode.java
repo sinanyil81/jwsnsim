@@ -49,7 +49,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 		outgoingMsg.sequence = 0;
 
-		System.out.println("Node:" + this.NODE_ID + ":" + CLOCK.getDrift());
+		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
 	double calculateSkew(RadioPacket packet) {
