@@ -1,5 +1,6 @@
 package application.appFcsa;
 
+import application.appSelf.ClockSpeedAdapter;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -126,12 +127,17 @@ public class FloodingNode extends Node implements TimerHandler {
 			}						
 		}
 	}
-
+	
+	/* TODO remove */ ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter(); 
+ 
 	void processMsg() {
 		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
 
 		addEntry(msg, processedMsg.getEventTime());
 		updateClockRate();
+		
+		/* TODO remove */ speedAdapter.adjust(msg.nodeid, msg.clock, processedMsg.getEventTime(), msg.multiplier);
+		/* TODO remove */ logicalClock.rate = speedAdapter.getSpeed();
 		
 		if( msg.rootid < outgoingMsg.rootid &&
 	            //after becoming the root, a node ignores messages that advertise the old root (it may take
@@ -229,8 +235,8 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-//		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
-		s += " " + Float.floatToIntBits(logicalClock.rate);
+		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
+//		s += " " + Float.floatToIntBits(logicalClock.rate);
 
 		return s;
 	}
