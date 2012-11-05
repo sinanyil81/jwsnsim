@@ -129,15 +129,13 @@ public class FloodingNode extends Node implements TimerHandler {
 	}
 	
 	/* TODO remove */ ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter();
-	/* TODO remove */ UInt32 lastValue = new UInt32();
  
 	void processMsg() {
 		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
 
-//		addEntry(msg, processedMsg.getEventTime());
-//		updateClockRate();
+		addEntry(msg, processedMsg.getEventTime());
+		updateClockRate();
 		
-//		/* TODO remove */ speedAdapter.adjust(msg.nodeid, msg.progress,processedMsg.getEventTime());
 		/* TODO remove */ speedAdapter.adjust(msg.nodeid,msg.clock,processedMsg.getEventTime(),msg.multiplier);
 		/* TODO remove */ logicalClock.rate = speedAdapter.getSpeed();
 		
@@ -210,10 +208,6 @@ public class FloodingNode extends Node implements TimerHandler {
 		outgoingMsg.multiplier = (float) logicalClock.rate;
 		
 		outgoingMsg.rootClock = new UInt32(globalTime);
-
-		/* TODO remove */
-//		outgoingMsg.progress = speedAdapter.getValue(localTime).subtract(lastValue);
-//		lastValue = speedAdapter.getValue(localTime);
 		
 		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
 		packet.setSender(this);
@@ -242,6 +236,7 @@ public class FloodingNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
+		System.out.println(""+NODE_ID+" "+(1.0+(double)logicalClock.rate)*(1.0+CLOCK.getDrift()));
 //		s += " " + Float.floatToIntBits(logicalClock.rate);
 
 		return s;
