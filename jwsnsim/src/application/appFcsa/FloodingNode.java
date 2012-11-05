@@ -128,15 +128,17 @@ public class FloodingNode extends Node implements TimerHandler {
 		}
 	}
 	
-	/* TODO remove */ ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter(); 
+	/* TODO remove */ ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter();
+	/* TODO remove */ UInt32 lastValue = new UInt32();
  
 	void processMsg() {
 		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
 
-		addEntry(msg, processedMsg.getEventTime());
-		updateClockRate();
+//		addEntry(msg, processedMsg.getEventTime());
+//		updateClockRate();
 		
-		/* TODO remove */ speedAdapter.adjust(msg.nodeid, msg.clock, processedMsg.getEventTime(), msg.multiplier);
+//		/* TODO remove */ speedAdapter.adjust(msg.nodeid, msg.progress,processedMsg.getEventTime());
+		/* TODO remove */ speedAdapter.adjust(msg.nodeid,msg.clock,processedMsg.getEventTime(),msg.multiplier);
 		/* TODO remove */ logicalClock.rate = speedAdapter.getSpeed();
 		
 		if( msg.rootid < outgoingMsg.rootid &&
@@ -208,6 +210,10 @@ public class FloodingNode extends Node implements TimerHandler {
 		outgoingMsg.multiplier = (float) logicalClock.rate;
 		
 		outgoingMsg.rootClock = new UInt32(globalTime);
+
+		/* TODO remove */
+//		outgoingMsg.progress = speedAdapter.getValue(localTime).subtract(lastValue);
+//		lastValue = speedAdapter.getValue(localTime);
 		
 		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
 		packet.setSender(this);
