@@ -1,6 +1,7 @@
 package application.appFcsa;
 
 import application.appSelf.ClockSpeedAdapter;
+import application.appSelf.ClockSpeedAdapter2;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -13,29 +14,25 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class FloodingNode extends Node implements TimerHandler {
+public class SelfFloodingNode extends Node implements TimerHandler {
 
-	private static final int MAX_NEIGHBORS = 8;
-	
 	private static final int BEACON_RATE = 30000000;  
 	private static final int ROOT_TIMEOUT = 5;
 	private static final int IGNORE_ROOT_MSG = 4;	
-	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
 
-	Neighbor neighbors[] = new Neighbor[MAX_NEIGHBORS];
-	int numNeighbors = 0;
-
-	LeastSquares ls = new LeastSquares();
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
 	RadioPacket processedMsg = null;
-	FloodingMessage outgoingMsg = new FloodingMessage();
+	SelfFloodingMessage outgoingMsg = new SelfFloodingMessage();
+	
+	ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter();
+//	ClockSpeedAdapter2 speedAdapter = new ClockSpeedAdapter2();
     
 	int heartBeats; // the number of sucessfully sent messages
     // since adding a new entry with lower beacon id than ours	
 
-	public FloodingNode(int id, Position position) {
+	public SelfFloodingNode(int id, Position position) {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
@@ -48,91 +45,17 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		outgoingMsg.sequence = 0;
 		outgoingMsg.rootid = 0xFFFF;
-
-		for (int i = 0; i < neighbors.length; i++) {
-			neighbors[i] = new Neighbor();
-		}
-	}
-
-	private int findNeighborSlot(int id) {
-		for (int i = 0; i < neighbors.length; i++) {
-			if ((neighbors[i].free == false) && (neighbors[i].id == id)) {
-				return i;
-			}
-		}
-
-		return -1;
 	}
 	
-	private void updateNeighborhood(){
-		int i;
-		UInt32 age;
-
-		UInt32 localTime = CLOCK.getValue();
-
-		for (i = 0; i < MAX_NEIGHBORS; ++i) {
-			age = new UInt32(localTime);
-			age = age.subtract(neighbors[i].timestamp);
-			
-			if(age.toLong() >= NEIGHBOR_REMOVE && neighbors[i].free == false) {
-				neighbors[i].free = true;
-				neighbors[i].clearTable();
-			}
-		}
-	}
-
-	private int getFreeSlot() {
-		int i, freeItem = -1;
-
-		for (i = 0; i < MAX_NEIGHBORS; ++i) {
-			
-			if(neighbors[i].free){
-				freeItem = i;
-			}
-		}
-
-		return freeItem;
-	}
-
-	private void addEntry(FloodingMessage msg, UInt32 eventTime) {
-
-		boolean found = false;
-				
-		updateNeighborhood();
-		
-		/* find and add neighbor */
-		int index = findNeighborSlot(msg.nodeid);
-		
-		if(index >= 0){
-			found = true;
-		}
-		else{
-			index = getFreeSlot();
-		}
-
-		if (index >= 0) {
-
-			
-			neighbors[index].free = false;
-			neighbors[index].id = msg.nodeid;
-			neighbors[index].rate = msg.multiplier;			
-			neighbors[index].addNewEntry(msg.clock,eventTime);
-			neighbors[index].timestamp = new UInt32(eventTime);
-			if(found){
-				ls.calculate(neighbors[index].table, neighbors[index].tableEntries);
-				neighbors[index].relativeRate = ls.getSlope();
-			}
-			else{
-				neighbors[index].relativeRate = 0;
-			}						
-		}
-	}
-	
+	UInt32 lastValue = new UInt32();
+	UInt32 lastBroadcast = new UInt32();
+ 
 	void processMsg() {
-		FloodingMessage msg = (FloodingMessage) processedMsg.getPayload();
-
-		addEntry(msg, processedMsg.getEventTime());
-		updateClockRate();
+		SelfFloodingMessage msg = (SelfFloodingMessage) processedMsg.getPayload();
+		
+		speedAdapter.adjust(msg.nodeid,msg.clock,processedMsg.getEventTime(),msg.multiplier);
+//		speedAdapter.adjust(msg.nodeid,msg.progress,processedMsg.getEventTime());
+		logicalClock.rate = speedAdapter.getSpeed();
 		
 		if( msg.rootid < outgoingMsg.rootid &&
 	            //after becoming the root, a node ignores messages that advertise the old root (it may take
@@ -154,22 +77,6 @@ public class FloodingNode extends Node implements TimerHandler {
 		
 		logicalClock.setValue(rootClock);
 		logicalClock.updateLocalTime = eventTime;
-	}
-
-	private void updateClockRate() {
-		float rateSum = (float) logicalClock.rate;
-		int numNeighbors = 0;
-		
-		for (int i = 0; i < neighbors.length; i++) {
-			if(neighbors[i].free == false){
-				rateSum += neighbors[i].relativeRate*neighbors[i].rate + neighbors[i].rate+neighbors[i].relativeRate;
-				numNeighbors++;
-			}
-		}
-		
-		logicalClock.rate = rateSum/(float)(numNeighbors+1);
-		
-		this.numNeighbors = numNeighbors;
 	}
 
 	@Override
@@ -204,7 +111,18 @@ public class FloodingNode extends Node implements TimerHandler {
 		
 		outgoingMsg.rootClock = new UInt32(globalTime);
 		
-		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
+		outgoingMsg.progress = speedAdapter.getValue(localTime).subtract(lastValue).toInteger();
+		lastValue = speedAdapter.getValue(localTime);
+		
+//		if(lastBroadcast.toInteger()!=0){
+//			int progress = localTime.subtract(lastBroadcast).toInteger();
+//			int val = outgoingMsg.progress-progress;
+//			outgoingMsg.multiplier = (float)val/(float)progress;
+//		}
+		
+		lastBroadcast = new UInt32(localTime);
+		
+		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);	
@@ -231,6 +149,9 @@ public class FloodingNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
+		System.out.println(""+NODE_ID+" "+(1.0+(double)logicalClock.rate)*(1.0+CLOCK.getDrift()));
+//		System.out.println(""+NODE_ID+" "+(double)logicalClock.rate*1000000.0);
+//		s += " " + Float.floatToIntBits(logicalClock.rate);
 
 		return s;
 	}

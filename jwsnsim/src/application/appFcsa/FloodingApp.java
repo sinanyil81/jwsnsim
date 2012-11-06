@@ -29,7 +29,8 @@ public class FloodingApp extends Application implements TimerHandler{
 		logger = new Logger(logFile);		
 		this.NUMNODES = numNodes;
 			
-		createTopology(topology);
+//		createTopology(topology);
+		createSelfTopology(topology);
 			
 		for(int i=0;i<NUMNODES;i++){
 			nodes[i].on();
@@ -57,6 +58,28 @@ public class FloodingApp extends Application implements TimerHandler{
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
 					nodes[id] = new FloodingNode(id+1,new Position(k*10,i*10,0));
+					id++;
+				}				
+			}
+		}
+	}
+	
+	private void createSelfTopology(int topology) {
+		nodes = new SelfFloodingNode[NUMNODES];	
+		
+		if(topology == LINE){
+			for(int i=0;i<NUMNODES;i++){
+				nodes[i] = new SelfFloodingNode(i+1,new Position(i*5,i*5,0));
+			}			
+		}
+		else if(topology == GRID){
+			
+			int j = (int) Math.sqrt(NUMNODES);
+			int id = 0;
+			
+			for(int i = 0;i<j;i++){
+				for(int k = 0;k<j;k++){
+					nodes[id] = new SelfFloodingNode(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}
