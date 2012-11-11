@@ -1,9 +1,6 @@
 package application.appFcsa;
 
-import application.appSelf.ClockSpeedAdapter;
-import application.appSelf.ClockSpeedAdapter2;
 import application.appSelf.ClockSpeedAdapter3;
-import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -15,7 +12,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class SelfFloodingNode extends Node implements TimerHandler {
+public class SelfFloodingNode3 extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;  
 	private static final int ROOT_TIMEOUT = 5;
@@ -26,15 +23,13 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 
 	RadioPacket processedMsg = null;
 	SelfFloodingMessage outgoingMsg = new SelfFloodingMessage();
-	
-//	ClockSpeedAdapter speedAdapter = new ClockSpeedAdapter();
-//	ClockSpeedAdapter2 speedAdapter = new ClockSpeedAdapter2();
+
 	ClockSpeedAdapter3 speedAdapter = new ClockSpeedAdapter3();
     
 	int heartBeats; // the number of sucessfully sent messages
     // since adding a new entry with lower beacon id than ours	
 
-	public SelfFloodingNode(int id, Position position) {
+	public SelfFloodingNode3(int id, Position position) {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
@@ -48,17 +43,10 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		outgoingMsg.sequence = 0;
 		outgoingMsg.rootid = 0xFFFF;
 	}
-	
-	UInt32 lastValue = new UInt32();
-	UInt32 lastBroadcast = new UInt32();
  
 	void processMsg() {
 		SelfFloodingMessage msg = (SelfFloodingMessage) processedMsg.getPayload();
-		
-//		speedAdapter.adjust(msg.nodeid,msg.clock,processedMsg.getEventTime(),msg.multiplier);
-//		speedAdapter.adjust(msg.nodeid,msg.progress,processedMsg.getEventTime());
-//		logicalClock.rate = speedAdapter.getSpeed();
-		
+	
 		speedAdapter.adjust(msg.nodeid,msg.clock,processedMsg.getEventTime(),msg.multiplier,msg.criticality);
 		
 		if( msg.rootid < outgoingMsg.rootid &&
@@ -115,22 +103,10 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		speedAdapter.refresh();
 		logicalClock.rate = speedAdapter.getSpeed();				
 		outgoingMsg.multiplier = (float) logicalClock.rate;
-		
-		outgoingMsg.rootClock = new UInt32(globalTime);
-		
 		outgoingMsg.criticality = speedAdapter.getCriticality();
 		
-//		outgoingMsg.progress = speedAdapter.getValue(localTime).subtract(lastValue).toInteger();
-//		lastValue = speedAdapter.getValue(localTime);
-		
-//		if(lastBroadcast.toInteger()!=0){
-//			int progress = localTime.subtract(lastBroadcast).toInteger();
-//			int val = outgoingMsg.progress-progress;
-//			outgoingMsg.multiplier = (float)val/(float)progress;
-//		}
-		
-		lastBroadcast = new UInt32(localTime);
-		
+		outgoingMsg.rootClock = new UInt32(globalTime);
+				
 		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));

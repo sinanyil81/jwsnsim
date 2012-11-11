@@ -65,11 +65,11 @@ public class FloodingApp extends Application implements TimerHandler{
 	}
 	
 	private void createSelfTopology(int topology) {
-		nodes = new SelfFloodingNode[NUMNODES];	
+		nodes = new SelfFloodingNode3[NUMNODES];	
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new SelfFloodingNode(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new SelfFloodingNode3(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 		else if(topology == GRID){
@@ -79,7 +79,7 @@ public class FloodingApp extends Application implements TimerHandler{
 			
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
-					nodes[id] = new SelfFloodingNode(id+1,new Position(k*10,i*10,0));
+					nodes[id] = new SelfFloodingNode3(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}
