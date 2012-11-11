@@ -29,8 +29,8 @@ public class ClockSpeedAdapter {
 	.isDeterministicDelta(true)
 	.deltaMax(0.0001)
 	.startValue(0.0)
-	.deltaDecreaseFactor(2)
-	.deltaIncreaseFactor(2)
+//	.deltaDecreaseFactor(2)
+//	.deltaIncreaseFactor(2)
 	.build();
 	
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
