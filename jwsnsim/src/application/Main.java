@@ -5,6 +5,7 @@ import application.appFcsa.FloodingApp;
 import application.appFtsp.FtspApp;
 import application.appPulseSync.PulseSyncApp;
 import application.appRateDetection.RateApp;
+import application.appSelf.SelfApp;
 import application.appTheoric.SimTime;
 
 public class Main {
@@ -72,8 +73,8 @@ public class Main {
 
 	private static void selfSimulations() {
 		try {
-//			new application.appSelf.SelfApp(20, "Self.txt", RateApp.LINE);
-			new application.appFcsa.FloodingApp(20,"Self.txt",FloodingApp.LINE);
+			new application.appSelf.SelfApp(20, "Self.txt", SelfApp.LINE);
+//			new application.appFcsa.FloodingApp(20,"Self.txt",FloodingApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
