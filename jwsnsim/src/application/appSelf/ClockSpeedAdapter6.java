@@ -9,7 +9,7 @@ import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
 import sim.type.UInt32;
 
-public class ClockSpeedAdapter5 {
+public class ClockSpeedAdapter6 {
 
 	private static float TOLERANCE = 0.00000001f;
 
@@ -25,21 +25,25 @@ public class ClockSpeedAdapter5 {
 
 	// public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f,
 	// 0.00000000001f, 0.0001f);
-	public AVT rate = new AVTBuilder().upperBound(0.0001).lowerBound(-0.0001)
-			.deltaMin(0.000000001).isDeterministicDelta(true).deltaMax(0.0001)
-			.startValue(0.0)
-			// .deltaDecreaseFactor(30)
-			// .deltaIncreaseFactor(20)
-			.build();
+	public AVT rate = new AVTBuilder()
+	.upperBound(0.0001)
+	.lowerBound(-0.0001)
+	.deltaMin(0.000000001)
+	.isDeterministicDelta(true)
+	.deltaMax(0.0001)
+	.startValue(0.0)
+// .deltaDecreaseFactor(30)
+// .deltaIncreaseFactor(20)
+	.build();
 
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 
-	public ClockSpeedAdapter5() {
+	public ClockSpeedAdapter6() {
 		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
 				.setDelta(0.000001f);
 	}
 
-	private float getDecision(int nodeid, UInt32 progress, UInt32 timestamp) {
+	private float getDecision(int nodeid, UInt32 progress, UInt32 timestamp,float rate) {
 
 		float decision = 0.0f;
 
@@ -48,21 +52,22 @@ public class ClockSpeedAdapter5 {
 		if (neighbor != null) {
 
 			int neighborProgress = progress.toInteger();
-
-			int timePassed = timestamp.subtract(neighbor.timestamp).toInteger();
-			int myProgress = timePassed
-					+ (int) (((float) timePassed) * (float) this.rate
-							.getValue());
-
-			decision = (float) (neighborProgress - myProgress);
-			decision /= (float) myProgress;
+			int myProgress = timestamp.subtract(neighbor.timestamp).toInteger();
+			float a = rate - (float)this.rate.getValue();
+			a *= (float)neighborProgress;
+			float b = (float)(myProgress - neighborProgress);
+			b *= (float)this.rate.getValue();
+			float c = (float)(neighborProgress-myProgress);
+			decision = a - b + c;
 		}
+		
+		System.out.println(decision);
 
 		return decision;
 	}
 
-	public void adjust(int nodeid, UInt32 progress, UInt32 timestamp) {
-		float neighborDecision = getDecision(nodeid, progress, timestamp);
+	public void adjust(int nodeid, UInt32 progress, UInt32 timestamp,float rate) {
+		float neighborDecision = getDecision(nodeid, progress, timestamp,rate);
 
 		adjustRate(neighborDecision);
 
