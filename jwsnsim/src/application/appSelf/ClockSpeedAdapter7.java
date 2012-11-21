@@ -11,7 +11,7 @@ import sim.type.UInt32;
 
 public class ClockSpeedAdapter7 {
 
-	private static float TOLERANCE = 0.00000001f;
+	private static float TOLERANCE = 0.000000001f;
 
 	class NeighborData {
 		public UInt32 timestamp;
@@ -39,8 +39,8 @@ public class ClockSpeedAdapter7 {
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 
 	public ClockSpeedAdapter7() {
-		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
-				.setDelta(0.000001f);
+//		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
+//				.setDelta(0.00000001f);		
 	}
 
 	private float getDecision(int nodeid, UInt32 progress,UInt32 hardwareProgress, UInt32 timestamp,float rate) {
@@ -54,14 +54,15 @@ public class ClockSpeedAdapter7 {
 			int neighborProgress = progress.toInteger();
 			int neighborHardwareProgress = hardwareProgress.toInteger();
 
-			float meanNeighborMultiplier = (float)(neighborProgress - neighborHardwareProgress)/(float)neighborHardwareProgress;
+//			float meanNeighborMultiplier = (float)(neighborProgress - neighborHardwareProgress)/(float)neighborHardwareProgress;
+			float meanNeighborMultiplier = rate; // anlık
 			
 			int myHardwareProgress = timestamp.subtract(neighbor.timestamp).toInteger();
 			
 			float relativeHardwareClockRate = (float)(neighborHardwareProgress - myHardwareProgress)/(float)(myHardwareProgress);
 			
 			decision = relativeHardwareClockRate + relativeHardwareClockRate*meanNeighborMultiplier;
-			decision -= (float)this.rate.getValue();
+			decision += meanNeighborMultiplier - (float)this.rate.getValue();
 						
 //			float multiplierDifference = meanNeighborMultiplier - (float)this.rate.getValue();
 			
@@ -79,12 +80,14 @@ public class ClockSpeedAdapter7 {
 		float neighborDecision = getDecision(nodeid, progress,hardwareProgress, timestamp,rate);
 
 		adjustRate(neighborDecision);
+//		adjustRate(getAverageDecision());
 
 		neighbors.remove(nodeid);
 		neighbors.put(nodeid, new NeighborData(timestamp, neighborDecision));
 	}
 
 	private void adjustRate(float currentDecision) {
+		
 		if (currentDecision < -TOLERANCE) {
 			this.rate.adjustValue(Feedback.LOWER);
 		} else if (currentDecision > TOLERANCE) {
@@ -93,6 +96,25 @@ public class ClockSpeedAdapter7 {
 			this.rate.adjustValue(Feedback.GOOD);
 		}
 	}
+	
+//	private float getAverageDecision() {
+//		float retVal = 0.0f;
+//		int num = 0;
+//		
+//		for (Iterator<Integer> iterator = neighbors.keySet().iterator(); iterator.hasNext();) {
+//			Integer id = (Integer) iterator.next();
+//			NeighborData n = neighbors.get(id);	
+//			
+//			retVal += n.decision;
+//			num++;					
+//		}
+//		
+//		if(num > 0)
+//			retVal /= (float)num;
+//		
+//			
+//		return retVal;
+//	}
 
 	public float getSpeed() {
 
