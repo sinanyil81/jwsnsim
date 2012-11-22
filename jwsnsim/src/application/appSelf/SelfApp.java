@@ -28,7 +28,8 @@ public class SelfApp extends Application implements TimerHandler{
 	public SelfApp(int numNodes,String logFile,int topology) throws Exception {
 		logger = new Logger(logFile);		
 		this.NUMNODES = numNodes;
-			
+		
+//		createTopology(topology);
 		createTopology2(topology);
 			
 		for(int i=0;i<NUMNODES;i++){
@@ -64,11 +65,11 @@ public class SelfApp extends Application implements TimerHandler{
 	}
 	
 	private void createTopology2(int topology) {
-		nodes = new SelfNode7[NUMNODES];	
+		nodes = new SelfNode8[NUMNODES];	
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new SelfNode7(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new SelfNode8(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 		else if(topology == GRID){
@@ -78,7 +79,7 @@ public class SelfApp extends Application implements TimerHandler{
 			
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
-					nodes[id] = new SelfNode7(id+1,new Position(k*10,i*10,0));
+					nodes[id] = new SelfNode8(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}
