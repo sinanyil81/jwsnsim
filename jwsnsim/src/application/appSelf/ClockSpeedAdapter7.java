@@ -15,20 +15,22 @@ public class ClockSpeedAdapter7 {
 
 	class NeighborData {
 		public UInt32 timestamp;
-		public float decision;
+		public float speed;
 
-		public NeighborData(UInt32 timestamp, float decision) {
+		public NeighborData(UInt32 timestamp, float speed) {
 			this.timestamp = new UInt32(timestamp);
-			this.decision = decision;
+			this.speed = speed;
 		}
 	}
 
 	// public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f,
 	// 0.00000000001f, 0.0001f);
+	
+	
 	public AVT rate = new AVTBuilder()
 	.upperBound(0.0001)
 	.lowerBound(-0.0001)
-	.deltaMin(0.000000001)
+	.deltaMin(0.00000000001)
 	.isDeterministicDelta(true)
 	.deltaMax(0.0001)
 	.startValue(0.0)
@@ -39,8 +41,8 @@ public class ClockSpeedAdapter7 {
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 
 	public ClockSpeedAdapter7() {
-//		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
-//				.setDelta(0.00000001f);		
+		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
+				.setDelta(0.00000001f);		
 	}
 
 	private float getDecision(int nodeid, UInt32 progress,UInt32 hardwareProgress, UInt32 timestamp,float rate) {
@@ -51,7 +53,7 @@ public class ClockSpeedAdapter7 {
 
 		if (neighbor != null) {
 			
-			int neighborProgress = progress.toInteger();
+//			int neighborProgress = progress.toInteger();
 			int neighborHardwareProgress = hardwareProgress.toInteger();
 
 //			float meanNeighborMultiplier = (float)(neighborProgress - neighborHardwareProgress)/(float)neighborHardwareProgress;
@@ -61,8 +63,8 @@ public class ClockSpeedAdapter7 {
 			
 			float relativeHardwareClockRate = (float)(neighborHardwareProgress - myHardwareProgress)/(float)(myHardwareProgress);
 			
-			decision = relativeHardwareClockRate + relativeHardwareClockRate*meanNeighborMultiplier;
-			decision += meanNeighborMultiplier - (float)this.rate.getValue();
+			decision = relativeHardwareClockRate + relativeHardwareClockRate*meanNeighborMultiplier + meanNeighborMultiplier;
+//			decision = relativeHardwareClockRate + relativeHardwareClockRate*meanNeighborMultiplier + meanNeighborMultiplier - (float)this.rate.getValue();
 						
 //			float multiplierDifference = meanNeighborMultiplier - (float)this.rate.getValue();
 			
@@ -79,14 +81,21 @@ public class ClockSpeedAdapter7 {
 	public void adjust(int nodeid, UInt32 progress,UInt32 hardwareProgress, UInt32 timestamp,float rate) {
 		float neighborDecision = getDecision(nodeid, progress,hardwareProgress, timestamp,rate);
 
-		adjustRate(neighborDecision);
-//		adjustRate(getAverageDecision());
-
 		neighbors.remove(nodeid);
 		neighbors.put(nodeid, new NeighborData(timestamp, neighborDecision));
+		
+//		adjustRate(neighborDecision);
+		adjustRate(getAverageDecision());
+		
+//		neighbors.remove(nodeid);
+//		neighbors.put(nodeid, new NeighborData(timestamp, neighborDecision));
+
+
 	}
 
 	private void adjustRate(float currentDecision) {
+		
+		currentDecision -= (float)this.rate.getValue();
 		
 		if (currentDecision < -TOLERANCE) {
 			this.rate.adjustValue(Feedback.LOWER);
@@ -97,24 +106,25 @@ public class ClockSpeedAdapter7 {
 		}
 	}
 	
-//	private float getAverageDecision() {
-//		float retVal = 0.0f;
-//		int num = 0;
-//		
-//		for (Iterator<Integer> iterator = neighbors.keySet().iterator(); iterator.hasNext();) {
-//			Integer id = (Integer) iterator.next();
-//			NeighborData n = neighbors.get(id);	
-//			
-//			retVal += n.decision;
-//			num++;					
-//		}
-//		
-//		if(num > 0)
-//			retVal /= (float)num;
-//		
-//			
-//		return retVal;
-//	}
+	private float getAverageDecision() {
+//		float retVal = (float) this.rate.getValue();
+//		int num = 1;
+		
+		float retVal = 0.0f;
+		int num = 0;
+		
+		for (Iterator<Integer> iterator = neighbors.keySet().iterator(); iterator.hasNext();) {
+			Integer id = (Integer) iterator.next();
+			NeighborData n = neighbors.get(id);	
+			
+			retVal += n.speed;
+			num++;					
+		}
+		
+		retVal /= (float)num;		
+			
+		return retVal;
+	}
 
 	public float getSpeed() {
 
