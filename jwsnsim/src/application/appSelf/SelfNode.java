@@ -252,7 +252,8 @@ public class SelfNode extends Node implements TimerHandler {
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
 						.getValue()) * (1.0 + CLOCK.getDrift())));
-		
+		System.out.println(""+NODE_ID+" "+(1.0+(double)logicalClock.rate.getValue())*(1.0+CLOCK.getDrift()));
+
 		
 
 		return s;
