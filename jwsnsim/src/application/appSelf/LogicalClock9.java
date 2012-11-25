@@ -9,12 +9,12 @@ public class LogicalClock9 {
 	private UInt32 value = new UInt32();
 	
 	public AVT rate = new AVTBuilder()
-	.upperBound(0.000100)
-	.lowerBound(0.000030)
+	.upperBound(0.0001)
+	.lowerBound(-0.0001)
 	.deltaMin(0.000000001)
 	.isDeterministicDelta(true)
 	.deltaMax(0.0001)
-	.startValue(0.000070)
+	.startValue(0.00001)
 	.build();
 	
 //	public AvtSimple rate = new AvtSimple(0.000030f, 0.000100f, 0.000070f, 0.000000001f, 0.0001f);
@@ -25,19 +25,22 @@ public class LogicalClock9 {
 	
 	public LogicalClock9(){
 		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
-		.setDelta(0.000001f);		
+		.setDelta(0.0001f);		
 	}
 	
-	public void resetRate(){
-		rate = new AVTBuilder()
-		.upperBound(0.000100)
-		.lowerBound(0.000030)
-		.deltaMin(0.000000001)
-		.isDeterministicDelta(true)
-		.deltaMax(0.0001)
-		.startValue(0.000070)
-		.build();
-	}
+//	public void resetRate(){
+//		rate = new AVTBuilder()
+//		.upperBound(0.0001)
+//		.lowerBound(-0.0001)
+//		.deltaMin(0.000000001)
+//		.isDeterministicDelta(true)
+//		.deltaMax(0.0001)
+//		.startValue(0.0)
+//		.build();
+//		
+//		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM()
+//		.setDelta(0.0001f);
+//	}
 		
 	public void setOffset(UInt32 offset) {
 		this.offset = new UInt32(offset);

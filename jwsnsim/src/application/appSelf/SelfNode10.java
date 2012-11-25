@@ -12,7 +12,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class SelfNode9 extends Node implements TimerHandler {
+public class SelfNode10 extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
 	
@@ -22,17 +22,8 @@ public class SelfNode9 extends Node implements TimerHandler {
 	Timer timer0;
 	
 	SelfMessage9 outgoingMsg = new SelfMessage9();
-	
-	class NeighborData {
-		public int id = -1;		
-		int skew;
-		float delta;
-	}
-	
-	NeighborData fastestNeighbor = new NeighborData();
-	NeighborData slowestNeighbor = new NeighborData();
 
-	public SelfNode9(int id, Position position) {
+	public SelfNode10(int id, Position position) {
 		super(id, position);
 
 		CLOCK = new ConstantDriftClock();
@@ -59,30 +50,25 @@ public class SelfNode9 extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toInteger();
 	}
 
-	private void adjustClock() {
+	private void adjustClock(RadioPacket packet) {
+		SelfMessage9 msg = (SelfMessage9) packet.getPayload();
 		
-		if(update == true){
-			adjustOffset();
-			adjustSpeed();
+		int skew = calculateSkew(packet);
+		
+		if(skew < -1000){
+			logicalClock.setValue(msg.clock, packet.getEventTime());
+			
+			return;
 		}
 		else{
-
+			skew /= 2;
+			int skewRest = skew % 2;
+			skew += skewRest/2;
+			UInt32 offset = logicalClock.getOffset();
+			offset = offset.add(-skew);
+			logicalClock.setOffset(offset);
 		}
 		
-		fastestNeighbor = new NeighborData();
-		slowestNeighbor = new NeighborData();
-		
-		update = true;
-	}
-	
-	private void adjustSpeed(){
-
-		int skew = slowestNeighbor.skew/2;
-		int skewRest = slowestNeighbor.skew %2;
-		skew += fastestNeighbor.skew/2;
-		skewRest += fastestNeighbor.skew%2;
-		skew += skewRest/2;
-			
 		if (skew > TOLERANCE) {
 //			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
 			logicalClock.rate.adjustValue(Feedback.LOWER);
@@ -92,66 +78,13 @@ public class SelfNode9 extends Node implements TimerHandler {
 		} else {
 //			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 			logicalClock.rate.adjustValue(Feedback.GOOD);
-		}		
-	}
-
-	private void adjustOffset() {	
-				
-		int skew = slowestNeighbor.skew/2;
-		int skewRest = slowestNeighbor.skew %2;
-		skew += fastestNeighbor.skew/2;
-		skewRest += fastestNeighbor.skew%2;
-		skew += skewRest/2;
-		
-		UInt32 offset = logicalClock.getOffset();
-		offset = offset.add(-skew);
-		logicalClock.setOffset(offset);
-	}
-	
-	
-	boolean update = true;
-
-	private void updateLocalInfo(RadioPacket packet) {
-		SelfMessage9 msg = (SelfMessage9) packet.getPayload();
-		
-		int skew = calculateSkew(packet);
-		
-		if(skew > -5000){
-			if(fastestNeighbor.id == -1){
-				fastestNeighbor.id = msg.nodeid;
-				fastestNeighbor.skew = skew;
-				fastestNeighbor.delta = msg.rateMultiplier;
-			}
-			else if(skew < fastestNeighbor.skew || fastestNeighbor.id == msg.nodeid){
-				fastestNeighbor.id = msg.nodeid;
-				fastestNeighbor.skew = skew;
-				fastestNeighbor.delta = msg.rateMultiplier;
-			}
-			
-			if(slowestNeighbor.id == -1){
-				slowestNeighbor.id = msg.nodeid;
-				slowestNeighbor.skew = skew;
-				slowestNeighbor.delta = msg.rateMultiplier;
-			}
-			else if(skew > slowestNeighbor.skew || slowestNeighbor.id == msg.nodeid){
-				slowestNeighbor.id = msg.nodeid;
-				slowestNeighbor.skew = skew;
-				slowestNeighbor.delta = msg.rateMultiplier;
-			}			
-		}
-		else{			
-			logicalClock.setValue(msg.clock, packet.getEventTime());
-//			if(update == true)
-				
-//			logicalClock.resetRate();
-			update = false;
-		}		
+		}			
 	}
 
 	@Override
 	public void receiveMessage(RadioPacket packet) {
-		logicalClock.update(packet.getEventTime());
-		updateLocalInfo(packet);		
+		logicalClock.update(packet.getEventTime());	
+		adjustClock(packet);
 	}
 
 	@Override
@@ -167,14 +100,12 @@ public class SelfNode9 extends Node implements TimerHandler {
 		logicalClock.update(localTime);		
 		globalTime = logicalClock.getValue(localTime);
 		
-		adjustClock();
+//		adjustClock();
 
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
 		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;		
-		
-		outgoingMsg.rateMultiplier = (float) logicalClock.rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDelta();
 		
 		RadioPacket packet = new RadioPacket(new SelfMessage9(outgoingMsg));
 		packet.setSender(this);
@@ -204,7 +135,7 @@ public class SelfNode9 extends Node implements TimerHandler {
 		System.out.println(""+NODE_ID+" "+(1.0+(double)logicalClock.rate.getValue())*(1.0+CLOCK.getDrift()));
 //		System.out.println(""+NODE_ID+" "+logicalClock.rate.getValue());
 //		
-//		System.out.println(""+NODE_ID+" "+logicalClock.rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDelta());
+//		System.out.println(rootRate);
 
 		
 

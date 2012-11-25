@@ -65,11 +65,11 @@ public class SelfApp extends Application implements TimerHandler{
 	}
 	
 	private void createTopology2(int topology) {
-		nodes = new SelfNode9[NUMNODES];	
+		nodes = new SelfNode10[NUMNODES];	
 		
 		if(topology == LINE){
 			for(int i=0;i<NUMNODES;i++){
-				nodes[i] = new SelfNode9(i+1,new Position(i*5,i*5,0));
+				nodes[i] = new SelfNode10(i+1,new Position(i*5,i*5,0));
 			}			
 		}
 		else if(topology == GRID){
@@ -79,7 +79,7 @@ public class SelfApp extends Application implements TimerHandler{
 			
 			for(int i = 0;i<j;i++){
 				for(int k = 0;k<j;k++){
-					nodes[id] = new SelfNode9(id+1,new Position(k*10,i*10,0));
+					nodes[id] = new SelfNode10(id+1,new Position(k*10,i*10,0));
 					id++;
 				}				
 			}

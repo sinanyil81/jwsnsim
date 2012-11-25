@@ -19,7 +19,7 @@ public class SelfMessage9 {
 		this.sequence = sequence;
 	}
 	
-	public SelfMessage9(int nodeid, UInt32 clock, UInt32 offset,UInt32 hardwareClock,float rateMultiplier, int sequence) {
+	public SelfMessage9(int nodeid, UInt32 clock, UInt32 offset,UInt32 hardwareClock,float rateMultiplier,int sequence) {
 		this.nodeid = nodeid;
 		this.clock = new UInt32(clock);
 		this.offset = new UInt32(offset);
@@ -31,7 +31,7 @@ public class SelfMessage9 {
 	}
 
 	public SelfMessage9(SelfMessage9 msg) {
-		this(msg.nodeid, new UInt32(msg.clock),new UInt32(msg.offset),new UInt32(msg.hardwareClock),msg.rateMultiplier, msg.sequence);
+		this(msg.nodeid, new UInt32(msg.clock),new UInt32(msg.offset),new UInt32(msg.hardwareClock),msg.rateMultiplier,msg.sequence);
 	}
 
 	public SelfMessage9() {
