@@ -29,8 +29,8 @@ public class SelfApp extends Application implements TimerHandler{
 		logger = new Logger(logFile);		
 		this.NUMNODES = numNodes;
 		
-//		createTopology(topology);
-		createTopology2(topology);
+		createTopology(topology);
+//		createTopology2(topology);
 			
 		for(int i=0;i<NUMNODES;i++){
 			nodes[i].on();
