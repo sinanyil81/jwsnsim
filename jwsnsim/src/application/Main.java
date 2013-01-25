@@ -73,8 +73,8 @@ public class Main {
 
 	private static void selfSimulations() {
 		try {
-			new application.appSelf.SelfApp(20, "Self.txt", SelfApp.LINE);
-//			new application.appFcsa.FloodingApp(20,"Self.txt",FloodingApp.LINE);
+//			new application.appSelfFlooding.FloodingApp(5, "Self.txt", FloodingApp.LINE);
+			new application.appSelf.SelfApp(50, "Self.txt", SelfApp.LINE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
