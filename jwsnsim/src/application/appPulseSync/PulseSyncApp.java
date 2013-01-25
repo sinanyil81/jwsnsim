@@ -66,9 +66,9 @@ public class PulseSyncApp extends Application implements TimerHandler{
 //		nodes = new PulseSyncNodeMinimumVariance[NUMNODES];
 		
 		if(topology == DENSE){
-							
+			double stepsize = 2.0*(double)SimpleRadio.MAX_DISTANCE/(double)density;
 			for(int i = 0; i< NUMNODES;i++){
-				nodes[i] = new PulseSyncNode(i+1,new Position(i*density,i*density,0));
+				nodes[i] = new PulseSyncNode(i+1,new Position(i*stepsize,0,0));
 //				nodes[i] = new PulseSyncNodeMinimumVariance(i+1,new Position(i*density,i*density,0));
 			}			
 		}
