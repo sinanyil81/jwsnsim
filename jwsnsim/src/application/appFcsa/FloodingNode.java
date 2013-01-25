@@ -232,6 +232,8 @@ public class FloodingNode extends Node implements TimerHandler {
 		s += " " + local2Global().toString();
 		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
 
+		System.out.println(""+NODE_ID+" "+(1.0+(double)logicalClock.rate)*(1.0+CLOCK.getDrift()));
+
 		return s;
 	}
 }
