@@ -56,13 +56,19 @@ public class SelfNode extends Node implements TimerHandler {
 	int counter = 0;
 
 	private void adjustClock(RadioPacket packet) {
+		SelfMessage msg = (SelfMessage)packet.getPayload();
 		logicalClock.update(packet.getEventTime());
 
 		double skew = calculateSkew(packet);
 
 		// aynı anda başladıklarında bir dahaki mesaja kadar aralarında
 		// olabilecek en fazla saat farkını hesapla
-		double threshold = 0.00007 * BEACON_RATE;
+		double threshold = 0.0002 * BEACON_RATE;
+		
+		if(skew<-threshold*3){
+			logicalClock.setValue(msg.clock, packet.getEventTime());
+			return;
+		}
 
 		if (skew < -threshold) {
 			adjustOffset(skew);

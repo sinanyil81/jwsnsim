@@ -10,7 +10,7 @@ public class LogicalClock {
 
 	public AVT rate = new AVTBuilder()
 							.upperBound(0.0001)
-							.lowerBound(0.000030)
+							.lowerBound(-0.0001)
 							.deltaMin(0.0000000001)						
 							.build();	
 	public UInt32 offset = new UInt32();
