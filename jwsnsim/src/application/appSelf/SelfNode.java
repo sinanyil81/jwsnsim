@@ -62,12 +62,6 @@ public class SelfNode extends Node implements TimerHandler {
 		// aynı anda başladıklarında bir dahaki mesaja kadar aralarında
 		// olabilecek en fazla saat farkını hesapla
 		double threshold = 0.0002 * BEACON_RATE;
-		
-		if(skew<-threshold*3){
-			logicalClock.setValue(msg.clock, packet.getEventTime());
-			return;
-		}
-		
 
 		if (skew < -threshold) {
 			logicalClock.setValue(msg.clock, packet.getEventTime());
