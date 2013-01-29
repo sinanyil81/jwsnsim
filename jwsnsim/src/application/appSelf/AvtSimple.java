@@ -7,6 +7,7 @@ public class AvtSimple {
 	final static public int FEEDBACK_GREATER = 0;
 	final static public int FEEDBACK_LOWER = 1;
 	final static public int FEEDBACK_GOOD = 2;
+	final static public int FEEDBACK_NONE = 3;
 	 
 	float lowerBound = 0.0f;
 	float upperBound = 0.0f;
@@ -14,7 +15,7 @@ public class AvtSimple {
 	
 	float delta, deltaMin, deltaMax;
 	
-	int lastFeedback = FEEDBACK_GOOD;
+	int lastFeedback = FEEDBACK_NONE;
 			
     public AvtSimple(float lBound,float uBound,float val,float dMin, float dMax)
     {
@@ -24,7 +25,7 @@ public class AvtSimple {
 		
 		deltaMin = dMin;
 		deltaMax = dMax;
-		delta = (dMin + dMax)/2.0f;
+		delta = 0.00000032f;
     }
     
     public float getValue(){
@@ -53,6 +54,9 @@ public class AvtSimple {
     }
         
     void updateDelta(int feedback){
+    	if(lastFeedback == FEEDBACK_NONE)
+    		return;
+    	
     	if (lastFeedback == FEEDBACK_GOOD) {
 			if (feedback == FEEDBACK_GOOD) {
 				decreaseDelta();
@@ -66,12 +70,26 @@ public class AvtSimple {
 		}
     }
     
+    float min(float a,float b){
+    	if(a<b) 
+    		return a;
+    		
+    	return b;
+    }
+    
+    float max(float a,float b){
+    	if(a>b) 
+    		return a;
+    		
+    	return b;
+    }
+    
     public void adjustValue(int feedback)
     {    	
 		updateDelta(feedback);
 
 		if (feedback != FEEDBACK_GOOD) {
-			value = Math.min(upperBound,Math.max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1.0f : -1.0f)));
+			value = min(upperBound,max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1.0f : -1.0f)));
 		}
 		
 		lastFeedback = feedback;

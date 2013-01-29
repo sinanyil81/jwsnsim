@@ -8,11 +8,14 @@ public class LogicalClock {
 
 	private UInt32 value = new UInt32();
 
-	public AVT rate = new AVTBuilder()
-							.upperBound(0.0001)
-							.lowerBound(-0.0001)
-							.deltaMin(0.0000000001)						
-							.build();	
+//	public AVT rate = new AVTBuilder()
+//							.upperBound(0.0001)
+//							.lowerBound(-0.0001)
+//							.deltaMin(0.00000001)						
+//							.build();	
+	
+	public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.00000001f, 0.00001024f);
+	
 	public UInt32 offset = new UInt32();
 
 	UInt32 updateLocalTime = new UInt32();

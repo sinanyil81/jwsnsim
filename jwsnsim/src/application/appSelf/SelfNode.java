@@ -53,8 +53,6 @@ public class SelfNode extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toDouble();
 	}
 
-	int counter = 0;
-
 	private void adjustClock(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage)packet.getPayload();
 		logicalClock.update(packet.getEventTime());
@@ -69,18 +67,22 @@ public class SelfNode extends Node implements TimerHandler {
 			logicalClock.setValue(msg.clock, packet.getEventTime());
 			return;
 		}
+		
 
 		if (skew < -threshold) {
-			adjustOffset(skew);
+			logicalClock.setValue(msg.clock, packet.getEventTime());
 		} else if (skew > threshold) {
 			// do nothing
 		} else if (skew > TOLERANCE) {
-			 logicalClock.rate.adjustValue(Feedback.LOWER);
+//			 logicalClock.rate.adjustValue(Feedback.LOWER);
+			 logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
 		} else if (skew < (-1.0) * TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.GREATER);
-			adjustOffset(skew);
+//			logicalClock.rate.adjustValue(Feedback.GREATER);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			logicalClock.setValue(msg.clock, packet.getEventTime());
 		} else {
-			logicalClock.rate.adjustValue(Feedback.GOOD);
+//			logicalClock.rate.adjustValue(Feedback.GOOD);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 		}
 	}
 
