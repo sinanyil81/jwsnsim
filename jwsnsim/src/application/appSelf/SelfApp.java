@@ -2,12 +2,14 @@ package application.appSelf;
 
 import application.Application;
 import application.Logger;
+import application.appEgtsp.GradientNode;
 import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
+import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 
 
@@ -61,6 +63,17 @@ public class SelfApp extends Application implements TimerHandler{
 					id++;
 				}				
 			}
+		}
+		else if(topology == RING){
+			
+			double oneStep = 360.0 / NUMNODES;
+			double radius = SimpleRadio.MAX_DISTANCE/Math.toRadians(oneStep); 
+					
+			for(int i = 0; i< NUMNODES;i++){
+				Position pos = new Position(radius * Math.cos(Math.toRadians(i * oneStep)),
+											radius * Math.sin(Math.toRadians(i * oneStep)),0);	
+				nodes[i] = new SelfNode(i+1,pos);
+			}			
 		}
 	}
 	

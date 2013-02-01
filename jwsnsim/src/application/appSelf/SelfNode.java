@@ -68,15 +68,15 @@ public class SelfNode extends Node implements TimerHandler {
 		} else if (skew > threshold) {
 			// do nothing
 		} else if (skew > TOLERANCE) {
-//			 logicalClock.rate.adjustValue(Feedback.LOWER);
-			 logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			 logicalClock.rate.adjustValue(Feedback.LOWER);
+//			 logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
 		} else if (skew < (-1.0) * TOLERANCE) {
-//			logicalClock.rate.adjustValue(Feedback.GREATER);
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			logicalClock.rate.adjustValue(Feedback.GREATER);
+//			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
 			logicalClock.setValue(msg.clock, packet.getEventTime());
 		} else {
-//			logicalClock.rate.adjustValue(Feedback.GOOD);
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			logicalClock.rate.adjustValue(Feedback.GOOD);
+//			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 		}
 	}
 
