@@ -15,8 +15,7 @@ import sim.type.UInt32;
 public class SelfFloodingNode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;  
-	private static final double TOLERANCE = 1.0;
-	private static final int ROOT_ID = 1;
+	private static final int TOLERANCE = 0;
 
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
@@ -35,67 +34,53 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		
 	
 		outgoingMsg.sequence = 0;
-		outgoingMsg.rootid = ROOT_ID;
+		outgoingMsg.rootid = NODE_ID;
 		outgoingMsg.nodeid = NODE_ID;
 	}
 	
-	double calculateSkew(RadioPacket packet) {
+	int calculateSkew(RadioPacket packet) {
 		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
 		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
 
-		return myClock.subtract(neighborClock).toDouble();
+		return myClock.subtract(neighborClock).toInteger();
 	}
 
 	private void adjustClock(RadioPacket packet) {
 		logicalClock.update(packet.getEventTime());
+		SelfFloodingMessage msg = (SelfFloodingMessage)packet.getPayload();
 
-		double skew = calculateSkew(packet);
-
-		// aynı anda başladıklarında bir dahaki mesaja kadar aralarında
-		// olabilecek en fazla saat farkını hesapla
-		double threshold = 0.00007 * BEACON_RATE;
-
-		if (skew < -threshold) {
-			adjustOffset(skew);
-		} else if (skew > threshold) {
-			adjustOffset(skew);
-		} else if (skew > TOLERANCE) {
-			 logicalClock.rate.adjustValue(Feedback.LOWER);
-//			 adjustOffset(skew);
-		} else if (skew < (-1.0) * TOLERANCE) {
+		if( msg.rootid < outgoingMsg.rootid) {
+			outgoingMsg.rootid = msg.rootid;
+			outgoingMsg.sequence = msg.sequence;
+		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
+			outgoingMsg.sequence = msg.sequence;
+		}
+		else {
+			return;
+		}
+		
+		int skew = calculateSkew(packet);
+		logicalClock.setValue(msg.clock, packet.getEventTime());
+		
+		if (skew > TOLERANCE) {
+			logicalClock.rate.adjustValue(Feedback.LOWER);
+		} else if (skew < -TOLERANCE) {
 			logicalClock.rate.adjustValue(Feedback.GREATER);
-//			adjustOffset(skew);
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
 		}
 	}
-
-	private void adjustOffset(double skew) {
-		UInt32 offset = logicalClock.getOffset();
-		offset = offset.add((int) -(skew * 1.0));
-		logicalClock.setOffset(offset);
-	}
-
 	
 	void processMsg() {
-		SelfFloodingMessage msg = (SelfFloodingMessage) processedMsg.getPayload();
-	
-		if(outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
-			outgoingMsg.sequence = msg.sequence;
-			adjustClock(processedMsg);
-		}
-		else {
-			return;
-		}	
+		adjustClock(processedMsg);
 	}
 
 	@Override
 	public void receiveMessage(RadioPacket packet) {
 		processedMsg = packet;
-		if( outgoingMsg.rootid != NODE_ID )
-			processMsg();
+		processMsg();
 	}
 
 	@Override
@@ -108,7 +93,6 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
-	
 		
 		if( outgoingMsg.rootid == NODE_ID ) {
 			outgoingMsg.clock = new UInt32(localTime);
@@ -121,7 +105,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);	
-
+		
 		if (outgoingMsg.rootid == NODE_ID)
 			++outgoingMsg.sequence;
 	}
