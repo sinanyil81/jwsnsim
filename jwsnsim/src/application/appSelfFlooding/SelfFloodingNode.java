@@ -65,11 +65,14 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		logicalClock.setValue(msg.clock, packet.getEventTime());
 		
 		if (skew > TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.LOWER);
+//			logicalClock.rate.adjustValue(Feedback.LOWER);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
 		} else if (skew < -TOLERANCE) {
-			logicalClock.rate.adjustValue(Feedback.GREATER);
+//			logicalClock.rate.adjustValue(Feedback.GREATER);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
 		} else {
-			logicalClock.rate.adjustValue(Feedback.GOOD);
+//			logicalClock.rate.adjustValue(Feedback.GOOD);
+			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 		}
 	}
 	
