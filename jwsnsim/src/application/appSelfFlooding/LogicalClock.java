@@ -8,20 +8,20 @@ public class LogicalClock {
 
 	private UInt32 value = new UInt32();
 
-	public AVT rate = new AVTBuilder()
-							.upperBound(0.0001)
-							.lowerBound(-0.0001)
-							.deltaMin(0.0000000001)
-							.deltaMax(0.00001)
-							.build();	
+//	public AVT rate = new AVTBuilder()
+//							.upperBound(0.0001)
+//							.lowerBound(-0.0001)
+//							.deltaMin(0.0000000001)
+//							.deltaMax(0.00001)
+//							.build();	
 	
-//	public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.00000001f, 0.00001024f);
+	public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.0000000001f, 0.00001f);
 	UInt32 updateLocalTime = new UInt32();
 	
 	public LogicalClock(){
-		double deltaMax = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMax();
-		double deltaMin = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMin();
-		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMax);
+//		double deltaMax = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMax();
+//		double deltaMin = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMin();
+//		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMax);
 	}
 
 	public void update(UInt32 local) {
