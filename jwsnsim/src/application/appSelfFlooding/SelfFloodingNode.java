@@ -42,10 +42,12 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+//		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		UInt32 myClock = logicalClock.calculateY(packet.getEventTime());
 
 		return myClock.subtract(neighborClock).toInteger();
 	}
+	
 
 	private void adjustClock(RadioPacket packet) {
 		logicalClock.update(packet.getEventTime());
@@ -61,6 +63,22 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 			return;
 		}
 		
+		UInt32 x1 = new UInt32(logicalClock.updateLocalTime);
+		UInt32 y1 = logicalClock.value.subtract(logicalClock.updateLocalTime);
+		UInt32 x2 = packet.getEventTime();
+		UInt32 y2 = msg.clock.subtract(packet.getEventTime());
+		
+		int diff = x2.subtract(x1).toInteger()/2;
+    	diff += x2.subtract(x1).toInteger() % 2 ;
+    	UInt32 meanX = x1.add(diff);
+    	
+    	diff = y2.subtract(y1).toInteger()/2;
+    	diff += y2.subtract(y1).toInteger() % 2 ;
+    	UInt32 meanY = y1.add(diff);
+    	
+    	logicalClock.meanX = meanX;
+    	logicalClock.meanY = meanY.toInteger();
+	
 		int skew = calculateSkew(packet);
 		logicalClock.setValue(msg.clock, packet.getEventTime());
 		
@@ -96,6 +114,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
+		globalTime = logicalClock.calculateY(localTime);
 		
 		if( outgoingMsg.rootid == NODE_ID ) {
 			outgoingMsg.clock = new UInt32(localTime);
