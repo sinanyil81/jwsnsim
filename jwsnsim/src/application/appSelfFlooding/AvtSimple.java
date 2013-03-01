@@ -60,7 +60,7 @@ public class AvtSimple {
     	if(lastFeedback == FEEDBACK_NONE)
     		return;
     	
-    	if (lastFeedback == FEEDBACK_GOOD) {
+    	if (lastFeedback == FEEDBACK_GOOD) {  		
 			if (feedback == FEEDBACK_GOOD) {
 				decreaseDelta();
 			} else {
@@ -93,8 +93,7 @@ public class AvtSimple {
 		updateDelta(feedback);
 
 		if (feedback != FEEDBACK_GOOD) {
-//			if(lastFeedback != FEEDBACK_GOOD)
-				value = min(upperBound,max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1.0f : -1.0f)));
+			value = min(upperBound,max(lowerBound,value + delta*(feedback == FEEDBACK_GREATER ? 1.0f : -1.0f)));
 		}
 		
 		lastFeedback = feedback;
