@@ -225,11 +225,13 @@ public class SimpleRadio extends Radio implements EventObserver{
             if(!corrupted){
             	node.getMAC().receivePacket(receivingPacket);
             }            
+            else
+            	System.out.println("Corruption!");
             
             receivingPacket = null;
             signalStrength = 0;
             noiseStrength -= ambientNoise;
-            listener.radioReceptionEnd();
+            listener.radioReceptionEnd();                        
         }
 		else{
 			noiseStrength -= getNoise(packet);
