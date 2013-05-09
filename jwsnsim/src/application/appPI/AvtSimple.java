@@ -25,7 +25,7 @@ public class AvtSimple {
 		
 		deltaMin = dMin;
 		deltaMax = dMax;
-		delta = 0.00001f;
+		delta = dMin;
     }
     
     public void setValue(float value){
@@ -39,6 +39,10 @@ public class AvtSimple {
     
     public float getDelta(){
     	return delta;
+    }
+    
+    public void resetDelta(){
+    	delta = deltaMin;
     }
     
     void increaseDelta(){
@@ -65,7 +69,7 @@ public class AvtSimple {
 			if (feedback == FEEDBACK_GOOD) {
 				decreaseDelta();
 			} else {
-				increaseDelta();
+//				increaseDelta();
 			}
 		}else if (lastFeedback != feedback) {
 			decreaseDelta();

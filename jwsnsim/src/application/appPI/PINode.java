@@ -1,6 +1,6 @@
 package application.appPI;
-import application.appSelfFlooding.AvtSimple;
 
+import application.appPIFlooding.PIFloodingMessage;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -15,7 +15,7 @@ import sim.type.UInt32;
 public class PINode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;
-	private static final int TOLERANCE = 1;
+	private static final float MAX_PPM = 0.0001f;
 
 	static int decreaseCount = 0;
 	static int increaseCount = 0;
@@ -25,8 +25,10 @@ public class PINode extends Node implements TimerHandler {
 	Timer timer0;
 
 	PIMessage outgoingMsg = new PIMessage();
-	
-	public AvtSimple alpha = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.000000001f, 0.00001f);
+
+	// public AvtSimple alpha = new AvtSimple(-0.0001f, 0.0001f, 0.0f,
+	// 0.000000001f, 0.00001f);
+	// public float alpha = 1.0f/(float)BEACON_RATE;
 
 	public PINode(int id, Position position) {
 		super(id, position);
@@ -34,7 +36,20 @@ public class PINode extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		if (this.NODE_ID == 1) {
+//			CLOCK.setValue(new UInt32(0));
+			CLOCK.setDrift(0.00005f);
+		}
+//		/* to start clock with a random value */
+//		else if (this.NODE_ID == 2) {
+//			CLOCK.setValue(new UInt32(0));
+//		} else if (this.NODE_ID == 20) {
+//			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
+//			CLOCK.setDrift(0.0f);
+//		} else
+//			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
+		CLOCK.setValue(new UInt32(0));
 
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -53,34 +68,191 @@ public class PINode extends Node implements TimerHandler {
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
-
-	private void adjustClock(RadioPacket packet) {
+	
+	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
+	float K_max = 0.000004f/BOUNDARY;
+	
+	private void algorithmPI(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
 
 		int skew = calculateSkew(packet);
 		
-		// update offset 
-		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew/2),updateTime);
-		
-		float decision = 0.0f;
-		
-		if(skew !=0)
-			decision = 2.0f*logicalClock.rate/(float)skew;
-//		
-//		if(Math.abs(skew)< 6000)
-//			logicalClock.rate += 0.000000001*((float)skew/2.0f);
+		/*  initial offset compensation */ 
+		if(Math.abs(skew) <= BOUNDARY){	
+					
+			float x = BOUNDARY - Math.abs(skew);					
+			float K_i = x*K_max/BOUNDARY;
+						
+			logicalClock.rate += K_i*(float)skew;
+		}	
+			
+		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		logicalClock.setValue(myClock.add(skew/2),updateTime);
+	}
 
-		if (skew > TOLERANCE) {
-			alpha.adjustValue(AvtSimple.FEEDBACK_GREATER);			
-		} else if (skew < -TOLERANCE) {
-			alpha.adjustValue(AvtSimple.FEEDBACK_LOWER);
-		} else {
-			alpha.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//	float incrementAmount = 0.0000000001f;	
+//	float K_max = 1.0f/(float)BEACON_RATE;
+//	float alpha = 0.0f;
+//	int previousSkew = 0;
+//	
+//	private void algorithmPI(RadioPacket packet) {
+//		UInt32 updateTime = packet.getEventTime();
+//		logicalClock.update(updateTime);
+//
+//		int skew = calculateSkew(packet);
+//
+//		float boundary = 2.0f * MAX_PPM * (float) BEACON_RATE; // + maybe a
+//																// tolerance;
+//
+//		/*  initial offset compensation */ 
+//		if(Math.abs(skew) <= boundary){			
+//			
+//			if ((skew > 0 && previousSkew > 0) || (skew < 0 && previousSkew < 0)){
+//				alpha += incrementAmount;
+//				if(alpha > K_max)
+//					alpha -= incrementAmount; 
+//				incrementAmount *= 2.0f;
+//			}
+//			else if ((skew > 0 && previousSkew <= 0) || (skew < 0 && previousSkew >= 0)) {
+//				alpha = 0.0f;
+//				incrementAmount = 0.0000000001f;
+//			}
+//			
+//			previousSkew = skew;
+//									
+//			logicalClock.rate += alpha*(float)skew/2.0f;					
+//			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew/2),updateTime);	
+//		}
+//		else{
+//			previousSkew = 0;
+//			alpha = 0.0f;
+//			incrementAmount = 0.0000000001f;
+//			if(skew>0)
+//				logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
+//		}
+//
+//	}
+
+	private void algorithm1(RadioPacket packet) {
+		UInt32 updateTime = packet.getEventTime();
+		logicalClock.update(updateTime);
+
+		int skew = calculateSkew(packet);
+
+		float boundary = 2.0f * MAX_PPM * (float) BEACON_RATE;
+
+		/* initial offset compensation */
+		if (skew > boundary) {
+			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
+					updateTime);
+			return;
+		} else if (skew < -boundary) {
+			// do nothing
+			return;
 		}
-		
-		logicalClock.rate += alpha.getValue()*((float)skew/2.0f);
-		
+
+		/* within bounds */
+		if (skew > 0) {
+			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
+					updateTime);
+		} else if (skew < 0) {
+			// do nothing
+		}
+
+		logicalClock.rate += 0.000000001f * (float) skew / 2.0f;
+	}
+
+	// float K_p = 0.5f;
+	// float K_i = 0.0f;
+
+	final static public int FEEDBACK_GREATER = 0;
+	final static public int FEEDBACK_LOWER = 1;
+	final static public int FEEDBACK_GOOD = 2;
+
+	int lastFeedback = FEEDBACK_GOOD;
+
+	// private void algorithm2(RadioPacket packet){
+	// UInt32 updateTime = packet.getEventTime();
+	// logicalClock.update(updateTime);
+	//
+	// int skew = calculateSkew(packet);
+	//
+	// float boundary = 2.0f*MAX_PPM*(float)BEACON_RATE; // + maybe a tolerance;
+	//
+	// /* initial offset compensation */
+	// if(skew > boundary){
+	// logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
+	// // K_i = 0;
+	// return;
+	// }
+	// else if (skew < -boundary){
+	// // do nothing
+	// // K_i = 0;
+	// return;
+	// }
+	//
+	// int feedback;
+	//
+	// if(skew == 1)
+	// feedback = FEEDBACK_GOOD;
+	// else
+	// feedback = (skew > 0) ? FEEDBACK_GREATER : FEEDBACK_LOWER;
+	//
+	// if(lastFeedback != FEEDBACK_GOOD){
+	// if(feedback == lastFeedback){
+	// K_i += 0.00000000001f;
+	// }
+	// }
+	//
+	// lastFeedback = feedback;
+	//
+	// if(K_i > 0.000000001f)
+	// K_i = 0.000000001f;
+	//
+	// logicalClock.setValue(logicalClock.getValue(updateTime).add((int)((float)skew*K_p)),updateTime);
+	// logicalClock.rate += K_i*0.5f*(float)skew;
+	// }
+
+	// float K_i = 0.0f;
+	// float K_max = 0.00001f/(2.0f*MAX_PPM*(float)BEACON_RATE);
+	//
+	// private void algorithm3(RadioPacket packet){
+	// UInt32 updateTime = packet.getEventTime();
+	// logicalClock.update(updateTime);
+	//
+	// int skew = calculateSkew(packet);
+	//
+	// float boundary = 2.0f*MAX_PPM*(float)BEACON_RATE + 1000; // + maybe a
+	// tolerance;
+	//
+	// /* initial offset compensation */
+	// if(skew > boundary){
+	// logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
+	// return;
+	// }
+	// else if (skew < -boundary){
+	// // do nothing
+	// return;
+	// }
+	//
+	// float x = boundary - Math.abs(skew);
+	// K_i = x*K_max/boundary;
+	//
+	// // if(Math.abs(skew) < 50)
+	// // K_i /= 10.0f;
+	//
+	// logicalClock.rate += K_i*0.5f*(float)skew;
+	//
+	// if(skew >0)
+	// logicalClock.setValue(logicalClock.getValue(updateTime).add((int)((float)skew)),updateTime);
+	// }
+
+	private void adjustClock(RadioPacket packet) {
+		algorithmPI(packet);
+		// algorithm1(packet);
+		// algorithm2(packet);
+		// algorithm3(packet);
 	}
 
 	@Override
@@ -125,21 +297,22 @@ public class PINode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-//						.getValue()) * (1.0 + CLOCK.getDrift())));
-//		System.out.println(""
-//				+ NODE_ID
-//				+ " "
-//				+ (1.0 + (double) logicalClock.rate.getValue())
-//				* (1.0 + CLOCK.getDrift()));
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK.getDrift())));
-		System.out.println(""
-				+ NODE_ID
-				+ " "
-				+ (1.0 + (double) logicalClock.rate)
-				* (1.0 + CLOCK.getDrift()));
+				// + Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+				// .getValue()) * (1.0 + CLOCK.getDrift())));
+				// System.out.println(""
+				// + NODE_ID
+				// + " "
+				// + (1.0 + (double) logicalClock.rate.getValue())
+				// * (1.0 + CLOCK.getDrift()));
+				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
+						.getDrift())));
+		// + Float.floatToIntBits(K_i);
+		// System.out.println(""
+		// + NODE_ID
+		// + " "
+		// + (1.0 + (double) logicalClock.rate)
+		// * (1.0 + CLOCK.getDrift()));
 
-		
 		return s;
 	}
 }

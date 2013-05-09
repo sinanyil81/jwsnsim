@@ -17,6 +17,7 @@ public class PIApp extends Application implements TimerHandler{
 	public static final int LINE = 0;
 	public static final int RING = 1;
 	public static final int GRID = 2;
+	public static final int DENSE = 3;
 	
 	private int PERIOD = 20000000;
 	int NUMNODES = 20;
@@ -40,6 +41,33 @@ public class PIApp extends Application implements TimerHandler{
 		timer.startOneshot(PERIOD);
 		
 		run();
+	}
+	
+	public PIApp(int numNodes,String logFile,int topology,int density) throws Exception {
+		logger = new Logger(logFile);		
+		this.NUMNODES = numNodes;
+		
+		createTopology(topology,density);
+		
+		for(int i=0;i<NUMNODES;i++){
+			nodes[i].on();
+		}
+		
+		clock.start();
+		timer.startOneshot(PERIOD);
+		
+		run();
+	}
+	
+	private void createTopology(int topology,double density) {
+		nodes = new PINode[NUMNODES];	
+		
+		if(topology == DENSE){
+			double stepsize = 2.0*(double)SimpleRadio.MAX_DISTANCE/(double)density;
+			for(int i = 0; i< NUMNODES;i++){
+				nodes[i] = new PINode(i+1,new Position(i*stepsize,0,0));
+			}			
+		}
 	}
 
 	private void createTopology(int topology) {
