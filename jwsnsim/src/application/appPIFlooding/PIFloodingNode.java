@@ -13,7 +13,7 @@ import sim.type.UInt32;
 
 public class PIFloodingNode extends Node implements TimerHandler {
 
-	private static final int BEACON_RATE = 500000000;  
+	private static final int BEACON_RATE = 30000000;  
 	private static final float MAX_PPM = 0.0001f;
 
 	LogicalClock logicalClock = new LogicalClock();
@@ -32,20 +32,22 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		
 		/* to start clock with a random value */
 		if(this.NODE_ID == 1){
-			CLOCK.setValue(new UInt32(0));
+//			CLOCK.setValue(new UInt32(0));
 //			CLOCK.setDrift(0.0001f);
 			CLOCK.setDrift(0.000050f);
 		}
 		/* to start clock with a random value */
 		else if(this.NODE_ID == 2){
-			CLOCK.setValue(new UInt32(0));
+//			CLOCK.setValue(new UInt32(0));
 		}
 		else if(this.NODE_ID == 20){
-			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
+//			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
 //			CLOCK.setDrift(0.0002f);
 		}
 		else
-			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+//			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
+		CLOCK.setValue(new UInt32(0));
 
 		timer0 = new Timer(CLOCK, this);		
 	
@@ -98,7 +100,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	float K_i = 0.0f;	
 	float K_max_20 = 0.00002f/(2.0f*MAX_PPM*(float)BEACON_RATE);	
 
-	float K_min = 0.000004f/(2.0f*MAX_PPM*(float)BEACON_RATE);
+	float K_min = 0.00004f/(2.0f*MAX_PPM*(float)BEACON_RATE);
 	
 	float increment = 0.0f;
 	
@@ -187,8 +189,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
 		logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
 		
-		if(this.NODE_ID ==100 )
-			System.out.println(Simulator.getInstance().getSecond() + " " + logicalClock.rate + " " + skew);
+//		if(this.NODE_ID ==100 )
+//			System.out.println(Simulator.getInstance().getSecond() + " " + logicalClock.rate + " " + skew);
 		
 //		if (counter == 1){		
 //			timer0.stop();
@@ -197,8 +199,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //		}
 //		else if(counter > 0)
 //		{
-			timer0.startOneshot(5000);
-			counter--;
+//			timer0.startOneshot(5000);
+//			counter--;
 //		}
 	}
 	
@@ -355,8 +357,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	public void on() throws Exception {
 		super.on();
 		
-		if(this.NODE_ID == 1)
-			timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
+		timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
 	}
 
 	public UInt32 local2Global() {
