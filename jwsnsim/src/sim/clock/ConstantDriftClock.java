@@ -16,7 +16,7 @@ public class ConstantDriftClock implements Clock {
 
 	/** Clock specific constants */
 	private static final int MEAN_DRIFT = 50;
-	private static final int DRIFT_VARIANCE = 100;
+	private static final int DRIFT_VARIANCE = 300;
 	private static double MAX_CLOCK =  4294967295.0;	
 	
 	/** Constant drift of the hardware clock */
@@ -33,8 +33,8 @@ public class ConstantDriftClock implements Clock {
 	
 	public ConstantDriftClock(){
 		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);
-		if(drift > 100)
-			drift -= 100;
+		if(drift < 0)
+			drift = 0;
 		
 		drift /= 1000000.0;
 	}
