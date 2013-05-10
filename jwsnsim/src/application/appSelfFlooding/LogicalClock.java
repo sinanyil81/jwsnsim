@@ -15,7 +15,7 @@ public class LogicalClock {
 //							.deltaMax(0.00001)
 //							.build();	
 	
-	public AvtSimple rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.000000001f, 0.00001f);
+	public AvtSimple rate = new AvtSimple(-0.0002f, 0.0002f, 0.0f, 0.00000000001f, 0.00001f);
 	UInt32 updateLocalTime = new UInt32();
 	
 	public LogicalClock(){

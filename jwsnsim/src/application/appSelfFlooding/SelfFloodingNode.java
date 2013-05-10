@@ -14,7 +14,7 @@ import sim.type.UInt32;
 
 public class SelfFloodingNode extends Node implements TimerHandler {
 
-	private static final int BEACON_RATE = 30000000;  
+	private static final int BEACON_RATE = 500000000;  
 	private static final int TOLERANCE = 1;
 
 	LogicalClock logicalClock = new LogicalClock();
@@ -31,6 +31,22 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		RADIO = new SimpleRadio(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
+		
+		/* to start clock with a random value */
+		if(this.NODE_ID == 1){
+			CLOCK.setValue(new UInt32(0));
+			CLOCK.setDrift(0.000050f);
+		}
+		/* to start clock with a random value */
+		else if(this.NODE_ID == 2){
+			CLOCK.setValue(new UInt32(0));
+		}
+		else if(this.NODE_ID == 20){
+			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
+//			CLOCK.setDrift(0.0f);
+		}
+		else
+			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
 		
 	
 		outgoingMsg.sequence = 0;
@@ -124,6 +140,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 
+	boolean changed = false;
 	public String toString() {
 		String s = "" + Simulator.getInstance().getSecond();
 
@@ -132,6 +149,17 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
 						.getValue()) * (1.0 + CLOCK.getDrift())));
+		
+//		if(Simulator.getInstance().getSecond()>=100000)
+//		{
+//			/* to start clock with a random value */
+//			if(this.NODE_ID == 1){
+//				if(changed == false){
+//					CLOCK.setDrift(0.0001f);
+//					changed = true;
+//				}				
+//			}
+//		}
 //		System.out.println("" + NODE_ID + " "
 //				+ (1.0 + (double) logicalClock.rate.getValue())
 //				* (1.0 + CLOCK.getDrift()));
