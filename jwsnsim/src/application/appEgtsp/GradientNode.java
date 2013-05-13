@@ -14,7 +14,7 @@ import sim.type.UInt32;
 
 public class GradientNode extends Node implements TimerHandler {
 
-	private static final int MAX_NEIGHBORS = 8;
+	private static final int MAX_NEIGHBORS = 20;
 	
 	private static final int BEACON_RATE = 30000000;  
 	private static final long NEIGHBOR_REMOVE = BEACON_RATE * 5; 
