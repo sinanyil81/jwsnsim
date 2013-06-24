@@ -44,6 +44,10 @@ public class GradientNode extends Node implements TimerHandler {
 		for (int i = 0; i < neighbors.length; i++) {
 			neighbors[i] = new Neighbor();
 		}
+		
+		/* to start clock with a random value */
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+
 	}
 
 	private int findNeighborSlot(int id) {
@@ -262,9 +266,8 @@ public class GradientNode extends Node implements TimerHandler {
 		s += " " + logicalClock.getRTValue(CLOCK.getValue()).toString();
 		//s += " " + logicalClock.getValue().toString();
 		//s += " " + logicalClock.getOffset().toLong();
-//		s += " " + Float.floatToIntBits((1.0f+logicalClock.rate)*(float)(1.0f+CLOCK.getDrift()));
-		
-		s += " " + Float.floatToIntBits(logicalClock.getRate());
+		s += " " + Float.floatToIntBits((1.0f+logicalClock.getRate())*(float)(1.0f+CLOCK.getDrift()));		
+//		s += " " + Float.floatToIntBits(logicalClock.getRate());
 		//s += " " + CLOCK.getValue().toString();
 		//s += " " + logicalClock.getRootRate();
 
