@@ -107,9 +107,6 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //	private static final float TURNING_POINT1 = 2.0f*MAX_PPM*(float)BEACON_RATE;
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
 	float K_max_10 = 0.000004f/BOUNDARY;
-//	private static final float TURNING_POINT1 = BOUNDARY*0.01f;
-	private static final float TURNING_POINT1 = 0;
-	
 	int counter = 0;
 	
 	private void algorithm2(RadioPacket packet) {
@@ -149,13 +146,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 ////				K_i = x*K_max_10/boundary;
 //			}
 			
-			if(Math.abs(skew) < TURNING_POINT1){
-				K_i = Math.abs(skew)*K_max_10/TURNING_POINT1;
-			}
-			else{
-				float x = BOUNDARY - Math.abs(skew);					
-				K_i = x*K_max_10/(BOUNDARY-TURNING_POINT1);
-			}
+			float x = BOUNDARY - Math.abs(skew);					
+			K_i = x*K_max_10/BOUNDARY;
 			
 //			if(Math.abs(skew) < BOUNDARY/2){
 //				float x = BOUNDARY - Math.abs(skew);
@@ -187,7 +179,16 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		}
 				
 //		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
-		logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
+		
+//		logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
+		
+		if(Math.abs(skew)>2)
+			logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
+		else{
+			float x = (2.0f - Math.abs(skew))/2.0f;
+			skew *= x;
+			logicalClock.setValue(logicalClock.getValue(updateTime).add((int)x),updateTime);			
+		}
 		
 //		if(this.NODE_ID ==100 )
 //			System.out.println(Simulator.getInstance().getSecond() + " " + logicalClock.rate + " " + skew);
