@@ -80,7 +80,7 @@ public class Simulator {
 		nodes = new Vector<Node>();	
 		
 		simTime = new SimTime();
-		//random.setSeed(SIMULATOR_SEED);
+//		random.setSeed(SIMULATOR_SEED);
 	}
 	
 	public SimTime getTime(){
