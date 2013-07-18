@@ -32,10 +32,10 @@ public class ConstantDriftClock implements Clock {
 	
 	public ConstantDriftClock(){
 		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);
-		if(drift < 0)
-			drift = 0;
 		
 		drift /= 1000000.0;
+		
+		System.out.println(drift);
 	}
 	
 	public ConstantDriftClock(double drift){ 

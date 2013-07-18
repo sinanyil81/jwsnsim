@@ -11,6 +11,7 @@ import sim.jprowler.RadioModel;
 import sim.jprowler.Simulator;
 import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
+import sim.jprowler.clock.TimerHandler;
 
 
 /**
@@ -22,7 +23,7 @@ import sim.jprowler.clock.Timer;
  * 
  * @author Gabor Pap, Gyorgy Balogh, Miklos Maroti
  */
-public class PISyncProtocol extends Protocol{
+public class PISyncProtocol extends Protocol implements TimerHandler{
 
 	/** This field is true if this mote rebroadcasted the message already. */
 	boolean sent = false;
@@ -34,14 +35,27 @@ public class PISyncProtocol extends Protocol{
 		getNode().setPosition( x, y ,z );
 		getNode().setId( nodeId );
 		Simulator.getInstance().register(getNode());
-		timer0 = new Timer(getNode().getClock(), new TimerEvent());
+		timer0 = new Timer(getNode().getClock(), this);
+		timer0.startPeriodic(30000000);
 	}
 	
-	class TimerEvent extends Event{
-		public void execute(){
-			
-		}
+	public void receiveMessage(Object message){
+		System.out.println("Received "+ (String)message);
 	}
+	
+	
+	public void sendMessageDone(){
+	}	
+	
+	@Override
+	public void fireEvent(Timer timer) {
+		if(timer == timer0){
+			System.out.println(sendMessage("ID:" + getNode().getId()));
+		}
+		
+	}
+	
+
 
 }
 

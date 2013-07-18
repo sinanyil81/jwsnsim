@@ -18,15 +18,37 @@ public class Timer {
 	private Clock clock;
 	
 	/** System event which will be used for timer events */
-	Event event = null;
+	TimerHandler handler = null;
+	TimerEvent event = null;
 	
-	public Timer(Clock clock,Event timerEvent){
+	class TimerEvent extends Event{
+		Timer timer = null;
+		
+		public TimerEvent(Timer timer) {
+			this.timer = timer;
+		}
+		
+		public void execute(){
+			if(handler !=null)
+				handler.fireEvent(timer);
+			
+			if(periodic)
+				event.register((int) period);
+		}
+	}
+	
+	public Timer(Clock clock,TimerHandler handler){
 		this.clock = clock;
-		event = timerEvent;
+		this.handler = handler;
+		event = new TimerEvent(this);
 	}
 	
 	private int convert(double ticks) {
 		long result = (long) (ticks/(1.0 + clock.getDrift()));
+		
+		if (result == 0)
+			result = 1;
+		
 		return (int)result;
 	}
 	
@@ -40,11 +62,7 @@ public class Timer {
 		
 		if(ticks > 0){
 			periodic = false;	
-			period = convert(ticks);
-			
-			if(period == 0){
-				period = 1;
-			}
+			period = convert(ticks);			
 					
 			event.register((int) period);			
 		}
@@ -61,10 +79,6 @@ public class Timer {
 		if(ticks > 0){
 			periodic = true;	
 			period = convert(ticks);	
-			
-			if(period == 0){
-				period = 1;
-			}
 				
 			event.register((int) period);			
 		}
@@ -76,5 +90,5 @@ public class Timer {
 
 	public int getPeriod() {
 		return (int) period;
-	}
+	}	
 }

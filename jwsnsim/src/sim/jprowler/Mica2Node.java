@@ -87,16 +87,16 @@ public class Mica2Node extends Node {
 	// //////////////////////////////
 
 	/** The constant component of the time spent waiting before a transmission. */
-	public static int sendMinWaitingTime = 200;
+	public static int sendMinWaitingTime = 200*25;
 
 	/** The variable component of the time spent waiting before a transmission. */
-	public static int sendRandomWaitingTime = 128;
+	public static int sendRandomWaitingTime = 128*25;
 
 	/** The constant component of the backoff time. */
-	public static int sendMinBackOffTime = 100;
+	public static int sendMinBackOffTime = 100*25;
 
 	/** The variable component of the backoff time. */
-	public static int sendRandomBackOffTime = 30;
+	public static int sendRandomBackOffTime = 30*25;
 
 	/** The time of one transmission in 1/{@link Simulator#ONE_SECOND} second. */
 	public static int sendTransmissionTime = 960;
@@ -165,6 +165,7 @@ public class Mica2Node extends Node {
 			if (isChannelFree(noiseStrength)) {
 				// start transmitting
 				transmitting = true;
+//				System.out.println("Transmitting Started "+Mica2Node.this.id);
 				beginTransmission(1, Mica2Node.this);
 				endTransmissionEvent.register(sendTransmissionTime);
 			} else {
@@ -184,6 +185,7 @@ public class Mica2Node extends Node {
 		 */
 		public void execute() {
 			transmitting = false;
+//			System.out.println("Transmitting Finished "+Mica2Node.this.id);
 			sending = false;
 			endTransmission();
 			senderApplication.sendMessageDone();
@@ -231,11 +233,14 @@ public class Mica2Node extends Node {
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(Object message, Protocol app) {
-		if (sending)
+		if (sending){
+			System.out.println("FALSE "+Mica2Node.this.id);
 			return false;
+		}
 		else {
 			sending = true;
 			transmitting = false;
+//			System.out.println("Prepare Transmitting "+Mica2Node.this.id);
 			this.message = message;
 			senderApplication = app;
 
@@ -344,9 +349,11 @@ public class Mica2Node extends Node {
 				// start receiving
 				parentNode = (Node) stream;
 				receiving = true;
+//				System.out.println("Receiving started"+Mica2Node.this.id);
 				corrupted = false;
 				signalStrength = level;
 			} else {
+				System.out.println("Transmitting "+transmitting +" Receivable " +  isReceivable(level, noiseStrength));
 				noiseStrength += level;
 			}
 		}
@@ -366,9 +373,11 @@ public class Mica2Node extends Node {
 	protected void removeNoise(double level, Object stream) {
 		if (parentNode == stream) {
 			receiving = false;
+//			System.out.println("Receiving finished"+Mica2Node.this.id);
 			if (!corrupted) {
 				this.getApplication().receiveMessage(((Mica2Node) stream).message);
 			}
+
 			signalStrength = 0;
 			if (sendingPostponed) {
 				sendingPostponed = false;
