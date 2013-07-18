@@ -1,6 +1,6 @@
 package sim.jprowler.clock;
 
-import sim.simulator.EventObserver;
+import sim.jprowler.Event;
 
 /**
  * Simulates Timer which is built on a hardware clock.
@@ -20,9 +20,9 @@ public class Timer {
 	/** System event which will be used for timer events */
 	Event event = null;
 	
-	public Timer(Clock clock){
+	public Timer(Clock clock,Event timerEvent){
 		this.clock = clock;
-		event = new Event(this);
+		event = timerEvent;
 	}
 	
 	private int convert(double ticks) {
@@ -45,7 +45,7 @@ public class Timer {
 			if(period == 0){
 				period = 1;
 			}
-			
+					
 			event.register((int) period);			
 		}
 	}
@@ -76,14 +76,5 @@ public class Timer {
 
 	public int getPeriod() {
 		return (int) period;
-	}
-
-	public void signal(Event event) {
-		if(handler != null)
-			handler.fireEvent(this);
-		
-		if(periodic){
-			event.register((int) period);
-		}		
 	}
 }

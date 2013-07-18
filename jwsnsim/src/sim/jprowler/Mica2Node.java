@@ -23,6 +23,8 @@
  */
 package sim.jprowler;
 
+import sim.jprowler.clock.Clock;
+
 /**
  * This class represents a mote and all its properties important from the
  * simulation point of view. The MAC layer specific constant are all defined and
@@ -36,7 +38,7 @@ public class Mica2Node extends Node {
 	 * this means is that the Mica2Node has to hold the information on the
 	 * sender application which runs on this very mote.
 	 */
-	protected Application senderApplication = null;
+	protected Protocol senderApplication = null;
 
 	 /**
 	 * This node is the one that sent the last message or the one this node is
@@ -49,7 +51,7 @@ public class Mica2Node extends Node {
 	/**
 	 * This is the message being sent, on reception it is extracted and the
 	 * message part is forwarded to the appropriate application, see
-	 * {@link Application#receiveMessage}.
+	 * {@link Protocol#receiveMessage}.
 	 */
 	protected Object message = null;
 
@@ -197,8 +199,8 @@ public class Mica2Node extends Node {
 	 * @param radioModel
 	 *            the RadioModel used on this mote
 	 */
-	public Mica2Node(Simulator sim, RadioModel radioModel) {
-		super(sim, radioModel);
+	public Mica2Node(Simulator sim, RadioModel radioModel,Clock clock) {
+		super(sim, radioModel,clock);
 	}
 
 	/**
@@ -228,7 +230,7 @@ public class Mica2Node extends Node {
 	 *            the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public boolean sendMessage(Object message, Application app) {
+	public boolean sendMessage(Object message, Protocol app) {
 		if (sending)
 			return false;
 		else {

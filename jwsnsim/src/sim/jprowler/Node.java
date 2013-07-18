@@ -25,6 +25,7 @@
 package sim.jprowler;
 
 import sim.jprowler.RadioModel.Neighborhood;
+import sim.jprowler.clock.Clock;
 
 /**
  * This class is the base class of all nodes. Nodes are entities in a simulator
@@ -39,9 +40,9 @@ public abstract class Node {
 	/**
 	 * The applications of the TinyOs node are linked together
 	 * in a single linked list. This points to the first,
-	 * and then {@link Application#nextApplication} to the next. 
+	 * and then {@link Protocol#nextApplication} to the next. 
 	 */
-	protected Application application = null;
+	protected Protocol application = null;
 
 	/** 
 	 * This field defines the relative strength of a mote. If it is set to
@@ -72,6 +73,8 @@ public abstract class Node {
 	 * interact with this one.
 	 */
 	private Neighborhood neighborhood;
+	
+	private Clock clock;
 
 	/**
 	 * Parameterized constructor, sets the simulator and creates an initial 
@@ -80,8 +83,9 @@ public abstract class Node {
 	 * @param sim the Simulator
 	 * @param radioModel the RadioModel used to create the nodes neighborhood
 	 */
-	public Node(Simulator sim, RadioModel radioModel){
+	public Node(Simulator sim, RadioModel radioModel,Clock clock){
 		this.simulator = sim;
+		this.clock = clock;
 		neighborhood = radioModel.createNeighborhood();
 	} 
 	
@@ -194,7 +198,7 @@ public abstract class Node {
 	 * @param app the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public abstract boolean sendMessage(Object message, Application app);
+	public abstract boolean sendMessage(Object message, Protocol app);
 	
 	/**
 	 * Sets the id of the node. It is allowed that two nodes have the
@@ -259,9 +263,13 @@ public abstract class Node {
 		return simulator;
 	}
 	
+	public Clock getClock(){
+		return clock;
+	}
+	
 	/**
 	 * This function is part of the application management. Adds an 
-	 * {@link Application} to the list of applications running on this Node.
+	 * {@link Protocol} to the list of applications running on this Node.
 	 * Note that applications on a node represent TinyOS components, so do not 
 	 * try to solve all your problems in a derived class of Node. Also note
 	 * that there can be only one instance of an Application class running on 
@@ -270,7 +278,7 @@ public abstract class Node {
 	 * 
 	 * @param app the Application 
 	 */
-	public void addApplication(Application app){
+	public void addApplication(Protocol app){
 		application = app;
 	}
 
@@ -281,7 +289,7 @@ public abstract class Node {
 	 * @param appClass the class that identifies the needed application for us
 	 * @return Returns the application instance running on this node
 	 */
-	protected Application getApplication(){
+	protected Protocol getApplication(){
 	
 		return application;
 	}

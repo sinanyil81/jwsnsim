@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Vector;
 
-
 public class Simulator {
 //	static private long SIMULATOR_SEED = 0x123456L;	
 //	static public Random random = new Random(SIMULATOR_SEED);
@@ -86,5 +85,11 @@ public class Simulator {
 	
 	public long getSecond(){
 		return getTime().getTimeHigh()/1024/1024;
+	}
+	
+	public void run(long duration){
+		while(getSecond() < duration){
+			tick();
+		}						
 	}
 }

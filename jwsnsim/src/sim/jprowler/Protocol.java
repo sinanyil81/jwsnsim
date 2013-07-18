@@ -36,13 +36,13 @@ package sim.jprowler;
  * 
  * @author Gyorgy Balogh, Gabor Pap, Miklos Maroti
  */
-public abstract class Application {
+public abstract class Protocol {
 	
 	/** 
 	 * The applications objects of a node are linked together 
 	 * in a list. This reference points to the next one in the list. 
 	 */
-	Application nextApplication;
+	Protocol nextApplication;
 	
 	/** The parent {@link Node} this application belongs to. */
 	Node node;
@@ -58,7 +58,7 @@ public abstract class Application {
 	 * 
 	 * @param node The parent {@link Node} of this application
 	 */
-	public Application(Node node){
+	public Protocol(Node node){
 		this.node = node;
 		node.addApplication(this);
 	}
@@ -78,13 +78,13 @@ public abstract class Application {
 	
 	/**
 	 * Sends a message via the radio to neighboring nodes where
-	 * the {@link Application#receiveMessage} method will be fired in the 
+	 * the {@link Protocol#receiveMessage} method will be fired in the 
 	 * application instance of the same derived type.
 	 * This method has the same semantics as SendMsg.send() in TinyOS.
 	 * 
 	 * @param message The message to be sent.
 	 * @return Returns <code>true</code> if the message is accepted for 
-	 * 	transmissions, in which case {@link Application#sendMessageDone}
+	 * 	transmissions, in which case {@link Protocol#sendMessageDone}
 	 * 	will be called eventually, or <code>false</code> if a message 
 	 * (maybe from another Application) is under transmission and
 	 *  this message is not accepted.
@@ -97,7 +97,7 @@ public abstract class Application {
 	
 	/**
 	 * Signaled when the message posted is sent. This method
-	 * is called only if {@link Application#sendMessage} returned <code>true</code>. 
+	 * is called only if {@link Protocol#sendMessage} returned <code>true</code>. 
 	 * This has the same semantics as SendMsg.sendDone() in TinyOS.
 	 * 
 	 * @see #sendMessage
