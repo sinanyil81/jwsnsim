@@ -198,7 +198,7 @@ public abstract class Node {
 	 * @param app the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public abstract boolean sendMessage(Object message, Protocol app);
+	public abstract boolean sendMessage(RadioPacket message, Protocol app);
 	
 	/**
 	 * Sets the id of the node. It is allowed that two nodes have the

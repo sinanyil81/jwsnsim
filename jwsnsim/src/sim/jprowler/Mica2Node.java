@@ -53,7 +53,7 @@ public class Mica2Node extends Node {
 	 * message part is forwarded to the appropriate application, see
 	 * {@link Protocol#receiveMessage}.
 	 */
-	protected Object message = null;
+	protected RadioPacket message = null;
 
 	// //////////////////////////////
 	// STATE VARIABLES
@@ -232,7 +232,7 @@ public class Mica2Node extends Node {
 	 *            the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public boolean sendMessage(Object message, Protocol app) {
+	public boolean sendMessage(RadioPacket message, Protocol app) {
 		if (sending){
 			System.out.println("FALSE "+Mica2Node.this.id);
 			return false;
@@ -355,6 +355,7 @@ public class Mica2Node extends Node {
 			} else {
 				System.out.println("Transmitting "+transmitting +" Receivable " +  isReceivable(level, noiseStrength));
 				noiseStrength += level;
+				System.out.println(noiseStrength);
 			}
 		}
 	}
@@ -377,8 +378,13 @@ public class Mica2Node extends Node {
 			if (!corrupted) {
 				this.getApplication().receiveMessage(((Mica2Node) stream).message);
 			}
+			else{
+				System.out.println("Corrupted");
+			}
 
 			signalStrength = 0;
+			parentNode = null;
+			
 			if (sendingPostponed) {
 				sendingPostponed = false;
 				testChannelEvent.register(generateWaitingTime());

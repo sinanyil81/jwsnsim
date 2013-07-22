@@ -73,7 +73,7 @@ public abstract class Protocol {
 	 *
 	 * @param message The message that arrived.
 	 */
-	public void receiveMessage(Object message){
+	public void receiveMessage(RadioPacket message){
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public abstract class Protocol {
 	 * @see #sendMessageDone 
 	 */
 
-	public final boolean sendMessage(Object message){
+	public final boolean sendMessage(RadioPacket message){
 		return node.sendMessage(message, this);
 	}
 	

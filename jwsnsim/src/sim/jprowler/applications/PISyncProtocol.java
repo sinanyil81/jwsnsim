@@ -8,6 +8,7 @@ import sim.jprowler.GaussianRadioModel;
 import sim.jprowler.Mica2Node;
 import sim.jprowler.Node;
 import sim.jprowler.RadioModel;
+import sim.jprowler.RadioPacket;
 import sim.jprowler.Simulator;
 import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
@@ -39,8 +40,8 @@ public class PISyncProtocol extends Protocol implements TimerHandler{
 		timer0.startPeriodic(30000000);
 	}
 	
-	public void receiveMessage(Object message){
-		System.out.println("Received "+ (String)message);
+	public void receiveMessage(RadioPacket message){
+		System.out.println("Received "+ (String)message.getPayload());
 	}
 	
 	
@@ -50,7 +51,7 @@ public class PISyncProtocol extends Protocol implements TimerHandler{
 	@Override
 	public void fireEvent(Timer timer) {
 		if(timer == timer0){
-			System.out.println(sendMessage("ID:" + getNode().getId()));
+			System.out.println(sendMessage(new RadioPacket("ID:" + getNode().getId())));
 		}
 		
 	}
