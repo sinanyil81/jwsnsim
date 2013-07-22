@@ -1,6 +1,6 @@
 package sim.jprowler.clock;
 
-import sim.type.UInt32;
+import sim.jprowler.UInt32;
 
 public interface Clock {
 	public void start();

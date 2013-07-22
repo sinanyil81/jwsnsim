@@ -1,7 +1,5 @@
 package sim.jprowler;
 
-import sim.type.UInt32;
-
 public class RadioPacket {
 
 	private Object payload;

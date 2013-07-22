@@ -1,6 +1,6 @@
 package sim.jprowler.applications.PISync;
 
-import sim.type.UInt32;
+import sim.jprowler.UInt32;
 
 public class PIPayload {
 	public int nodeid = -1;

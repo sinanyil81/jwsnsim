@@ -23,8 +23,8 @@
  */
 package sim.jprowler;
 
+import sim.jprowler.UInt32;
 import sim.jprowler.clock.Clock;
-import sim.type.UInt32;
 
 /**
  * This class represents a mote and all its properties important from the

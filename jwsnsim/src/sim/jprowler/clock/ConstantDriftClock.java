@@ -1,7 +1,7 @@
 package sim.jprowler.clock;
 import sim.jprowler.SimTime;
 import sim.jprowler.Simulator;
-import sim.type.UInt32;
+import sim.jprowler.UInt32;
 /**
  * 
  * @author K. Sinan YILDIRIM

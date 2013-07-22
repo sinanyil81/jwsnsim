@@ -7,10 +7,10 @@ import sim.jprowler.Mica2Node;
 import sim.jprowler.RadioModel;
 import sim.jprowler.RadioPacket;
 import sim.jprowler.Simulator;
+import sim.jprowler.UInt32;
 import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
-import sim.type.UInt32;
 
 public class PIProtocol extends Protocol implements TimerHandler{
 	
