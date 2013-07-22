@@ -2,6 +2,7 @@ package sim.jprowler.applications;
 
 import sim.jprowler.GaussianRadioModel;
 import sim.jprowler.Simulator;
+import sim.jprowler.applications.PISync.PISyncProtocol;
 
 public class Main {
 	
