@@ -207,11 +207,11 @@ public abstract class Node {
 	 * postponed until the receive is finished. This method should behave
 	 * exactly as the SendMsg.send command in TinyOS.
 	 * 
-	 * @param message the message to be sent
+	 * @param packet the message to be sent
 	 * @param app the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public abstract boolean sendMessage(RadioPacket message, Protocol app);
+	public abstract boolean sendMessage(RadioPacket packet, Protocol app);
 	
 	/**
 	 * Sets the id of the node. It is allowed that two nodes have the

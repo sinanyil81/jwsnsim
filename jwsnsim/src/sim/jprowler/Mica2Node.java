@@ -194,7 +194,6 @@ public class Mica2Node extends Node {
 		 */
 		public void execute() {
 			transmitting = false;
-//			System.out.println("Transmitting Finished "+Mica2Node.this.id);
 			sending = false;
 			endTransmission();
 			senderApplication.sendMessageDone();
@@ -235,13 +234,13 @@ public class Mica2Node extends Node {
 	 * is postponed until the receive is finished. This method behaves exactly
 	 * like the SendMsg.send command in TinyOS.
 	 * 
-	 * @param message
+	 * @param packet
 	 *            the message to be sent
 	 * @param app
 	 *            the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public boolean sendMessage(RadioPacket message, Protocol app) {
+	public boolean sendMessage(RadioPacket packet, Protocol app) {
 		if (sending){
 			System.out.println("FALSE "+Mica2Node.this.id);
 			return false;
@@ -249,8 +248,8 @@ public class Mica2Node extends Node {
 		else {
 			sending = true;
 			transmitting = false;
-//			System.out.println("Prepare Transmitting "+Mica2Node.this.id);
-			this.sentPacket = message;
+
+			this.sentPacket = packet;
 			senderApplication = app;
 
 			if (receiving) {
