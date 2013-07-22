@@ -5,7 +5,7 @@ import sim.type.UInt32;
 public class RadioPacket {
 
 	private Object payload;
-	private UInt32 timestamp;
+	private UInt32 timestamp = new UInt32();
 	
 	public RadioPacket(Object payload){
 		this.payload = payload;
@@ -17,10 +17,10 @@ public class RadioPacket {
 	public void setPayload(Object payload) {
 		this.payload = payload;
 	}
-	public UInt32 getTimestamp() {
+	public UInt32 getEventTime() {
 		return timestamp;
 	}
-	public void setTimestamp(UInt32 timestamp) {
+	public void setEventTime(UInt32 timestamp) {
 		this.timestamp = timestamp;
 	}	
 }

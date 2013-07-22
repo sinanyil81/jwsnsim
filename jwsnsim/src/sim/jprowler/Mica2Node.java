@@ -24,6 +24,7 @@
 package sim.jprowler;
 
 import sim.jprowler.clock.Clock;
+import sim.type.UInt32;
 
 /**
  * This class represents a mote and all its properties important from the
@@ -165,13 +166,19 @@ public class Mica2Node extends Node {
 			if (isChannelFree(noiseStrength)) {
 				// start transmitting
 				transmitting = true;
-//				System.out.println("Transmitting Started "+Mica2Node.this.id);
+				setEventTime(Mica2Node.this.message);
 				beginTransmission(1, Mica2Node.this);
 				endTransmissionEvent.register(sendTransmissionTime);
 			} else {
 				// test again
 				this.register(generateBackOffTime());
 			}
+		}
+
+		private void setEventTime(RadioPacket message) {
+			UInt32 age = Mica2Node.this.getClock().getValue();
+			age = age.subtract(message.getEventTime());
+			message.setEventTime(age);		
 		}
 	}
 

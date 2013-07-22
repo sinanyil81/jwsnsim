@@ -88,13 +88,6 @@ public class GaussianRadioModel extends RadioModel{
         // count nodes
 		Vector<Node> nodes = sim.getNodes();		
 		int nodeNum = nodes.size(); // get number of nodes
-		
-//        int nodeNum = 0;
-//        Node node1 = sim.firstNode;
-//        while (node1 != null){
-//            node1 = node1.nextNode;
-//            ++nodeNum;
-//        }
         
         Node[] neighbors = new Node[nodeNum];
         double[] staticFadings = new double[nodeNum];
@@ -120,31 +113,7 @@ public class GaussianRadioModel extends RadioModel{
 			neighborhood.staticFadings = new double[i];
             System.arraycopy(staticFadings, 0, neighborhood.staticFadings, 0, i );
 			neighborhood.dynamicStrengths = new double[i];			
-		}
-                                
-//		node1 = sim.firstNode;
-//		while (node1 != null){
-//			int i = 0;
-//            Node node2 = sim.firstNode;
-//			
-//			while (node2 != null){
-//				double staticRadioStrength = getStaticFading(node1, node2);
-//				if( staticRadioStrength >= radioStrengthCutoff && node1 != node2){
-//                    neighbors[i] = node2;
-//                    staticFadings[i] = staticRadioStrength;                    
-//					i++;
-//				}
-//				node2 = node2.nextNode;
-//			}
-//			
-//			Neighborhood neighborhood = (Neighborhood)node1.getNeighborhood();
-//			neighborhood.neighbors = new Node[i];
-//            System.arraycopy(neighbors, 0, neighborhood.neighbors, 0, i );           
-//			neighborhood.staticFadings = new double[i];
-//            System.arraycopy(staticFadings, 0, neighborhood.staticFadings, 0, i );
-//			neighborhood.dynamicStrengths = new double[i];			
-//			node1 = node1.nextNode;
-//		}
+		}                                
 	}
 
 	/**
