@@ -1,10 +1,18 @@
 package sim.jprowler;
 
-public class RadioPacket {
+public class RadioPacket implements Cloneable{
 
 	private Object payload;
 	private UInt32 timestamp = new UInt32();
 	private UInt32 eventTime = new UInt32();
+		
+	public RadioPacket clone(){
+		RadioPacket packet = new RadioPacket(this.payload);
+		packet.setTimestamp(timestamp);
+		packet.setEventTime(eventTime);
+		
+		return packet;
+	}
 	
 	public RadioPacket(Object payload){
 		this.payload = payload;

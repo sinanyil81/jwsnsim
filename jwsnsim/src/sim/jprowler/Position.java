@@ -43,4 +43,13 @@ public class Position {
 	public boolean equals(Position p) {
 		return p.xCoord == xCoord && p.yCoord == yCoord && p.zCoord == zCoord;
 	}
+	
+	public String toString(){
+		String s  ="";
+		s += this.xCoord + " ";
+		s += this.yCoord + " ";
+		s += this.zCoord;
+		
+		return s;
+	}
 }

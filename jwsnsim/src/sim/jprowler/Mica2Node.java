@@ -47,14 +47,16 @@ public class Mica2Node extends Node {
 	 purposes,
 	 * as you know this information is not embedded into any TinyOS message.
 	 */
-	 protected Node parentNode = null;
+	 protected Node senderNode = null;
 
 	/**
 	 * This is the message being sent, on reception it is extracted and the
 	 * message part is forwarded to the appropriate application, see
 	 * {@link Protocol#receiveMessage}.
 	 */
-	protected RadioPacket message = null;
+	protected RadioPacket sentPacket = null;
+	
+	protected RadioPacket receivedPacket = null;
 
 	// //////////////////////////////
 	// STATE VARIABLES
@@ -166,7 +168,7 @@ public class Mica2Node extends Node {
 			if (isChannelFree(noiseStrength)) {
 				// start transmitting
 				transmitting = true;
-				setEventTime(Mica2Node.this.message);
+				setEventTime(Mica2Node.this.sentPacket);
 				beginTransmission(1, Mica2Node.this);
 				endTransmissionEvent.register(sendTransmissionTime);
 			} else {
@@ -248,7 +250,7 @@ public class Mica2Node extends Node {
 			sending = true;
 			transmitting = false;
 //			System.out.println("Prepare Transmitting "+Mica2Node.this.id);
-			this.message = message;
+			this.sentPacket = message;
 			senderApplication = app;
 
 			if (receiving) {
@@ -354,9 +356,12 @@ public class Mica2Node extends Node {
 		} else {
 			if (!transmitting && isReceivable(level, noiseStrength)) {
 				// start receiving
-				parentNode = (Node) stream;
-				receiving = true;				
-				setReceptionTimestamp(((Mica2Node)parentNode).message);
+				senderNode = (Node) stream;
+				receiving = true;	
+				
+				receivedPacket = ((Mica2Node)senderNode).sentPacket.clone();
+				setReceptionTimestamp(receivedPacket);
+				
 				corrupted = false;
 				signalStrength = level;
 			} else {
@@ -386,18 +391,20 @@ public class Mica2Node extends Node {
 	 *            the level of noise
 	 */
 	protected void removeNoise(double level, Object stream) {
-		if (parentNode == stream) {
+		if (senderNode == stream) {
 			receiving = false;
 //			System.out.println("Receiving finished"+Mica2Node.this.id);
 			if (!corrupted) {
-				this.getApplication().receiveMessage(((Mica2Node) stream).message);
+				this.getApplication().receiveMessage(receivedPacket);
 			}
 			else{
 				System.out.println("Corrupted");
 			}
 
 			signalStrength = 0;
-			parentNode = null;
+			
+			senderNode = null;
+			receivedPacket = null;
 			
 			if (sendingPostponed) {
 				sendingPostponed = false;

@@ -11,7 +11,7 @@ import sim.jprowler.clock.TimerHandler;
 
 public class SimulatorMain implements TimerHandler{
 	
-	public final static int NUMNODES = 2;
+	public final static int NUMNODES = 3;
 	
 	static PIProtocol protocol[] = new PIProtocol[NUMNODES];
 	static sim.jprowler.applications.Logger logger = null;
@@ -19,7 +19,7 @@ public class SimulatorMain implements TimerHandler{
 	public static void main(String[] args) throws Exception{			
 		createNodes();		
 		startLogging("deneme");
-        Simulator.getInstance().run(20000);       
+        Simulator.getInstance().run(100000);       
 	}
 
 	private static void startLogging(String filename) {
@@ -34,9 +34,10 @@ public class SimulatorMain implements TimerHandler{
 		
 		System.out.println("creating nodes...");
 		
-		for(int i = 0; i<2;i++){
+		for(int i = 0; i<3;i++){
 			Node node = new Mica2Node(Simulator.getInstance(),radioModel,new ConstantDriftClock());
 			node.setPosition( Topology.getNextLinePosition());
+			System.out.println(node.getPosition());
 			node.setId(i+1);
 			Simulator.getInstance().register(node);				
 			protocol[i] = new PIProtocol(node);

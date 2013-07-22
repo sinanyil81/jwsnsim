@@ -5,7 +5,6 @@ import sim.jprowler.UInt32;
 public class PIClock {
 
 	private UInt32 value = new UInt32();
-
 	public float rate = 0.0f;
 
 	UInt32 updateLocalTime = new UInt32();	

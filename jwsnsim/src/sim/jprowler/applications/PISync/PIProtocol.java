@@ -1,14 +1,10 @@
 package sim.jprowler.applications.PISync;
 
 import sim.jprowler.Node;
-import sim.jprowler.Position;
 import sim.jprowler.Protocol;
-import sim.jprowler.Mica2Node;
-import sim.jprowler.RadioModel;
 import sim.jprowler.RadioPacket;
 import sim.jprowler.Simulator;
 import sim.jprowler.UInt32;
-import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
 
@@ -55,6 +51,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 			piClock.rate += K_i*0.5*(float)skew;
 		}	
 		
+				
 		if(skew > 1000){
 			UInt32 myClock = piClock.getValue(packet.getEventTime());
 			piClock.setValue(myClock.add(skew),updateTime);
@@ -66,8 +63,15 @@ public class PIProtocol extends Protocol implements TimerHandler{
 	}
 
 	
-	public void receiveMessage(RadioPacket message){
-		algorithmPI(message);
+	public void receiveMessage(RadioPacket packet){
+//		PIPayload payload = (PIPayload)packet.getPayload();
+//		System.out.println("------------------------------------------------------------");
+//		System.out.println("Node:"+getNode().getId() + " receiving from node " + payload.nodeid);
+//		System.out.println("r clock value:"+payload.clock.toLong());
+//		System.out.println("m clock value:"+piClock.getValue(packet.getEventTime()));
+//		System.out.println("------------------------------------------------------------");
+		
+		algorithmPI(packet);		
 	}
 	
 	private void send(){

@@ -104,6 +104,10 @@ public abstract class Node {
 		clock.stop();
 	}
 	
+	public Position getPosition(){
+		return position;
+	}
+	
 	/**
 	 * A getter method used by the RadioModels to manipulate neighborhood of nodes. 
 	 */
