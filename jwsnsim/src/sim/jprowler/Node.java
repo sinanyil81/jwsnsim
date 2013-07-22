@@ -49,15 +49,8 @@ public abstract class Node {
 	 * a high value for a given mote it can supress other motes.
 	 */
 	double maxRadioStrength = 100;	
-
-	/** positions x in meters (not that it metters much) */
-	protected double    x = 0;
-
-	/** positions y in meters (not that it metters much) */
-	protected double    y = 0;
 	
-	/** positions z in meters (not that it metters much) */
-	protected double    z = 0;
+	protected Position position = new Position();
     
 	/** A reference to the simulator in which the Node exists. */
 	public Simulator simulator;
@@ -122,16 +115,6 @@ public abstract class Node {
 		return this.radioModel;
 	}
 
-	/**
-	 * Calculates the square of the distance between two nodes. This method is 
-	 * used by the radio models to calculate the fading of radio signals.
-	 * 
-	 * @param other The other node
-	 * @return The square of the distance between this and the other node
-	 */		
-	public double getDistanceSquare(Node other){
-		return (x-other.x)*(x-other.x) + (y-other.y)*(y-other.y) + (z-other.z)*(z-other.z);
-	} 
 
 	/**
 	 * Returns the maximum radio strength this node will ever transmit with. 
@@ -245,37 +228,11 @@ public abstract class Node {
 	 * @param y the y position
 	 * @param z the z position
 	 */
-	public void setPosition( double x, double y, double z ){
-		this.x = x;
-		this.y = y;
-		this.z = z;
-	}
-
-	/**
-	 * A getter function for position X.
-	 * 
-	 * @return Returns the x coordinate of the node.
-	 */
-	public double getX(){
-		return x;
-	}
-
-	/**
-	 * A getter function for position Y.
-	 * 
-	 * @return Returns the y coordinate of the node.
-	 */
-	public double getY(){
-		return y;
-	}
-
-	/**
-	 * A getter function for position Z.
-	 * 
-	 * @return Returns the z coordinate of the node.
-	 */
-	public double getZ(){
-		return z;
+	public void setPosition( Position pos ){
+		 
+		this.position.xCoord = pos.xCoord;
+		this.position.yCoord = pos.yCoord;
+		this.position.zCoord = pos.zCoord;
 	}
 	
 	public int getId(){

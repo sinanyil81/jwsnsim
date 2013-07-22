@@ -140,7 +140,7 @@ public class GaussianRadioModel extends RadioModel{
 		double staticRandomFading = 1.0 + staticRandomFactor * Simulator.random.nextGaussian();
 
 		return staticRandomFading <= 0.0 ? 0.0 : sender.getMaximumRadioStrength() * staticRandomFading 
-			/ (1.0 + Math.pow(sender.getDistanceSquare(receiver), fallingFactorHalf));
+			/ (1.0 + Math.pow(sender.position.squareDistanceTo(receiver.position), fallingFactorHalf));
 	}
 
 	/**

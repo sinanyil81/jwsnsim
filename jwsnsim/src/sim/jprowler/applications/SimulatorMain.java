@@ -1,7 +1,8 @@
 package sim.jprowler.applications;
 
 import sim.jprowler.GaussianRadioModel;
-import sim.jprowler.Protocol;
+import sim.jprowler.Mica2Node;
+import sim.jprowler.Node;
 import sim.jprowler.Simulator;
 import sim.jprowler.applications.PISync.PIProtocol;
 import sim.jprowler.clock.ConstantDriftClock;
@@ -12,7 +13,7 @@ public class SimulatorMain implements TimerHandler{
 	
 	public final static int NUMNODES = 2;
 	
-	static Protocol nodes[] = new Protocol[NUMNODES];
+	static PIProtocol protocol[] = new PIProtocol[NUMNODES];
 	static sim.jprowler.applications.Logger logger = null;
 			
 	public static void main(String[] args) throws Exception{			
@@ -31,12 +32,15 @@ public class SimulatorMain implements TimerHandler{
 	private static void createNodes() {
 		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
 		
-		System.out.println("creating nodes...");  
-		PIProtocol node1 = new PIProtocol(1,5,5,0,radioModel);
-		PIProtocol node2 = new PIProtocol(2,10,10,0,radioModel);
+		System.out.println("creating nodes...");
 		
-		nodes[0] = node1;
-		nodes[1] = node2;
+		for(int i = 0; i<2;i++){
+			Node node = new Mica2Node(Simulator.getInstance(),radioModel,new ConstantDriftClock());
+			node.setPosition( Topology.getNextLinePosition());
+			node.setId(i+1);
+			Simulator.getInstance().register(node);				
+			protocol[i] = new PIProtocol(node);
+		}
 				
 		radioModel.updateNeighborhoods();
 	}
@@ -47,8 +51,8 @@ public class SimulatorMain implements TimerHandler{
 	}
 	
 	private void log() {
-		for(int i=0;i<nodes.length;i++){
-			logger.log(nodes[i].toString());
+		for(int i=0;i<protocol.length;i++){
+			logger.log(protocol[i].toString());
 		}
 	}
 }

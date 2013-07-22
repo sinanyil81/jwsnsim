@@ -1,5 +1,7 @@
 package sim.jprowler.applications.PISync;
 
+import sim.jprowler.Node;
+import sim.jprowler.Position;
 import sim.jprowler.Protocol;
 import sim.jprowler.Mica2Node;
 import sim.jprowler.RadioModel;
@@ -17,18 +19,13 @@ public class PIProtocol extends Protocol implements TimerHandler{
 	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
 	float K_max = 0.000004f/BOUNDARY;
-
-	/** This field is true if this mote rebroadcasted the message already. */
-	boolean sent = false;
 	
 	Timer timer0 = null;
 	PIClock piClock = new PIClock();
 		
-	public PIProtocol(int nodeId, double x, double y, double z, RadioModel radio){
-		super (new Mica2Node(Simulator.getInstance(),radio,new ConstantDriftClock()));	
-		getNode().setPosition( x, y ,z );
-		getNode().setId( nodeId );
-		Simulator.getInstance().register(getNode());
+	public PIProtocol(Node node){
+		super (node);	
+		
 		getNode().turnOn();
 		timer0 = new Timer(getNode().getClock(), this);
 		timer0.startPeriodic(BEACON_RATE);
