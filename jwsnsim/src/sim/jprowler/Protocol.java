@@ -104,4 +104,8 @@ public abstract class Protocol {
 	 */
 	public void sendMessageDone(){
 	}	
+	
+	public String toString(){
+		return "";
+	}
 }
