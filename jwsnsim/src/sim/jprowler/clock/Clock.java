@@ -8,4 +8,5 @@ public interface Clock {
 	public void setValue(UInt32 value);
 	public double getDrift();
 	public void setDrift(double drift);
+	public void stop();
 }

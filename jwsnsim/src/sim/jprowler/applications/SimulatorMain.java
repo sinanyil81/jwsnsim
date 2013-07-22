@@ -37,7 +37,7 @@ public class SimulatorMain implements TimerHandler{
 		
 		nodes[0] = node1;
 		nodes[1] = node2;
-		
+				
 		radioModel.updateNeighborhoods();
 	}
 

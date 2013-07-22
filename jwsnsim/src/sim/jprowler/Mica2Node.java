@@ -175,10 +175,10 @@ public class Mica2Node extends Node {
 			}
 		}
 
-		private void setEventTime(RadioPacket message) {
+		private void setEventTime(RadioPacket packet) {
 			UInt32 age = Mica2Node.this.getClock().getValue();
-			age = age.subtract(message.getEventTime());
-			message.setEventTime(age);		
+			age = age.subtract(packet.getEventTime());
+			packet.setEventTime(age);		
 		}
 	}
 
@@ -355,8 +355,8 @@ public class Mica2Node extends Node {
 			if (!transmitting && isReceivable(level, noiseStrength)) {
 				// start receiving
 				parentNode = (Node) stream;
-				receiving = true;
-//				System.out.println("Receiving started"+Mica2Node.this.id);
+				receiving = true;				
+				setReceptionTimestamp(((Mica2Node)parentNode).message);
 				corrupted = false;
 				signalStrength = level;
 			} else {
@@ -365,6 +365,13 @@ public class Mica2Node extends Node {
 				System.out.println(noiseStrength);
 			}
 		}
+	}
+
+	private void setReceptionTimestamp(RadioPacket packet) {
+			UInt32 timestamp = getClock().getValue();
+			packet.setTimestamp(timestamp);
+			timestamp  = timestamp.subtract(packet.getEventTime());
+			packet.setEventTime(timestamp);
 	}
 
 	/**

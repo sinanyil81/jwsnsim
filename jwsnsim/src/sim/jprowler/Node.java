@@ -75,6 +75,10 @@ public abstract class Node {
 	private Neighborhood neighborhood;
 	
 	private Clock clock;
+	
+	private boolean isOn = false;
+	
+	private RadioModel radioModel;
 
 	/**
 	 * Parameterized constructor, sets the simulator and creates an initial 
@@ -86,14 +90,36 @@ public abstract class Node {
 	public Node(Simulator sim, RadioModel radioModel,Clock clock){
 		this.simulator = sim;
 		this.clock = clock;
+		this.radioModel = radioModel;
 		neighborhood = radioModel.createNeighborhood();
 	} 
+	
+	public boolean isOn(){
+		return isOn;
+	}
+	
+	/**
+	 * 
+	 */
+	public void turnOn(){
+		isOn = true;
+		clock.start();
+	}
+	
+	public void turnOff(){
+		isOn = false;
+		clock.stop();
+	}
 	
 	/**
 	 * A getter method used by the RadioModels to manipulate neighborhood of nodes. 
 	 */
 	public Neighborhood getNeighborhood(){
 		return neighborhood;
+	}
+	
+	public RadioModel getRadioModel(){
+		return this.radioModel;
 	}
 
 	/**

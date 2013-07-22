@@ -10,16 +10,6 @@ import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
 import sim.type.UInt32;
 
-
-/**
- * This is a sample application, it shows a way of utilizing the Prowler 
- * simulator. This is a broadcast application, where a mote in the middle of the 
- * field broadcasts a message which is further broadcasted by all the recepients.
- * Please note that this is not the only way of writing applications, this is 
- * just an example.
- * 
- * @author Gabor Pap, Gyorgy Balogh, Miklos Maroti
- */
 public class PIProtocol extends Protocol implements TimerHandler{
 	
 	private static final int BEACON_RATE = 30000000;
@@ -39,6 +29,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 		getNode().setPosition( x, y ,z );
 		getNode().setId( nodeId );
 		Simulator.getInstance().register(getNode());
+		getNode().turnOn();
 		timer0 = new Timer(getNode().getClock(), this);
 		timer0.startPeriodic(BEACON_RATE);
 	}

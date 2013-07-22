@@ -93,11 +93,18 @@ public class GaussianRadioModel extends RadioModel{
         double[] staticFadings = new double[nodeNum];
         
         for (Iterator<Node> iterator1 = nodes.iterator(); iterator1.hasNext();) {
-			Node node1 = (Node) iterator1.next();		
+			Node node1 = (Node) iterator1.next();	
+			
+			if(!node1.isOn())
+				continue;
+			
 			int i = 0;
 			
 			for (Iterator<Node> iterator2 = nodes.iterator(); iterator2.hasNext();) {
-				Node node2 = (Node) iterator2.next();				
+				Node node2 = (Node) iterator2.next();
+				
+				if(!node2.isOn())
+					continue;
 				
 				double staticRadioStrength = getStaticFading(node1, node2);
 				if( staticRadioStrength >= radioStrengthCutoff && node1 != node2){

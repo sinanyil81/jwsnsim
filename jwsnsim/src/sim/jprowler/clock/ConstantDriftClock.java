@@ -77,6 +77,11 @@ public class ConstantDriftClock implements Clock {
 		started = true;	
 		lastRead = Simulator.getInstance().getTime();
 	}
+	
+	public void stop(){
+		started = false;
+		this.clock = 0.0;
+	}
 
 	@Override
 	public void setValue(UInt32 value) {
