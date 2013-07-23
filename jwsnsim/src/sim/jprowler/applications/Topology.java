@@ -11,7 +11,7 @@ public class Topology {
 	}
 	
 	public static Position getNextLinePosition(){
-		Position position =  new Position(counter*10,counter*10,0);
+		Position position =  new Position(counter*14,0,0);
 		counter++;
 		return position;
 	}

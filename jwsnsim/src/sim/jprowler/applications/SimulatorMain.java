@@ -3,6 +3,7 @@ package sim.jprowler.applications;
 import sim.jprowler.GaussianRadioModel;
 import sim.jprowler.Mica2Node;
 import sim.jprowler.Node;
+import sim.jprowler.Position;
 import sim.jprowler.Simulator;
 import sim.jprowler.applications.PISync.PIProtocol;
 import sim.jprowler.clock.ConstantDriftClock;
@@ -18,8 +19,9 @@ public class SimulatorMain implements TimerHandler{
 			
 	public static void main(String[] args) throws Exception{			
 		createNodes();		
+//		createRandomNodes(300, 5);
 		startLogging("deneme");
-        Simulator.getInstance().run(30000);       
+        Simulator.getInstance().run(50000);       
 	}
 
 	private static void startLogging(String filename) {
@@ -47,6 +49,23 @@ public class SimulatorMain implements TimerHandler{
 				
 		radioModel.updateNeighborhoods();
 	}
+	
+	public static void createRandomNodes(double areaWidth, double maxElevation) { 
+		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
+		
+		System.out.println("creating nodes...");
+		
+		for( int i=0; i< NUMNODES; ++i ){
+			Node node = new Mica2Node(Simulator.getInstance(),radioModel,new ConstantDriftClock());
+			node.setPosition( new Position(areaWidth * Simulator.random.nextDouble(), 
+										   areaWidth * Simulator.random.nextDouble(), 
+										   maxElevation * Simulator.random.nextDouble()));
+			node.setId( 1 + i);
+			Simulator.getInstance().register(node);				
+			protocol[i] = new PIProtocol(node);           
+		}
+	}
+
 
 	@Override
 	public void fireEvent(Timer timer) {

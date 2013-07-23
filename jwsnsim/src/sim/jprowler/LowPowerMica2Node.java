@@ -33,7 +33,7 @@ import sim.jprowler.clock.Clock;
  * 
  * @author Gyorgy Balogh, Gabor Pap, Miklos Maroti
  */
-public class Mica2Node extends Node {
+public class LowPowerMica2Node extends Node {
 	/**
 	 * In this simulation not messages but references to motes are passed. All
 	 * this means is that the Mica2Node has to hold the information on the
@@ -81,7 +81,7 @@ public class Mica2Node extends Node {
 	/**
 	 * State variable, true if radio failed to transmit a message do to high
 	 * radio traffic, this means it has to retry it later, which is done using
-	 * the {@link Mica2Node#generateBackOffTime} function.
+	 * the {@link LowPowerMica2Node#generateBackOffTime} function.
 	 */
 	protected boolean sendingPostponed = false;
 
@@ -102,10 +102,7 @@ public class Mica2Node extends Node {
 	public static int sendRandomBackOffTime = 30*25; // 0.75 ms
 
 	/** The time of one transmission in 1/{@link Simulator#ONE_SECOND} second. */
-	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
-	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
-	/** 46 * 32 microsec = approximately 1.5 ms */
-	public static int sendTransmissionTime = 1500; 
+	public static int sendTransmissionTime = 960; 
 
 	// //////////////////////////////
 	// EVENTS
@@ -115,7 +112,7 @@ public class Mica2Node extends Node {
 	 * Every mote has to test the radio traffic before transmitting a message,
 	 * if there is to much traffic this event remains a test and the mote
 	 * repeats it later, if there is no significant traffic this event initiates
-	 * message transmission and posts a {@link Mica2Node#EndTransmissionEvent}
+	 * message transmission and posts a {@link LowPowerMica2Node#EndTransmissionEvent}
 	 * event.
 	 */
 	private TestChannelEvent testChannelEvent = new TestChannelEvent();
@@ -136,14 +133,14 @@ public class Mica2Node extends Node {
 	private double noiseStrength = 0;
 
 	/**
-	 * The constant self noise level. See either the {@link Mica2Node#calcSNR}
-	 * or the {@link Mica2Node#isChannelFree} function.
+	 * The constant self noise level. See either the {@link LowPowerMica2Node#calcSNR}
+	 * or the {@link LowPowerMica2Node#isChannelFree} function.
 	 */
 	public double noiseVariance = 0.025;
 
 	/**
 	 * The maximum noise level that is allowed on sending. This is actually a
-	 * multiplicator of the {@link Mica2Node#noiseVariance}.
+	 * multiplicator of the {@link LowPowerMica2Node#noiseVariance}.
 	 */
 	public double maxAllowedNoiseOnSending = 5;
 
@@ -171,8 +168,8 @@ public class Mica2Node extends Node {
 			if (isChannelFree(noiseStrength)) {
 				// start transmitting
 				transmitting = true;
-				setEventTime(Mica2Node.this.sentPacket);
-				beginTransmission(1, Mica2Node.this);
+				setEventTime(LowPowerMica2Node.this.sentPacket);
+				beginTransmission(1, LowPowerMica2Node.this);
 				endTransmissionEvent.register(sendTransmissionTime);
 			} else {
 				// test again
@@ -181,7 +178,7 @@ public class Mica2Node extends Node {
 		}
 
 		private void setEventTime(RadioPacket packet) {
-			UInt32 age = Mica2Node.this.getClock().getValue();
+			UInt32 age = LowPowerMica2Node.this.getClock().getValue();
 			age = age.subtract(packet.getEventTime());
 			packet.setEventTime(age);		
 		}
@@ -212,12 +209,12 @@ public class Mica2Node extends Node {
 	 * @param radioModel
 	 *            the RadioModel used on this mote
 	 */
-	public Mica2Node(Simulator sim, RadioModel radioModel,Clock clock) {
+	public LowPowerMica2Node(Simulator sim, RadioModel radioModel,Clock clock) {
 		super(sim, radioModel,clock);
 	}
 
 	/**
-	 * Calls the {@link Mica2Node#addNoise} method. See also
+	 * Calls the {@link LowPowerMica2Node#addNoise} method. See also
 	 * {@link Node#receptionBegin} for more information.
 	 */
 	protected void receptionBegin(double strength, Object stream) {
@@ -225,7 +222,7 @@ public class Mica2Node extends Node {
 	}
 
 	/**
-	 * Calls the {@link Mica2Node#removeNoise} method. See also
+	 * Calls the {@link LowPowerMica2Node#removeNoise} method. See also
 	 * {@link Node#receptionEnd} for more information.
 	 */
 	protected void receptionEnd(double strength, Object stream) {
@@ -245,7 +242,7 @@ public class Mica2Node extends Node {
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
 		if (sending){
-			System.out.println("FALSE "+Mica2Node.this.id);
+			System.out.println("FALSE "+LowPowerMica2Node.this.id);
 			return false;
 		}
 		else {
@@ -361,7 +358,7 @@ public class Mica2Node extends Node {
 				senderNode = (Node) stream;
 				receiving = true;	
 				
-				receivedPacket = ((Mica2Node)senderNode).sentPacket.clone();
+				receivedPacket = ((LowPowerMica2Node)senderNode).sentPacket.clone();
 				setReceptionTimestamp(receivedPacket);
 				
 				corrupted = false;
