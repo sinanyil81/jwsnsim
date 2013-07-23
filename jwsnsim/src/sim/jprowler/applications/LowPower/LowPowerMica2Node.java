@@ -21,10 +21,18 @@
  * Author: Gyorgy Balogh, Gabor Pap, Miklos Maroti
  * Date last modified: 02/09/04
  */
-package sim.jprowler;
+package sim.jprowler.applications.LowPower;
 
+import sim.jprowler.Event;
+import sim.jprowler.Node;
+import sim.jprowler.Protocol;
+import sim.jprowler.RadioModel;
+import sim.jprowler.RadioPacket;
+import sim.jprowler.Simulator;
 import sim.jprowler.UInt32;
 import sim.jprowler.clock.Clock;
+import sim.jprowler.clock.Timer;
+import sim.jprowler.clock.TimerHandler;
 
 /**
  * This class represents a mote and all its properties important from the
@@ -33,7 +41,20 @@ import sim.jprowler.clock.Clock;
  * 
  * @author Gyorgy Balogh, Gabor Pap, Miklos Maroti
  */
-public class LowPowerMica2Node extends Node {
+public class LowPowerMica2Node extends Node implements TimerHandler{
+	
+	/** -------- LOW POWER MAC Protocol Parameters -------------------- **/
+	private final static int EPOCH = 30000000; /** Communication Period **/
+	private double alpha = 1.0;
+	
+	/** Logical clock **/
+	private UInt32 value = new UInt32(); 
+	public float rate = 0.0f;
+	UInt32 updateLocalTime = new UInt32();	
+	
+	Timer timer = new Timer(getClock(), this);	
+	/** -------------------------------------------------------------- **/
+	
 	/**
 	 * In this simulation not messages but references to motes are passed. All
 	 * this means is that the Mica2Node has to hold the information on the
@@ -241,7 +262,6 @@ public class LowPowerMica2Node extends Node {
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
-		this.radioModel.
 		if (sending){
 			System.out.println("FALSE "+LowPowerMica2Node.this.id);
 			return false;
@@ -413,5 +433,11 @@ public class LowPowerMica2Node extends Node {
 		} else {
 			noiseStrength -= level;
 		}
+	}
+
+	@Override
+	public void fireEvent(Timer timer) {
+		// TODO Auto-generated method stub
+		
 	}
 }
