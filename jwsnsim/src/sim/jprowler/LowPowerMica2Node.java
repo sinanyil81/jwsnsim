@@ -241,6 +241,7 @@ public class LowPowerMica2Node extends Node {
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
+		this.radioModel.
 		if (sending){
 			System.out.println("FALSE "+LowPowerMica2Node.this.id);
 			return false;

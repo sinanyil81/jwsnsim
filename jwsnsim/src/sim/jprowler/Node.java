@@ -65,13 +65,13 @@ public abstract class Node {
 	 * The neighborhood of this node, meaning all the neighboring nodes which 
 	 * interact with this one.
 	 */
-	private Neighborhood neighborhood;
+	protected Neighborhood neighborhood;
 	
 	private Clock clock;
 	
 	private boolean isOn = false;
 	
-	private RadioModel radioModel;
+	protected RadioModel radioModel;
 
 	/**
 	 * Parameterized constructor, sets the simulator and creates an initial 

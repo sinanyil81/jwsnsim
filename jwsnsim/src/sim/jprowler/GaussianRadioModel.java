@@ -228,5 +228,11 @@ public class GaussianRadioModel extends RadioModel{
 				
 			stream = null;
 		}
+
+		@Override
+		protected Node[] getNeighbors() {
+
+			return neighbors;
+		}
 	}
 }
