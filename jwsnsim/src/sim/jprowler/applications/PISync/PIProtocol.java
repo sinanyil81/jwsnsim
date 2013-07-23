@@ -64,7 +64,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 
 	
 	public void receiveMessage(RadioPacket packet){
-//		PIPayload payload = (PIPayload)packet.getPayload();
+		PIPayload payload = (PIPayload)packet.getPayload();
 //		System.out.println("------------------------------------------------------------");
 //		System.out.println("Node:"+getNode().getId() + " receiving from node " + payload.nodeid);
 //		System.out.println("r clock value:"+payload.clock.toLong());

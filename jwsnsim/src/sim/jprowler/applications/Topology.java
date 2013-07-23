@@ -11,14 +11,14 @@ public class Topology {
 	}
 	
 	public static Position getNextLinePosition(){
-		Position position =  new Position(counter*5,counter*5,0);
+		Position position =  new Position(counter*10,counter*10,0);
 		counter++;
 		return position;
 	}
 	
 	public static Position getNextRingPosition(int numNodes){
-		double oneStep = 360.0 / numNodes;
-		double radius = 10/Math.toRadians(oneStep); 
+		double oneStep = 360.0 / numNodes;		
+    	double radius = 15.0*360.0/(oneStep*2.0*Math.PI);
 
 		
 		Position position = new Position(radius * Math.cos(Math.toRadians(counter * oneStep)),
@@ -28,9 +28,9 @@ public class Topology {
 	}
 	
 	public static Position getNextDensePosition(int density){
-		double stepsize = 2.0*10.0/(double)density;
+		double stepsize = 2.0*15.0/(double)density;
 		
-		Position position = new Position(counter*stepsize,0,0);
+		Position position = new Position(counter*stepsize,counter*stepsize,0);
 		counter++;
 		return position;
 	}

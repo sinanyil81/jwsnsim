@@ -90,19 +90,19 @@ public class Mica2Node extends Node {
 	// //////////////////////////////
 
 	/** The constant component of the time spent waiting before a transmission. */
-	public static int sendMinWaitingTime = 200*25;
+	public static int sendMinWaitingTime = 200*25; // 5 ms
 
 	/** The variable component of the time spent waiting before a transmission. */
-	public static int sendRandomWaitingTime = 128*25;
+	public static int sendRandomWaitingTime = 128*25; // 3.2 ms
 
-	/** The constant component of the backoff time. */
-	public static int sendMinBackOffTime = 100*25;
+	/** The constant component of the backoff time. */ 
+	public static int sendMinBackOffTime = 100*25; // 2.5 ms
 
 	/** The variable component of the backoff time. */
-	public static int sendRandomBackOffTime = 30*25;
+	public static int sendRandomBackOffTime = 30*25; // 0.75 ms
 
 	/** The time of one transmission in 1/{@link Simulator#ONE_SECOND} second. */
-	public static int sendTransmissionTime = 960;
+	public static int sendTransmissionTime = 960; 
 
 	// //////////////////////////////
 	// EVENTS

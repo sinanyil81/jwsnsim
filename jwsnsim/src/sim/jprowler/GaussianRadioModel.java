@@ -95,6 +95,8 @@ public class GaussianRadioModel extends RadioModel{
         for (Iterator<Node> iterator1 = nodes.iterator(); iterator1.hasNext();) {
 			Node node1 = (Node) iterator1.next();	
 			
+			System.out.println("---------- Node "+ node1.getId()+" ------------");
+			
 			if(!node1.isOn())
 				continue;
 			
@@ -111,8 +113,11 @@ public class GaussianRadioModel extends RadioModel{
                     neighbors[i] = node2;
                     staticFadings[i] = staticRadioStrength;                    
 					i++;
+					System.out.println(node2.getId());
 				}				
 			}
+			
+			System.out.println("-------------------------------");
 			
 			Neighborhood neighborhood = (Neighborhood)node1.getNeighborhood();
 			neighborhood.neighbors = new Node[i];
