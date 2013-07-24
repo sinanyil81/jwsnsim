@@ -65,18 +65,16 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	private static final float MAX_PPM = 0.0001f;	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
 	float K_max = 0.000004f/BOUNDARY;
-	
-	LogicalClock logicalClock = new LogicalClock();
-	
+		
 	int calculateSkew(RadioPacket packet) {
 		UInt32 neighborClock = packet.getEventTime();
-		UInt32 myClock = logicalClock.getValue(packet.getTimestamp());
+		UInt32 myClock = LogicalClock.getInstance().getValue(packet.getTimestamp());
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
 
 	private void synchronize(RadioPacket packet) {
-		logicalClock.update(packet.getTimestamp());
+		LogicalClock.getInstance().update(packet.getTimestamp());
 		int skew = calculateSkew(packet);
 		
 		/*  initial offset compensation */ 
@@ -85,16 +83,16 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			float x = BOUNDARY - Math.abs(skew);					
 			float K_i = x*K_max/BOUNDARY;
 						
-			logicalClock.rate += K_i*0.5*(float)skew;
+			LogicalClock.getInstance().rate += K_i*0.5*(float)skew;
 		}			
 				
 		if(skew > 1000){
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			logicalClock.setValue(myClock.add(skew),packet.getTimestamp());
+			UInt32 myClock = LogicalClock.getInstance().getValue(packet.getEventTime());
+			LogicalClock.getInstance().setValue(myClock.add(skew),packet.getTimestamp());
 		}
 		else{
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			logicalClock.setValue(myClock.add(skew/2),packet.getTimestamp());
+			UInt32 myClock = LogicalClock.getInstance().getValue(packet.getEventTime());
+			LogicalClock.getInstance().setValue(myClock.add(skew/2),packet.getTimestamp());
 		}			
 	}
 	/** -------------------------------------------------------------- **/
@@ -555,15 +553,15 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 
 	private void setEventTime() {		
 		UInt32 localTime = getClock().getValue();
-		logicalClock.update(localTime);
-		UInt32 globalTime = logicalClock.getValue(localTime);
+		LogicalClock.getInstance().update(localTime);
+		UInt32 globalTime = LogicalClock.getInstance().getValue(localTime);
 		packetToSend.setEventTime(globalTime);
 	}
 
 	private void setNextTransmissionTime() {
 		UInt32 localTime = getClock().getValue();
-		logicalClock.update(localTime);
-		UInt32 globalTime = logicalClock.getValue(localTime);
+		LogicalClock.getInstance().update(localTime);
+		UInt32 globalTime = LogicalClock.getInstance().getValue(localTime);
 		
 		int mod = globalTime.modulus(BEACON_RATE);
 		int remainingTime = BEACON_RATE - mod + getId()*1000000;

@@ -50,8 +50,12 @@ public class LowPowerProtocol extends Protocol implements TimerHandler{
 	
 	public String toString(){
 		String s = "" + Simulator.getInstance().getSecond();
-	
-//		System.out.println(s);
+
+		s += " " + getNode().getId();
+		s += " " + LogicalClock.getInstance().getValue(getNode().getClock().getValue()).toString();
+		s += " " + Float.floatToIntBits((1.0f+LogicalClock.getInstance().rate)*(float)(1.0f+getNode().getClock().getDrift()));
+		
+		System.out.println(s);
 		
 		return s;
 	}

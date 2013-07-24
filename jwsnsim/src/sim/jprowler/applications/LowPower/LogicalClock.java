@@ -3,11 +3,25 @@ package sim.jprowler.applications.LowPower;
 import sim.jprowler.UInt32;
 
 public class LogicalClock {
+	
+	private static LogicalClock logicalClock = null;
 
 	private UInt32 value = new UInt32();
 	public float rate = 0.0f;
 
 	UInt32 updateLocalTime = new UInt32();	
+	
+	protected LogicalClock(){
+		
+	}
+
+	public static LogicalClock getInstance() {
+		if(logicalClock == null){
+			logicalClock = new LogicalClock();
+		}
+
+		return logicalClock;
+	}
 
 	public void update(UInt32 local) {
 		int timePassed = local.subtract(updateLocalTime).toInteger();
