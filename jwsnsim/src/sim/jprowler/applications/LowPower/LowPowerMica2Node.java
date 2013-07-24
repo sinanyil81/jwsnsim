@@ -49,8 +49,8 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	/** Communication Period **/
 	private double alpha = 1.0;
 
-	Timer sendTimer = new Timer(getClock(), this);
-	Timer receiveTimer = new Timer(getClock(), this);
+	Timer sendTimer = null;
+	Timer receiveTimer = null;
 
 	public enum RadioState {
 		OFF, IDLE, 
@@ -104,34 +104,18 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	 * this means is that the Mica2Node has to hold the information on the
 	 * sender application which runs on this very mote.
 	 */
-	protected Protocol senderApplication = null;
-
-	/**
-	 * This node is the one that sent the last message or the one this node is
-	 * receiving a message from right now. It is mainly used for display
-	 * purposes, as you know this information is not embedded into any TinyOS
-	 * message.
-	 */
-	protected Node senderNode = null;
+	protected Protocol senderApplication = null;	
 
 	/**
 	 * This is the message being sent, on reception it is extracted and the
 	 * message part is forwarded to the appropriate application, see
 	 * {@link Protocol#receiveMessage}.
 	 */
-	protected RadioPacket packetToSend = null;
-	protected RadioPacket packetToReceive = null;
-
-	// //////////////////////////////
-	// STATE VARIABLES
-	// //////////////////////////////
-
-	/**
-	 * State variable, true if radio is in sending mode, this means it has a one
-	 * message long buffer, which is full and the Node is trying to transmit its
-	 * content.
-	 */
 	protected boolean hasPacketToSend = false;
+	protected RadioPacket packetToSend = new RadioPacket(null);
+	
+	protected Node senderNode = null;
+	protected RadioPacket packetToReceive = null;
 
 	/** State variable, true if the last received message got corrupted by noise */
 	protected boolean corrupted = false;
@@ -252,9 +236,10 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 		public void execute() {
 			endTransmission();
 			hasPacketToSend = false;
-			packetToSend = null;
-			senderApplication.sendMessageDone(true);
-			senderApplication = null;
+			if(senderApplication!=null){
+				senderApplication.sendMessageDone(true);
+				senderApplication = null;				
+			}
 			radioState = RadioState.IDLE;
 			sleepEvent.execute();			
 		}
@@ -278,6 +263,8 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	}
 
 	protected boolean allowedToTurnOffRadio() {
+		
+		/* TODO */
 		return false;
 	}
 
@@ -292,7 +279,11 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	 */
 	public LowPowerMica2Node(Simulator sim, RadioModel radioModel, Clock clock) {
 		super(sim, radioModel, clock);
-		sendTimer.startOneshot(getId() * 1000000);
+		
+		sendTimer = new Timer(getClock(), this);
+		receiveTimer = new Timer(getClock(), this);
+		
+		sendTimer.startOneshot(1000);
 	}
 
 	/**
@@ -328,7 +319,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			return false;
 		} else {
 			hasPacketToSend = true;
-			this.packetToSend = packet;
+			packetToSend.setPayload(packet.getPayload());
 			senderApplication = app;
 			return true;
 		}
@@ -416,6 +407,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			break;
 			
 		case WAITING_TO_RECEIVE:
+		case IDLE:
 			if (isReceivable(level, noiseStrength)){
 				// start receiving
 				radioState = RadioState.RECEIVING;
@@ -490,6 +482,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	public void fireEvent(Timer timer) {
 
 		if (timer == sendTimer) {
+			setNextTransmissionTime();
 
 			switch (radioState) {
 
@@ -518,13 +511,12 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			default:
 				/** cant send packet since transmitting or receiving */
 				hasPacketToSend = false;
-				packetToSend = null;
-				senderApplication.sendMessageDone(false);
-				senderApplication = null;
+				if(senderApplication!=null){
+					senderApplication.sendMessageDone(false);
+					senderApplication = null;
+				}
 				break;
-			}
-
-			setNextTransmissionTime();
+			}		
 		} else if (timer == receiveTimer) {
 			switch (radioState) {
 			
@@ -572,6 +564,10 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 		UInt32 localTime = getClock().getValue();
 		logicalClock.update(localTime);
 		UInt32 globalTime = logicalClock.getValue(localTime);
+		
+		int mod = globalTime.modulus(BEACON_RATE);
+		int remainingTime = BEACON_RATE - mod + getId()*1000000;
+		sendTimer.startOneshot(remainingTime);
 	}
 
 	private void setNextReceptionTime() {

@@ -110,5 +110,9 @@ public class UInt32 implements Comparable<UInt32>{
 	public int compareTo(UInt32 o) {
 		return (int)(value - o.toLong());
 	}
+	
+	public int modulus(int mod){
+		return (int) (this.value % mod);
+	}
 
 }
