@@ -30,6 +30,7 @@ import sim.jprowler.RadioModel;
 import sim.jprowler.RadioPacket;
 import sim.jprowler.Simulator;
 import sim.jprowler.UInt32;
+import sim.jprowler.applications.PISync.PIPayload;
 import sim.jprowler.clock.Clock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
@@ -43,12 +44,10 @@ import sim.jprowler.clock.TimerHandler;
  */
 public class LowPowerMica2Node extends Node implements TimerHandler {
 
-	/** -------- LOW POWER Protocol Parameters -------------------- **/
-	private final static int EPOCH = 30000000;
+	/** ----------------- LOW POWER Parameters -------------------- **/
+	private final static int BEACON_RATE = 30000000;
 	/** Communication Period **/
 	private double alpha = 1.0;
-
-	LogicalClock logicalClock = new LogicalClock();
 
 	Timer sendTimer = new Timer(getClock(), this);
 	Timer receiveTimer = new Timer(getClock(), this);
@@ -60,6 +59,44 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	}
 
 	RadioState radioState = RadioState.IDLE;
+	/** -------------------------------------------------------------- **/
+	
+	/** --------- Time Synchronization Parameters -------------------- **/
+	private static final float MAX_PPM = 0.0001f;	
+	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
+	float K_max = 0.000004f/BOUNDARY;
+	
+	LogicalClock logicalClock = new LogicalClock();
+	
+	int calculateSkew(RadioPacket packet) {
+		UInt32 neighborClock = packet.getEventTime();
+		UInt32 myClock = logicalClock.getValue(packet.getTimestamp());
+
+		return neighborClock.subtract(myClock).toInteger();
+	}
+
+	private void synchronize(RadioPacket packet) {
+		logicalClock.update(packet.getTimestamp());
+		int skew = calculateSkew(packet);
+		
+		/*  initial offset compensation */ 
+		if(Math.abs(skew) <= BOUNDARY){	
+					
+			float x = BOUNDARY - Math.abs(skew);					
+			float K_i = x*K_max/BOUNDARY;
+						
+			logicalClock.rate += K_i*0.5*(float)skew;
+		}			
+				
+		if(skew > 1000){
+			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+			logicalClock.setValue(myClock.add(skew),packet.getTimestamp());
+		}
+		else{
+			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+			logicalClock.setValue(myClock.add(skew/2),packet.getTimestamp());
+		}			
+	}
 	/** -------------------------------------------------------------- **/
 
 	/**
@@ -113,12 +150,9 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	/** The amount of time spent for waking up radio */
 	public static int wakeUpTime = 180;
 
-	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
-	/**
+	/** For CC2420 250 kbps -> approximately 32 microseconds per byte.
 	 * In TinyOS, default packet size is 11 byte header, 28 byte payload, 7 byte
-	 * meta
-	 */
-	/** 46 * 32 microsec = approximately 1.5 ms */
+	 * meta= 46 * 32 microsec = approximately 1.5 ms */
 	public static int sendTransmissionTime = 1500;
 
 	// //////////////////////////////
@@ -132,7 +166,6 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	// //////////////////////////////
 	// Noise and signal
 	// //////////////////////////////
-
 	/** Signal stregth of transmitting or parent node. */
 	private double signalStrength = 0;
 
@@ -196,7 +229,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			
 			switch (radioState) {
 			case PROCESSING_TO_TRANSMIT:
-				radioState = RadioState.TRANSMITTING;
+				radioState = RadioState.TRANSMITTING;				
 				beginTransmission(1, LowPowerMica2Node.this);
 				endTransmissionEvent.register(sendTransmissionTime);
 				break;
@@ -409,8 +442,6 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 	private void setReceptionTimestamp(RadioPacket packet) {
 		UInt32 timestamp = getClock().getValue();
 		packet.setTimestamp(timestamp);
-		timestamp = timestamp.subtract(packet.getEventTime());
-		packet.setEventTime(timestamp);
 	}
 
 	/**
@@ -434,6 +465,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 				sleepEvent.execute();
 
 				if (!corrupted) {
+					synchronize(packetToReceive);
 					this.getApplication().receiveMessage(packetToReceive);
 				} else {
 					System.out.println("Corrupted");
@@ -451,6 +483,8 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 			break;
 		}
 	}
+	
+
 
 	@Override
 	public void fireEvent(Timer timer) {
@@ -527,15 +561,17 @@ public class LowPowerMica2Node extends Node implements TimerHandler {
 		return 0;
 	}
 
-	private void setEventTime() {
-		UInt32 age = getClock().getValue();
-		age = age.subtract(packetToSend.getEventTime());
-		packetToSend.setEventTime(age);
+	private void setEventTime() {		
+		UInt32 localTime = getClock().getValue();
+		logicalClock.update(localTime);
+		UInt32 globalTime = logicalClock.getValue(localTime);
+		packetToSend.setEventTime(globalTime);
 	}
 
 	private void setNextTransmissionTime() {
-		// TODO Auto-generated method stub
-
+		UInt32 localTime = getClock().getValue();
+		logicalClock.update(localTime);
+		UInt32 globalTime = logicalClock.getValue(localTime);
 	}
 
 	private void setNextReceptionTime() {
