@@ -43,17 +43,25 @@ import sim.jprowler.clock.TimerHandler;
  */
 public class LowPowerMica2Node extends Node implements TimerHandler{
 	
-	/** -------- LOW POWER MAC Protocol Parameters -------------------- **/
+	/** -------- LOW POWER Protocol Parameters -------------------- **/
+	private boolean radioOn = true;
+
 	private final static int EPOCH = 30000000; /** Communication Period **/
 	private double alpha = 1.0;
 	
-	/** Logical clock **/
-	private UInt32 value = new UInt32(); 
-	public float rate = 0.0f;
-	UInt32 updateLocalTime = new UInt32();	
+	LogicalClock logicalClock = new LogicalClock(); 
 	
-	Timer timer = new Timer(getClock(), this);	
+	Timer sendTimer = new Timer(getClock(), this);
+	Timer receiveTimer = new Timer(getClock(), this);	
+	
+	public enum RadioState {
+	    OFF, IDLE, WAKEUP, TRANSMITTING, RECEIVING
+	}
+	
+	RadioState radioState = RadioState.IDLE;	
 	/** -------------------------------------------------------------- **/
+	
+
 	
 	/**
 	 * In this simulation not messages but references to motes are passed. All
@@ -76,7 +84,6 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * {@link Protocol#receiveMessage}.
 	 */
 	protected RadioPacket sentPacket = null;
-	
 	protected RadioPacket receivedPacket = null;
 
 	// //////////////////////////////
@@ -88,59 +95,38 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * message long buffer, which is full and the Node is trying to transmit its
 	 * content.
 	 */
-	protected boolean sending = false;
-
-	/** State variable, true if the radio is transmitting a message right now. */
-	protected boolean transmitting = false;
-
-	/** State variable, true if the radio is in receiving mode */
-	protected boolean receiving = false;
+	protected boolean hasPacketToSend = false;
+	
+	protected boolean transmitSchedule = false;
+	
+	protected boolean receiveSchedule = false;
 
 	/** State variable, true if the last received message got corrupted by noise */
 	protected boolean corrupted = false;
 
-	/**
-	 * State variable, true if radio failed to transmit a message do to high
-	 * radio traffic, this means it has to retry it later, which is done using
-	 * the {@link LowPowerMica2Node#generateBackOffTime} function.
-	 */
-	protected boolean sendingPostponed = false;
-
 	// //////////////////////////////
 	// MAC layer specific constants
 	// //////////////////////////////
+	
+	/** The constant amount of time spent to send time information after
+	 * logical clock is calculated */
+	public static int processingTime = 100;	
+	public static int processingRandomTime = 25;
+	
+	/** The amount of time spent for waking up radio */
+	public static int wakeUpTime = 180;
 
-	/** The constant component of the time spent waiting before a transmission. */
-	public static int sendMinWaitingTime = 200*25; // 5 ms
-
-	/** The variable component of the time spent waiting before a transmission. */
-	public static int sendRandomWaitingTime = 128*25; // 3.2 ms
-
-	/** The constant component of the backoff time. */ 
-	public static int sendMinBackOffTime = 100*25; // 2.5 ms
-
-	/** The variable component of the backoff time. */
-	public static int sendRandomBackOffTime = 30*25; // 0.75 ms
-
-	/** The time of one transmission in 1/{@link Simulator#ONE_SECOND} second. */
-	public static int sendTransmissionTime = 960; 
+	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
+	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
+	/** 46 * 32 microsec = approximately 1.5 ms */
+	public static int sendTransmissionTime = 1500;
 
 	// //////////////////////////////
 	// EVENTS
 	// //////////////////////////////
-
-	/**
-	 * Every mote has to test the radio traffic before transmitting a message,
-	 * if there is to much traffic this event remains a test and the mote
-	 * repeats it later, if there is no significant traffic this event initiates
-	 * message transmission and posts a {@link LowPowerMica2Node#EndTransmissionEvent}
-	 * event.
-	 */
-	private TestChannelEvent testChannelEvent = new TestChannelEvent();
-
-	/**
-	 * Signals the end of a transmission.
-	 */
+	private RadioWakeUpEvent wakeUpEvent = new RadioWakeUpEvent();
+	private ProcessingEvent processingEvent = new ProcessingEvent();
+	private SleepEvent sleepEvent = new SleepEvent();
 	private EndTransmissionEvent endTransmissionEvent = new EndTransmissionEvent();
 
 	// //////////////////////////////
@@ -173,29 +159,37 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * corrupted.
 	 */
 	public double corruptionSNR = 2.0;
+	
+	/** The event signaled when the radio wake-up is ended **/
+	class RadioWakeUpEvent extends Event {
 
-	/**
-	 * Inner class TestChannelEvent. Represents a test event, this happens when
-	 * the mote listens for radio traffic to decide about transmission.
-	 */
-	class TestChannelEvent extends Event {
-
-		/**
-		 * If the radio channel is clear it begins the transmission process,
-		 * otherwise generates a backoff and restarts testing later. It also
-		 * adds noise to the radio channel if the channel is free.
-		 */
 		public void execute() {
-			if (isChannelFree(noiseStrength)) {
-				// start transmitting
-				transmitting = true;
-				setEventTime(LowPowerMica2Node.this.sentPacket);
-				beginTransmission(1, LowPowerMica2Node.this);
-				endTransmissionEvent.register(sendTransmissionTime);
-			} else {
-				// test again
-				this.register(generateBackOffTime());
+			// turn on radio
+			radioOn = true;
+			
+			if(transmitSchedule){
+				if(!transmitting && !receiving) {
+					transmitting = true;
+					setEventTime(LowPowerMica2Node.this.sentPacket);
+					processingEvent.register(generateProcessingTime());
+				}				
+				
+				transmitSchedule = false;
+
+				// disable sleeping 
+				sleepEvent.unregister();
 			}
+			else if(receiveSchedule){
+				if(!transmitting && !receiving) {
+					sleepEvent.register(setimateReceptionDuration());
+				}
+			}
+			
+		}
+		
+		private int setimateReceptionDuration() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 
 		private void setEventTime(RadioPacket packet) {
@@ -204,9 +198,18 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 			packet.setEventTime(age);		
 		}
 	}
+	
+	/** When CPU processing is ended, this event is signalled and transmission starts */
+	class ProcessingEvent extends Event {
+
+		public void execute() {	
+			beginTransmission(1, LowPowerMica2Node.this);
+			endTransmissionEvent.register(sendTransmissionTime);
+		}
+	}
 
 	/**
-	 * Inner class EndTransmissionEvent. Represents the end of a transmission.
+	 * Represents the end of a transmission.
 	 */
 	class EndTransmissionEvent extends Event {
 		/**
@@ -215,10 +218,25 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 		 */
 		public void execute() {
 			transmitting = false;
-			sending = false;
+			hasPacketToSend = false;
+			sentPacket = null;
 			endTransmission();
-			senderApplication.sendMessageDone();
+			senderApplication.sendMessageDone(true);
+			sleepEvent.execute();	
 		}
+	}
+	
+	class SleepEvent extends Event {
+		public void execute() {
+			if(!receiving && allowedToTurnOffRadio())
+				radioOn = false;
+		}
+	}
+
+
+	
+	protected boolean allowedToTurnOffRadio(){
+		return false;
 	}
 
 	/**
@@ -232,6 +250,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 */
 	public LowPowerMica2Node(Simulator sim, RadioModel radioModel,Clock clock) {
 		super(sim, radioModel,clock);
+		sendTimer.startOneshot(getId()*1000000);
 	}
 
 	/**
@@ -262,47 +281,29 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
-		if (sending){
+		if (hasPacketToSend){
 			System.out.println("FALSE "+LowPowerMica2Node.this.id);
 			return false;
 		}
 		else {
-			sending = true;
+			hasPacketToSend = true;
 			transmitting = false;
-
+			
+			/* save the information about send */
 			this.sentPacket = packet;
 			senderApplication = app;
 
-			if (receiving) {
-				sendingPostponed = true;
-			} else {
-				sendingPostponed = false;
-				testChannelEvent.register(generateWaitingTime());
-			}
 			return true;
 		}
 	}
 
-	/**
-	 * Generates a waiting time, adding a random variable time to a constant
-	 * minimum.
-	 * 
-	 * @return returns the waiting time in milliseconds
-	 */
-	public static int generateWaitingTime() {
-		return sendMinWaitingTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomWaitingTime);
-	}
 
 	/**
-	 * Generates a backoff time, adding a random variable time to a constant
-	 * minimum.
-	 * 
-	 * @return returns the backoff time in milliseconds
+	 * Generates a random processing time
 	 */
-	protected static int generateBackOffTime() {
-		return sendMinBackOffTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomBackOffTime);
+	protected static int generateProcessingTime() {
+		return processingTime
+				+ (int) (Simulator.random.nextDouble() * processingRandomTime);
 	}
 
 	/**
@@ -374,7 +375,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 			if (isMessageCorrupted(signalStrength, noiseStrength))
 				corrupted = true;
 		} else {
-			if (!transmitting && isReceivable(level, noiseStrength)) {
+			if (!transmitting && isReceivable(level, noiseStrength) && radioOn) {
 				// start receiving
 				senderNode = (Node) stream;
 				receiving = true;	
@@ -413,6 +414,10 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	protected void removeNoise(double level, Object stream) {
 		if (senderNode == stream) {
 			receiving = false;
+			
+			sleepEvent.unregister();
+			sleepEvent.execute();
+			
 //			System.out.println("Receiving finished"+Mica2Node.this.id);
 			if (!corrupted) {
 				this.getApplication().receiveMessage(receivedPacket);
@@ -424,12 +429,7 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 			signalStrength = 0;
 			
 			senderNode = null;
-			receivedPacket = null;
-			
-			if (sendingPostponed) {
-				sendingPostponed = false;
-				testChannelEvent.register(generateWaitingTime());
-			}
+			receivedPacket = null;			
 		} else {
 			noiseStrength -= level;
 		}
@@ -437,6 +437,32 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 
 	@Override
 	public void fireEvent(Timer timer) {
+					
+		if(timer == sendTimer){	
+			transmitSchedule = true;
+			setNextTransmitSchedule();								
+		}
+		else if(timer == receiveTimer){			
+			receiveSchedule = true;			
+			setNextReceiveSchedule();
+		}
+		
+		wakeUpRadio();
+	}
+
+	private void wakeUpRadio() {
+		if(radioState != RadioState.OFF)
+			wakeUpEvent.execute();
+		else
+			wakeUpEvent.register(wakeUpTime);
+	}
+
+	private void setNextTransmitSchedule() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void setNextReceiveSchedule() {
 		// TODO Auto-generated method stub
 		
 	}

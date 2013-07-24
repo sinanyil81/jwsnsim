@@ -89,7 +89,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 		sendMessage(packet);
 	}	
 	
-	public void sendMessageDone(){
+	public void sendMessageDone(boolean sendSuccess){
 		
 	}	
 	

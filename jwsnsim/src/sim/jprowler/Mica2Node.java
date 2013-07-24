@@ -101,7 +101,6 @@ public class Mica2Node extends Node {
 	/** The variable component of the backoff time. */
 	public static int sendRandomBackOffTime = 30*25; // 0.75 ms
 
-	/** The time of one transmission in 1/{@link Simulator#ONE_SECOND} second. */
 	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
 	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
 	/** 46 * 32 microsec = approximately 1.5 ms */
@@ -199,7 +198,7 @@ public class Mica2Node extends Node {
 			transmitting = false;
 			sending = false;
 			endTransmission();
-			senderApplication.sendMessageDone();
+			senderApplication.sendMessageDone(true);
 		}
 	}
 

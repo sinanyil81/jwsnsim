@@ -99,10 +99,11 @@ public abstract class Protocol {
 	 * Signaled when the message posted is sent. This method
 	 * is called only if {@link Protocol#sendMessage} returned <code>true</code>. 
 	 * This has the same semantics as SendMsg.sendDone() in TinyOS.
+	 * @param sendSuccess TODO
 	 * 
 	 * @see #sendMessage
 	 */
-	public void sendMessageDone(){
+	public void sendMessageDone(boolean sendSuccess){
 	}	
 	
 	public String toString(){
