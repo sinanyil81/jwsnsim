@@ -41,28 +41,27 @@ import sim.jprowler.clock.TimerHandler;
  * 
  * @author Gyorgy Balogh, Gabor Pap, Miklos Maroti
  */
-public class LowPowerMica2Node extends Node implements TimerHandler{
-	
+public class LowPowerMica2Node extends Node implements TimerHandler {
+
 	/** -------- LOW POWER Protocol Parameters -------------------- **/
-	private boolean radioOn = true;
-
-	private final static int EPOCH = 30000000; /** Communication Period **/
+	private final static int EPOCH = 30000000;
+	/** Communication Period **/
 	private double alpha = 1.0;
-	
-	LogicalClock logicalClock = new LogicalClock(); 
-	
-	Timer sendTimer = new Timer(getClock(), this);
-	Timer receiveTimer = new Timer(getClock(), this);	
-	
-	public enum RadioState {
-	    OFF, IDLE, WAKEUP, TRANSMITTING, RECEIVING
-	}
-	
-	RadioState radioState = RadioState.IDLE;	
-	/** -------------------------------------------------------------- **/
-	
 
-	
+	LogicalClock logicalClock = new LogicalClock();
+
+	Timer sendTimer = new Timer(getClock(), this);
+	Timer receiveTimer = new Timer(getClock(), this);
+
+	public enum RadioState {
+		OFF, IDLE, 
+		WAKEUP_TO_TRANSMIT, PROCESSING_TO_TRANSMIT, TRANSMITTING, 
+		WAKEUP_TO_RECEIVE, WAITING_TO_RECEIVE, RECEIVING
+	}
+
+	RadioState radioState = RadioState.IDLE;
+	/** -------------------------------------------------------------- **/
+
 	/**
 	 * In this simulation not messages but references to motes are passed. All
 	 * this means is that the Mica2Node has to hold the information on the
@@ -70,21 +69,21 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 */
 	protected Protocol senderApplication = null;
 
-	 /**
+	/**
 	 * This node is the one that sent the last message or the one this node is
 	 * receiving a message from right now. It is mainly used for display
-	 purposes,
-	 * as you know this information is not embedded into any TinyOS message.
+	 * purposes, as you know this information is not embedded into any TinyOS
+	 * message.
 	 */
-	 protected Node senderNode = null;
+	protected Node senderNode = null;
 
 	/**
 	 * This is the message being sent, on reception it is extracted and the
 	 * message part is forwarded to the appropriate application, see
 	 * {@link Protocol#receiveMessage}.
 	 */
-	protected RadioPacket sentPacket = null;
-	protected RadioPacket receivedPacket = null;
+	protected RadioPacket packetToSend = null;
+	protected RadioPacket packetToReceive = null;
 
 	// //////////////////////////////
 	// STATE VARIABLES
@@ -96,10 +95,6 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * content.
 	 */
 	protected boolean hasPacketToSend = false;
-	
-	protected boolean transmitSchedule = false;
-	
-	protected boolean receiveSchedule = false;
 
 	/** State variable, true if the last received message got corrupted by noise */
 	protected boolean corrupted = false;
@@ -107,17 +102,22 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	// //////////////////////////////
 	// MAC layer specific constants
 	// //////////////////////////////
-	
-	/** The constant amount of time spent to send time information after
-	 * logical clock is calculated */
-	public static int processingTime = 100;	
+
+	/**
+	 * The constant amount of time spent to send time information after logical
+	 * clock is calculated
+	 */
+	public static int processingTime = 100;
 	public static int processingRandomTime = 25;
-	
+
 	/** The amount of time spent for waking up radio */
 	public static int wakeUpTime = 180;
 
 	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
-	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
+	/**
+	 * In TinyOS, default packet size is 11 byte header, 28 byte payload, 7 byte
+	 * meta
+	 */
 	/** 46 * 32 microsec = approximately 1.5 ms */
 	public static int sendTransmissionTime = 1500;
 
@@ -140,8 +140,9 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	private double noiseStrength = 0;
 
 	/**
-	 * The constant self noise level. See either the {@link LowPowerMica2Node#calcSNR}
-	 * or the {@link LowPowerMica2Node#isChannelFree} function.
+	 * The constant self noise level. See either the
+	 * {@link LowPowerMica2Node#calcSNR} or the
+	 * {@link LowPowerMica2Node#isChannelFree} function.
 	 */
 	public double noiseVariance = 0.025;
 
@@ -159,52 +160,51 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * corrupted.
 	 */
 	public double corruptionSNR = 2.0;
-	
+
 	/** The event signaled when the radio wake-up is ended **/
 	class RadioWakeUpEvent extends Event {
 
 		public void execute() {
-			// turn on radio
-			radioOn = true;
 			
-			if(transmitSchedule){
-				if(!transmitting && !receiving) {
-					transmitting = true;
-					setEventTime(LowPowerMica2Node.this.sentPacket);
-					processingEvent.register(generateProcessingTime());
-				}				
+			switch (radioState) {
+			
+			case WAKEUP_TO_TRANSMIT:
+				setEventTime();
+				processingEvent.register(generateProcessingTime());
+				radioState = RadioState.PROCESSING_TO_TRANSMIT;
+				break;
 				
-				transmitSchedule = false;
-
-				// disable sleeping 
+			case WAKEUP_TO_RECEIVE:
 				sleepEvent.unregister();
-			}
-			else if(receiveSchedule){
-				if(!transmitting && !receiving) {
-					sleepEvent.register(setimateReceptionDuration());
-				}
-			}
-			
-		}
-		
-		private int setimateReceptionDuration() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
+				sleepEvent.register(generateGuardTime());
+				radioState = RadioState.WAITING_TO_RECEIVE;
+				break;
 
-		private void setEventTime(RadioPacket packet) {
-			UInt32 age = LowPowerMica2Node.this.getClock().getValue();
-			age = age.subtract(packet.getEventTime());
-			packet.setEventTime(age);		
+			default:
+				break;
+			}
 		}
 	}
-	
-	/** When CPU processing is ended, this event is signalled and transmission starts */
+
+	/**
+	 * When CPU processing is ended, this event is signalled and transmission
+	 * starts
+	 */
 	class ProcessingEvent extends Event {
 
-		public void execute() {	
-			beginTransmission(1, LowPowerMica2Node.this);
-			endTransmissionEvent.register(sendTransmissionTime);
+		public void execute() {
+			
+			switch (radioState) {
+			case PROCESSING_TO_TRANSMIT:
+				radioState = RadioState.TRANSMITTING;
+				beginTransmission(1, LowPowerMica2Node.this);
+				endTransmissionEvent.register(sendTransmissionTime);
+				break;
+
+			default:
+				break;
+			}
+
 		}
 	}
 
@@ -217,25 +217,34 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 		 * variables accordingly.
 		 */
 		public void execute() {
-			transmitting = false;
-			hasPacketToSend = false;
-			sentPacket = null;
 			endTransmission();
+			hasPacketToSend = false;
+			packetToSend = null;
 			senderApplication.sendMessageDone(true);
-			sleepEvent.execute();	
+			senderApplication = null;
+			radioState = RadioState.IDLE;
+			sleepEvent.execute();			
 		}
 	}
-	
+
 	class SleepEvent extends Event {
 		public void execute() {
-			if(!receiving && allowedToTurnOffRadio())
-				radioOn = false;
+			switch (radioState) {
+			case IDLE:
+			case WAITING_TO_RECEIVE:
+				if(allowedToTurnOffRadio())
+					radioState = RadioState.OFF;
+				else
+					radioState = RadioState.IDLE;
+				break;
+
+			default:
+				break;
+			}			
 		}
 	}
 
-
-	
-	protected boolean allowedToTurnOffRadio(){
+	protected boolean allowedToTurnOffRadio() {
 		return false;
 	}
 
@@ -248,9 +257,9 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * @param radioModel
 	 *            the RadioModel used on this mote
 	 */
-	public LowPowerMica2Node(Simulator sim, RadioModel radioModel,Clock clock) {
-		super(sim, radioModel,clock);
-		sendTimer.startOneshot(getId()*1000000);
+	public LowPowerMica2Node(Simulator sim, RadioModel radioModel, Clock clock) {
+		super(sim, radioModel, clock);
+		sendTimer.startOneshot(getId() * 1000000);
 	}
 
 	/**
@@ -281,22 +290,16 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
-		if (hasPacketToSend){
-			System.out.println("FALSE "+LowPowerMica2Node.this.id);
+		if (hasPacketToSend) {
+			System.out.println("FALSE " + LowPowerMica2Node.this.id);
 			return false;
-		}
-		else {
+		} else {
 			hasPacketToSend = true;
-			transmitting = false;
-			
-			/* save the information about send */
-			this.sentPacket = packet;
+			this.packetToSend = packet;
 			senderApplication = app;
-
 			return true;
 		}
 	}
-
 
 	/**
 	 * Generates a random processing time
@@ -370,34 +373,44 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 *            a reference to the incomming message
 	 */
 	protected void addNoise(double level, Object stream) {
-		if (receiving) {
+		
+		switch (radioState) {
+		
+		case RECEIVING:
 			noiseStrength += level;
 			if (isMessageCorrupted(signalStrength, noiseStrength))
 				corrupted = true;
-		} else {
-			if (!transmitting && isReceivable(level, noiseStrength) && radioOn) {
+			break;
+			
+		case WAITING_TO_RECEIVE:
+			if (isReceivable(level, noiseStrength)){
 				// start receiving
-				senderNode = (Node) stream;
-				receiving = true;	
-				
-				receivedPacket = ((LowPowerMica2Node)senderNode).sentPacket.clone();
-				setReceptionTimestamp(receivedPacket);
-				
+				radioState = RadioState.RECEIVING;
+
+				// stop sleeping
+				sleepEvent.unregister();
+
+				senderNode = (Node) stream;				
+				packetToReceive = ((LowPowerMica2Node) senderNode).packetToSend
+						.clone();
+				setReceptionTimestamp(packetToReceive);
+
 				corrupted = false;
 				signalStrength = level;
-			} else {
-				System.out.println("Transmitting "+transmitting +" Receivable " +  isReceivable(level, noiseStrength));
-				noiseStrength += level;
-				System.out.println(noiseStrength);
 			}
-		}
+			break;
+
+		default:
+			noiseStrength += level;
+			break;
+		}		
 	}
 
 	private void setReceptionTimestamp(RadioPacket packet) {
-			UInt32 timestamp = getClock().getValue();
-			packet.setTimestamp(timestamp);
-			timestamp  = timestamp.subtract(packet.getEventTime());
-			packet.setEventTime(timestamp);
+		UInt32 timestamp = getClock().getValue();
+		packet.setTimestamp(timestamp);
+		timestamp = timestamp.subtract(packet.getEventTime());
+		packet.setEventTime(timestamp);
 	}
 
 	/**
@@ -412,58 +425,121 @@ public class LowPowerMica2Node extends Node implements TimerHandler{
 	 *            the level of noise
 	 */
 	protected void removeNoise(double level, Object stream) {
-		if (senderNode == stream) {
-			receiving = false;
-			
-			sleepEvent.unregister();
-			sleepEvent.execute();
-			
-//			System.out.println("Receiving finished"+Mica2Node.this.id);
-			if (!corrupted) {
-				this.getApplication().receiveMessage(receivedPacket);
-			}
-			else{
-				System.out.println("Corrupted");
+		switch (radioState) {
+		
+		case RECEIVING:
+			if (senderNode == stream) {
+				
+				radioState = RadioState.IDLE;
+				sleepEvent.execute();
+
+				if (!corrupted) {
+					this.getApplication().receiveMessage(packetToReceive);
+				} else {
+					System.out.println("Corrupted");
+				}
+
+				signalStrength = 0;
+				senderNode = null;
+				packetToReceive = null;
 			}
 
-			signalStrength = 0;
-			
-			senderNode = null;
-			receivedPacket = null;			
-		} else {
+			break;
+
+		default:
 			noiseStrength -= level;
+			break;
 		}
 	}
 
 	@Override
 	public void fireEvent(Timer timer) {
-					
-		if(timer == sendTimer){	
-			transmitSchedule = true;
-			setNextTransmitSchedule();								
+
+		if (timer == sendTimer) {
+
+			switch (radioState) {
+
+			case OFF:
+				wakeUpEvent.register(wakeUpTime);
+				radioState = RadioState.WAKEUP_TO_TRANSMIT;
+				break;
+
+			case IDLE:
+				setEventTime();
+				processingEvent.register(generateProcessingTime());
+				radioState = RadioState.PROCESSING_TO_TRANSMIT;
+				break;
+
+			case WAITING_TO_RECEIVE:
+				setEventTime();
+				sleepEvent.unregister();
+				processingEvent.register(generateProcessingTime());
+				radioState = RadioState.PROCESSING_TO_TRANSMIT;
+				break;
+
+			case WAKEUP_TO_RECEIVE:
+				radioState = RadioState.WAKEUP_TO_TRANSMIT;
+				break;
+
+			default:
+				/** cant send packet since transmitting or receiving */
+				hasPacketToSend = false;
+				packetToSend = null;
+				senderApplication.sendMessageDone(false);
+				senderApplication = null;
+				break;
+			}
+
+			setNextTransmissionTime();
+		} else if (timer == receiveTimer) {
+			switch (radioState) {
+			
+			case OFF:
+				wakeUpEvent.register(wakeUpTime);
+				radioState = RadioState.WAKEUP_TO_RECEIVE;
+				break;
+				
+			case IDLE:
+				sleepEvent.register(generateGuardTime());
+				radioState = RadioState.WAITING_TO_RECEIVE;
+				break;
+				
+			case WAKEUP_TO_RECEIVE:
+				radioState = RadioState.WAKEUP_TO_RECEIVE;
+				break;
+
+			case WAITING_TO_RECEIVE:
+				sleepEvent.unregister();
+				sleepEvent.register(generateGuardTime());
+				radioState = RadioState.WAITING_TO_RECEIVE;
+				break;
+				
+
+			default:
+				break;
+			}
+			setNextReceptionTime();
 		}
-		else if(timer == receiveTimer){			
-			receiveSchedule = true;			
-			setNextReceiveSchedule();
-		}
-		
-		wakeUpRadio();
 	}
 
-	private void wakeUpRadio() {
-		if(radioState != RadioState.OFF)
-			wakeUpEvent.execute();
-		else
-			wakeUpEvent.register(wakeUpTime);
-	}
-
-	private void setNextTransmitSchedule() {
+	private int generateGuardTime() {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 
-	private void setNextReceiveSchedule() {
+	private void setEventTime() {
+		UInt32 age = getClock().getValue();
+		age = age.subtract(packetToSend.getEventTime());
+		packetToSend.setEventTime(age);
+	}
+
+	private void setNextTransmissionTime() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	private void setNextReceptionTime() {
+		// TODO Auto-generated method stub
+
 	}
 }
