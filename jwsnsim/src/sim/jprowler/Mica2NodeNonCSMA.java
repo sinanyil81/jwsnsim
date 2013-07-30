@@ -23,7 +23,6 @@
  */
 package sim.jprowler;
 
-import sim.jprowler.UInt32;
 import sim.jprowler.clock.Clock;
 
 /**
@@ -33,7 +32,14 @@ import sim.jprowler.clock.Clock;
  * 
  * @author Gyorgy Balogh, Gabor Pap, Miklos Maroti
  */
-public class Mica2Node extends Node {
+public class Mica2NodeNonCSMA extends Node {
+	
+	protected enum RadioStates{
+		OFF, IDLE, WAKEUP, TRANSMITTING,RECEIVING
+	}
+	
+	protected RadioStates radioState = RadioStates.IDLE;
+	
 	/**
 	 * In this simulation not messages but references to motes are passed. All
 	 * this means is that the Mica2Node has to hold the information on the
@@ -67,24 +73,9 @@ public class Mica2Node extends Node {
 	 * message long buffer, which is full and the Node is trying to transmit its
 	 * content.
 	 */
-	protected boolean sending = false;
-
-	/** State variable, true if the radio is transmitting a message right now. */
-	protected boolean transmitting = false;
-
-	/** State variable, true if the radio is in receiving mode */
-	protected boolean receiving = false;
 
 	/** State variable, true if the last received message got corrupted by noise */
 	protected boolean corrupted = false;
-
-	/**
-	 * State variable, true if radio failed to transmit a message do to high
-	 * radio traffic, this means it has to retry it later, which is done using
-	 * the {@link Mica2Node#generateBackOffTime} function.
-	 */
-	protected boolean sendingPostponed = false;
-
 	// //////////////////////////////
 	// MAC layer specific constants
 	// //////////////////////////////
@@ -95,30 +86,15 @@ public class Mica2Node extends Node {
 	/** The variable component of the time spent waiting before a transmission. */
 	public static int sendRandomWaitingTime = 128*25; // 3.2 ms
 
-	/** The constant component of the backoff time. */ 
-	public static int sendMinBackOffTime = 100*25; // 2.5 ms
-
-	/** The variable component of the backoff time. */
-	public static int sendRandomBackOffTime = 30*25; // 0.75 ms
-
 	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
 	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
 	/** 46 * 32 microsec = approximately 1.5 ms */
 	public static int sendTransmissionTime = 1500; 
+	
 
 	// //////////////////////////////
 	// EVENTS
 	// //////////////////////////////
-
-	/**
-	 * Every mote has to test the radio traffic before transmitting a message,
-	 * if there is to much traffic this event remains a test and the mote
-	 * repeats it later, if there is no significant traffic this event initiates
-	 * message transmission and posts a {@link Mica2Node#EndTransmissionEvent}
-	 * event.
-	 */
-	private TestChannelEvent testChannelEvent = new TestChannelEvent();
-
 	/**
 	 * Signals the end of a transmission.
 	 */
@@ -135,14 +111,14 @@ public class Mica2Node extends Node {
 	private double noiseStrength = 0;
 
 	/**
-	 * The constant self noise level. See either the {@link Mica2Node#calcSNR}
-	 * or the {@link Mica2Node#isChannelFree} function.
+	 * The constant self noise level. See either the {@link Mica2NodeNonCSMA#calcSNR}
+	 * or the {@link Mica2NodeNonCSMA#isChannelFree} function.
 	 */
 	public double noiseVariance = 0.025;
 
 	/**
 	 * The maximum noise level that is allowed on sending. This is actually a
-	 * multiplicator of the {@link Mica2Node#noiseVariance}.
+	 * multiplicator of the {@link Mica2NodeNonCSMA#noiseVariance}.
 	 */
 	public double maxAllowedNoiseOnSending = 5;
 
@@ -154,38 +130,62 @@ public class Mica2Node extends Node {
 	 * corrupted.
 	 */
 	public double corruptionSNR = 2.0;
+	
+	public static final int wakeUpTime = 180; 
+	public static final int processingTime = 180;
+	public static final int processingRandomTime = 25;
+	
+	private WakeUpEvent wakeUpEvent = new WakeUpEvent();
 
-	/**
-	 * Inner class TestChannelEvent. Represents a test event, this happens when
-	 * the mote listens for radio traffic to decide about transmission.
-	 */
-	class TestChannelEvent extends Event {
-
-		/**
-		 * If the radio channel is clear it begins the transmission process,
-		 * otherwise generates a backoff and restarts testing later. It also
-		 * adds noise to the radio channel if the channel is free.
-		 */
+	/** The event signaled when the radio wake-up is ended **/
+	class WakeUpEvent extends Event {
+		/** The amount of time spent for waking up radio --- deterministic */
+		
+		
 		public void execute() {
-			if (isChannelFree(noiseStrength)) {
-				// start transmitting
-				transmitting = true;
-				setEventTime(Mica2Node.this.sentPacket);
-				beginTransmission(1, Mica2Node.this);
-				endTransmissionEvent.register(sendTransmissionTime);
-			} else {
-				// test again
-				this.register(generateBackOffTime());
+
+			switch (radioState) {
+
+			case WAKEUP:
+				radioState = RadioStates.IDLE;
+				radioOn();
+				break;
+
+			default:
+				break;
 			}
 		}
+	}
+	
+	private ProcessingEvent processingEvent = new ProcessingEvent();
 
+	/** The event signaled when the radio wake-up is ended **/
+	class ProcessingEvent extends Event {
+		/** The amount of time spent for waking up radio --- deterministic */
+
+		
+		public void execute() {
+
+			switch (radioState) {
+
+			case TRANSMITTING:
+				setEventTime(sentPacket);
+				beginTransmission(1, Mica2NodeNonCSMA.this);
+				endTransmissionEvent.register(sendTransmissionTime);
+				break;
+
+			default:
+				break;
+			}
+		}
+		
 		private void setEventTime(RadioPacket packet) {
-			UInt32 age = Mica2Node.this.getClock().getValue();
+			UInt32 age = getClock().getValue();
 			age = age.subtract(packet.getEventTime());
 			packet.setEventTime(age);		
 		}
 	}
-
+	
 	/**
 	 * Inner class EndTransmissionEvent. Represents the end of a transmission.
 	 */
@@ -195,11 +195,15 @@ public class Mica2Node extends Node {
 		 * variables accordingly.
 		 */
 		public void execute() {
-			transmitting = false;
-			sending = false;
+			radioState = RadioStates.IDLE;
 			endTransmission();
 			senderApplication.sendMessageDone(true);
+			transmissionFinished();
 		}
+	}
+	
+	protected void transmissionFinished(){
+		
 	}
 
 	/**
@@ -211,12 +215,12 @@ public class Mica2Node extends Node {
 	 * @param radioModel
 	 *            the RadioModel used on this mote
 	 */
-	public Mica2Node(RadioModel radioModel,Clock clock) {
+	public Mica2NodeNonCSMA(RadioModel radioModel,Clock clock) {
 		super(radioModel,clock);
 	}
 
 	/**
-	 * Calls the {@link Mica2Node#addNoise} method. See also
+	 * Calls the {@link Mica2NodeNonCSMA#addNoise} method. See also
 	 * {@link Node#receptionBegin} for more information.
 	 */
 	protected void receptionBegin(double strength, Object stream) {
@@ -224,7 +228,7 @@ public class Mica2Node extends Node {
 	}
 
 	/**
-	 * Calls the {@link Mica2Node#removeNoise} method. See also
+	 * Calls the {@link Mica2NodeNonCSMA#removeNoise} method. See also
 	 * {@link Node#receptionEnd} for more information.
 	 */
 	protected void receptionEnd(double strength, Object stream) {
@@ -243,25 +247,28 @@ public class Mica2Node extends Node {
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
-		if (sending){
-			System.out.println("FALSE "+Mica2Node.this.id);
-			return false;
-		}
-		else {
-			sending = true;
-			transmitting = false;
+		
+		boolean success = true;
+		
+		switch(radioState){
+		
+		case IDLE:
+			radioState = RadioStates.TRANSMITTING;
+			processingEvent.register(processingTime+
+			(int) (Simulator.random.nextDouble() * processingRandomTime));
 
-			this.sentPacket = packet;
+			this.sentPacket = packet.clone();
 			senderApplication = app;
 
-			if (receiving) {
-				sendingPostponed = true;
-			} else {
-				sendingPostponed = false;
-				testChannelEvent.register(generateWaitingTime());
-			}
-			return true;
+			break;						
+			
+		default:
+			success = false;
+			break;
+		
 		}
+		
+		return success;
 	}
 
 	/**
@@ -273,17 +280,6 @@ public class Mica2Node extends Node {
 	public static int generateWaitingTime() {
 		return sendMinWaitingTime
 				+ (int) (Simulator.random.nextDouble() * sendRandomWaitingTime);
-	}
-
-	/**
-	 * Generates a backoff time, adding a random variable time to a constant
-	 * minimum.
-	 * 
-	 * @return returns the backoff time in milliseconds
-	 */
-	protected static int generateBackOffTime() {
-		return sendMinBackOffTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomBackOffTime);
 	}
 
 	/**
@@ -350,26 +346,30 @@ public class Mica2Node extends Node {
 	 *            a reference to the incomming message
 	 */
 	protected void addNoise(double level, Object stream) {
-		if (receiving) {
+		switch (radioState) {
+		case RECEIVING:
 			noiseStrength += level;
 			if (isMessageCorrupted(signalStrength, noiseStrength))
 				corrupted = true;
-		} else {
-			if (!transmitting && isReceivable(level, noiseStrength)) {
-				// start receiving
-				senderNode = (Node) stream;
-				receiving = true;	
-				
-				receivedPacket = ((Mica2Node)senderNode).sentPacket.clone();
-				setReceptionTimestamp(receivedPacket);
-				
-				corrupted = false;
-				signalStrength = level;
-			} else {
-				System.out.println("Transmitting "+transmitting +" Receivable " +  isReceivable(level, noiseStrength));
-				noiseStrength += level;
-				System.out.println(noiseStrength);
-			}
+			
+			break;
+			
+		case IDLE:
+			
+			// start receiving
+			senderNode = (Node) stream;			
+			receivedPacket = ((Mica2NodeNonCSMA)senderNode).sentPacket.clone();
+			setReceptionTimestamp(receivedPacket);
+			
+			corrupted = false;
+			signalStrength = level;
+			radioState = RadioStates.RECEIVING;
+			
+			break;
+
+		default:
+			noiseStrength += level;
+			break;
 		}
 	}
 
@@ -392,27 +392,45 @@ public class Mica2Node extends Node {
 	 *            the level of noise
 	 */
 	protected void removeNoise(double level, Object stream) {
-		if (senderNode == stream) {
-			receiving = false;
-//			System.out.println("Receiving finished"+Mica2Node.this.id);
-			if (!corrupted) {
-				this.getApplication().receiveMessage(receivedPacket);
+		switch (radioState) {
+		case RECEIVING:
+			if (senderNode == stream) {
+				radioState = RadioStates.IDLE;
+
+				if (!corrupted) {
+					this.getApplication().receiveMessage(receivedPacket);
+				}
+				else{
+					System.out.println("Corrupted");
+				}
+
+				signalStrength = 0;
+				
+				senderNode = null;
+				receivedPacket = null;
 			}
 			else{
-				System.out.println("Corrupted");
+				noiseStrength -= level;
 			}
+			
+			break;
 
-			signalStrength = 0;
-			
-			senderNode = null;
-			receivedPacket = null;
-			
-			if (sendingPostponed) {
-				sendingPostponed = false;
-				testChannelEvent.register(generateWaitingTime());
-			}
-		} else {
+		default:
 			noiseStrength -= level;
+			break;
 		}
+	}
+	
+	protected void radioOn(){
+		
+	}
+	
+	protected void wakeUp(){
+		wakeUpEvent.register(wakeUpTime);
+	}
+	
+	protected void sleep(){
+		if(radioState == RadioStates.IDLE)
+			radioState = RadioStates.OFF;
 	}
 }

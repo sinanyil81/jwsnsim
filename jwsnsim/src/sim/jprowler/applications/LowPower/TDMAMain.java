@@ -1,30 +1,34 @@
 package sim.jprowler.applications.LowPower;
 
 import sim.jprowler.GaussianRadioModel;
+import sim.jprowler.Mica2Node;
+import sim.jprowler.Mica2NodeNonCSMA;
 import sim.jprowler.Node;
+import sim.jprowler.Position;
 import sim.jprowler.Simulator;
+import sim.jprowler.applications.Logger;
 import sim.jprowler.applications.Topology;
 import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
 
-public class LowPowerMain implements TimerHandler{
+public class TDMAMain implements TimerHandler{
 	
-	public final static int NUMNODES = 2;
+	public final static int NUMNODES = 16;
 	
-	static LowPowerProtocol protocol[] = new LowPowerProtocol[NUMNODES];
+	static TDMAProtocol protocol[] = new TDMAProtocol[NUMNODES];
 	static sim.jprowler.applications.Logger logger = null;
 			
 	public static void main(String[] args) throws Exception{			
 		createNodes();		
-//		createRandomNodes(300, 5);
+		System.out.println("Nodes created");
 		startLogging("deneme");
         Simulator.getInstance().run(50000);       
 	}
 
 	private static void startLogging(String filename) {
 		// create logger application
-		Timer timer = new Timer((sim.jprowler.clock.Clock)new ConstantDriftClock(1.0),new LowPowerMain());
+		Timer timer = new Timer((sim.jprowler.clock.Clock)new ConstantDriftClock(1.0),new TDMAMain());
 		timer.startPeriodic(20000000);
 		logger = new sim.jprowler.applications.Logger(filename);
 	}
@@ -35,14 +39,16 @@ public class LowPowerMain implements TimerHandler{
 		System.out.println("creating nodes...");
 		
 		for(int i = 0; i<NUMNODES ;i++){
-			Node node = new LowPowerMica2Node(Simulator.getInstance(),radioModel,new ConstantDriftClock());
-			node.setPosition( Topology.getNextLinePosition());
+//			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
+			Node node = new TDMANode(radioModel,new ConstantDriftClock());
+			node.setPosition( Topology.getNext4x4GridPosition());
+			System.out.println(node.getPosition());
 			node.setId(i+1);
 			Simulator.getInstance().register(node);				
-			protocol[i] = new LowPowerProtocol(node);
+			protocol[i] = new TDMAProtocol(node);
 		}
 				
-		radioModel.updateNeighborhoods();
+		radioModel.updateNeighborhoods();		
 	}
 	
 	@Override

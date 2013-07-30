@@ -61,7 +61,7 @@ public abstract class RadioModel{
 	 */
 	protected abstract static class Neighborhood{
 		
-		protected abstract Node[] getNeighbors(); 
+		public abstract Node[] getNeighbors(); 
 		
 		/**
 		 * This method must call the {@link Node#receptionBegin} method of

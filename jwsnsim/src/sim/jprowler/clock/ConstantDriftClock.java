@@ -35,6 +35,9 @@ public class ConstantDriftClock implements Clock {
 		
 		drift /= 1000000.0;
 		
+		/* to start clock with a random value */
+		setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
 		System.out.println(drift);
 	}
 	

@@ -55,7 +55,8 @@ public class GaussianRadioModel extends RadioModel{
 	 * This coefficient is used to "simulate" the static part of environmental
 	 * noise. It is used when the mote field is first set up. 
 	 */ 
-	public double staticRandomFactor = 0.3;
+	public double staticRandomFactor = 0.0;
+//	public double staticRandomFactor = 0.3;
  
 	/** 
 	 * This limits the number of neighbours used to calculate interference ratio.
@@ -173,7 +174,7 @@ public class GaussianRadioModel extends RadioModel{
 	protected class Neighborhood extends RadioModel.Neighborhood{
 		
 		/** The vector of the neighboring nodes. */
-		protected Node[] neighbors; 
+		public Node[] neighbors; 
 		
 		/**
 		 * The vector of static fading factors. These numbers shall 
@@ -230,7 +231,7 @@ public class GaussianRadioModel extends RadioModel{
 		}
 
 		@Override
-		protected Node[] getNeighbors() {
+		public Node[] getNeighbors() {
 
 			return neighbors;
 		}

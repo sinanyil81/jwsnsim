@@ -51,9 +51,6 @@ public abstract class Node {
 	double maxRadioStrength = 100;	
 	
 	protected Position position = new Position();
-    
-	/** A reference to the simulator in which the Node exists. */
-	public Simulator simulator;
 
 	/**
 	 * The id of the node. It is allowed that two nodes have
@@ -80,8 +77,7 @@ public abstract class Node {
 	 * @param sim the Simulator
 	 * @param radioModel the RadioModel used to create the nodes neighborhood
 	 */
-	public Node(Simulator sim, RadioModel radioModel,Clock clock){
-		this.simulator = sim;
+	public Node(RadioModel radioModel,Clock clock){
 		this.clock = clock;
 		this.radioModel = radioModel;
 		neighborhood = radioModel.createNeighborhood();
@@ -113,6 +109,10 @@ public abstract class Node {
 	 */
 	public Neighborhood getNeighborhood(){
 		return neighborhood;
+	}
+	
+	public Node[] getNeighbors(){
+		return neighborhood.getNeighbors();
 	}
 	
 	public RadioModel getRadioModel(){
@@ -241,13 +241,6 @@ public abstract class Node {
 	
 	public int getId(){
 		return id;
-	}
-	
-	/**
-	 * @return simply returns the simulator in which this Node exists
-	 */
-	public Simulator getSimulator(){
-		return simulator;
 	}
 	
 	public Clock getClock(){

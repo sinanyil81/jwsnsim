@@ -108,7 +108,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 		s += " " + piClock.getValue(getNode().getClock().getValue()).toString();
 		s += " " + Float.floatToIntBits((1.0f+piClock.rate)*(float)(1.0f+getNode().getClock().getDrift()));
 		
-//		System.out.println(s);
+		System.out.println(s);
 		
 		return s;
 	}
