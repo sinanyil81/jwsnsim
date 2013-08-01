@@ -40,6 +40,8 @@ public class Mica2NodeNonCSMA extends Node {
 	
 	protected RadioStates radioState = RadioStates.IDLE;
 	
+	protected RadioListener listener = null;
+	
 	/**
 	 * In this simulation not messages but references to motes are passed. All
 	 * this means is that the Mica2Node has to hold the information on the
@@ -76,21 +78,11 @@ public class Mica2NodeNonCSMA extends Node {
 
 	/** State variable, true if the last received message got corrupted by noise */
 	protected boolean corrupted = false;
-	// //////////////////////////////
-	// MAC layer specific constants
-	// //////////////////////////////
-
-	/** The constant component of the time spent waiting before a transmission. */
-	public static int sendMinWaitingTime = 200*25; // 5 ms
-
-	/** The variable component of the time spent waiting before a transmission. */
-	public static int sendRandomWaitingTime = 128*25; // 3.2 ms
 
 	/** For CC2420 250 kbps -> approximately 32 microseconds per byte. */
 	/** In TinyOS, default packet size is 11  byte header, 28 byte payload, 7 byte meta */
 	/** 46 * 32 microsec = approximately 1.5 ms */
-	public static int sendTransmissionTime = 1500; 
-	
+	public static int transmissionTime = 1500;
 
 	// //////////////////////////////
 	// EVENTS
@@ -133,7 +125,6 @@ public class Mica2NodeNonCSMA extends Node {
 	
 	public static final int wakeUpTime = 180; 
 	public static final int processingTime = 180;
-	public static final int processingRandomTime = 25;
 	
 	private WakeUpEvent wakeUpEvent = new WakeUpEvent();
 
@@ -148,7 +139,12 @@ public class Mica2NodeNonCSMA extends Node {
 
 			case WAKEUP:
 				radioState = RadioStates.IDLE;
-				radioOn();
+				
+				if(sentPacket != null){
+					radioState = RadioStates.TRANSMITTING;
+					processingEvent.register(processingTime);
+				}
+				
 				break;
 
 			default:
@@ -156,6 +152,29 @@ public class Mica2NodeNonCSMA extends Node {
 			}
 		}
 	}
+	
+	/** The event signaled when the radio wake-up is ended **/
+	class SleepEvent extends Event {
+		/** The amount of time spent for waking up radio --- deterministic */
+		
+		
+		public void execute() {
+
+			switch (radioState) {
+
+			case IDLE:
+				radioState = RadioStates.OFF;
+				if(listener != null)
+					listener.sleepTimerExpired();
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+
+	private SleepEvent sleepEvent = new SleepEvent();
 	
 	private ProcessingEvent processingEvent = new ProcessingEvent();
 
@@ -170,8 +189,12 @@ public class Mica2NodeNonCSMA extends Node {
 
 			case TRANSMITTING:
 				setEventTime(sentPacket);
+				
+				if(listener != null)
+					listener.startedTransmitting();
+				
 				beginTransmission(1, Mica2NodeNonCSMA.this);
-				endTransmissionEvent.register(sendTransmissionTime);
+				endTransmissionEvent.register(transmissionTime);
 				break;
 
 			default:
@@ -198,14 +221,14 @@ public class Mica2NodeNonCSMA extends Node {
 			radioState = RadioStates.IDLE;
 			endTransmission();
 			senderApplication.sendMessageDone(true);
-			transmissionFinished();
+			sentPacket = null;
+			senderApplication = null;
+			
+			if(listener != null)
+				listener.stoppedTransmitting();
 		}
 	}
 	
-	protected void transmissionFinished(){
-		
-	}
-
 	/**
 	 * Parameterized constructor, it set both the {@link Simulator} in which
 	 * this mote exists and the {@link RadioModel} which is used by this mote.
@@ -218,12 +241,16 @@ public class Mica2NodeNonCSMA extends Node {
 	public Mica2NodeNonCSMA(RadioModel radioModel,Clock clock) {
 		super(radioModel,clock);
 	}
+	
+	public void setListener(RadioListener listener){
+		this.listener = listener;
+	}
 
 	/**
 	 * Calls the {@link Mica2NodeNonCSMA#addNoise} method. See also
 	 * {@link Node#receptionBegin} for more information.
 	 */
-	protected void receptionBegin(double strength, Object stream) {
+	protected void receptionBegin(double strength, Object stream) {	
 		addNoise(strength, stream);
 	}
 
@@ -231,20 +258,13 @@ public class Mica2NodeNonCSMA extends Node {
 	 * Calls the {@link Mica2NodeNonCSMA#removeNoise} method. See also
 	 * {@link Node#receptionEnd} for more information.
 	 */
-	protected void receptionEnd(double strength, Object stream) {
+	protected void receptionEnd(double strength, Object stream) {	
 		removeNoise(strength, stream);
 	}
 
 	/**
-	 * Sends out a radio message. If the node is in receiving mode the sending
-	 * is postponed until the receive is finished. This method behaves exactly
-	 * like the SendMsg.send command in TinyOS.
-	 * 
-	 * @param packet
-	 *            the message to be sent
-	 * @param app
-	 *            the application sending the message
-	 * @return If the node is in sending state it returns false otherwise true.
+	 * Sends out a radio message if the radio is OFF or IDLE. If the radio
+	 * is OFF, it wakes up and then sends.
 	 */
 	public boolean sendMessage(RadioPacket packet, Protocol app) {
 		
@@ -254,13 +274,17 @@ public class Mica2NodeNonCSMA extends Node {
 		
 		case IDLE:
 			radioState = RadioStates.TRANSMITTING;
-			processingEvent.register(processingTime+
-			(int) (Simulator.random.nextDouble() * processingRandomTime));
-
+			processingEvent.register(processingTime);
+			
 			this.sentPacket = packet.clone();
 			senderApplication = app;
 
-			break;						
+			break;		
+			
+		case OFF:			
+			this.sentPacket = packet.clone();
+			senderApplication = app;
+			wakeUp();
 			
 		default:
 			success = false;
@@ -269,29 +293,6 @@ public class Mica2NodeNonCSMA extends Node {
 		}
 		
 		return success;
-	}
-
-	/**
-	 * Generates a waiting time, adding a random variable time to a constant
-	 * minimum.
-	 * 
-	 * @return returns the waiting time in milliseconds
-	 */
-	public static int generateWaitingTime() {
-		return sendMinWaitingTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomWaitingTime);
-	}
-
-	/**
-	 * Tells if the transmitting media is free of transmissions based on the
-	 * noise level.
-	 * 
-	 * @param noiseStrength
-	 *            the level of noise right before transmission
-	 * @return returns true if the channel is free
-	 */
-	protected boolean isChannelFree(double noiseStrength) {
-		return noiseStrength < maxAllowedNoiseOnSending * noiseVariance;
 	}
 
 	/**
@@ -365,6 +366,9 @@ public class Mica2NodeNonCSMA extends Node {
 			signalStrength = level;
 			radioState = RadioStates.RECEIVING;
 			
+			if(listener != null)
+				listener.startedReceiving();
+			
 			break;
 
 		default:
@@ -396,8 +400,11 @@ public class Mica2NodeNonCSMA extends Node {
 		case RECEIVING:
 			if (senderNode == stream) {
 				radioState = RadioStates.IDLE;
+				
+				if(listener != null)
+					listener.stoppedReceiving();
 
-				if (!corrupted) {
+				if (!corrupted) {					
 					this.getApplication().receiveMessage(receivedPacket);
 				}
 				else{
@@ -421,12 +428,20 @@ public class Mica2NodeNonCSMA extends Node {
 		}
 	}
 	
-	protected void radioOn(){
-		
+	protected void wakeUp(){
+		if(radioState == RadioStates.OFF){
+			radioState = RadioStates.WAKEUP;				
+			wakeUpEvent.register(wakeUpTime);
+		}
 	}
 	
-	protected void wakeUp(){
-		wakeUpEvent.register(wakeUpTime);
+	protected void startSleepTimer(int ticks){
+		sleepEvent.unregister();
+		sleepEvent.register(ticks);
+	}
+	
+	protected void stopSleepTimer(){
+		sleepEvent.unregister();
 	}
 	
 	protected void sleep(){

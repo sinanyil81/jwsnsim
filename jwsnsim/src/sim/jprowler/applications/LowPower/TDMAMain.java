@@ -14,7 +14,7 @@ import sim.jprowler.clock.TimerHandler;
 
 public class TDMAMain implements TimerHandler{
 	
-	public final static int NUMNODES = 16;
+	public final static int NUMNODES = 2;
 	
 	static TDMAProtocol protocol[] = new TDMAProtocol[NUMNODES];
 	static sim.jprowler.applications.Logger logger = null;
@@ -44,6 +44,7 @@ public class TDMAMain implements TimerHandler{
 			node.setPosition( Topology.getNext4x4GridPosition());
 			System.out.println(node.getPosition());
 			node.setId(i+1);
+			((TDMANode)node).start();
 			Simulator.getInstance().register(node);				
 			protocol[i] = new TDMAProtocol(node);
 		}

@@ -1,92 +1,118 @@
 package sim.jprowler.applications.LowPower;
 
+import java.util.Vector;
+
+import sim.jprowler.Node;
 import sim.jprowler.UInt32;
 
 public class TDMASchedule4x4Grid {
 	
+	public enum ScheduleType  { RECEIVE,SEND};
+	
 	class Schedule{
-		int id;
-		int time = 0;
-		boolean expired = false;
+		ScheduleType type;
+		UInt32 time = null;
 		
-		public Schedule(int id) {
-			this.id = id;
+		public Schedule(ScheduleType type,UInt32 time){
+			this.type = type;
+			this.time = time;
 		}
 	}
 	
-	Schedule[] schedules = null;
-	int myId;
-	int nextIndex = 0;
-		
-	public final static int EPOCH = 30000000;
+	private LogicalClock logical = new LogicalClock();
+	private Node node = null;
 	
-	int remainingTicks = EPOCH;
-			
-	public int getRemainingTicks() {
-		return remainingTicks;
-	}
-
-	public TDMASchedule4x4Grid(int id){
-		int numNeighbors = 0;
+	Vector<Schedule> schedules = new Vector<Schedule>();
 	
-		if((id-4) > 0) numNeighbors++;
-		if((id-1) > 0) numNeighbors++;
-		if((id+1) < 17) numNeighbors++;
-		if((id+4) > 17) numNeighbors++;
-		
-		schedules = new Schedule[numNeighbors];
-		
-		int i = 0;
-		
-		if((id-4) > 0) schedules[i++] = new Schedule(id-4);
-		if((id-1) > 0) schedules[i++] = new Schedule(id-1);
-		if((id+1) < 17) schedules[i++] = new Schedule(id+1);
-		if((id+4) > 17) schedules[i++] = new Schedule(id+4);
-	}
+	int[] neighborIds = null;
 	
-	public void setSchedules(float logicalRate){
+	public final static int EPOCH = 0xFFFFFF;
+	
+	public TDMASchedule4x4Grid(Node node){
+		this.node = node;
 		
-		int  remaining = remainingTicks - (EPOCH + myId*1000000);
+//		int numNeighbors = 0;
+//	
+//		if((node.getId()-4) > 0) numNeighbors++;
+//		if((node.getId()-1) > 0) numNeighbors++;
+//		if((node.getId()+1) < 17) numNeighbors++;
+//		if((node.getId()+4) > 17) numNeighbors++;
+//		
+//		neighborIds = new int[numNeighbors];		
+//		
+//		int i = 0;
+//		
+//		if((node.getId()-4) > 0) neighborIds[i++] = node.getId()-4;
+//		if((node.getId()-1) > 0) neighborIds[i++] = node.getId()-1;
+//		if((node.getId()+1) < 17) neighborIds[i++] = node.getId()+1;
+//		if((node.getId()+4) > 17) neighborIds[i++] = node.getId()+4;
+//			
 		
-		for (int i = 0; i < schedules.length; i++) {
-			schedules[i].time = remaining + schedules[i].id*1000000;						
-			schedules[i].time = (int) ((float) schedules[i].time / (1.0+logicalRate));
-			if(schedules[i].time > 0)
-				schedules[i].expired = false;
-			else
-				schedules[i].expired = true;
-		}
+		neighborIds = new int[1];		
+		
+		if(node.getId() == 1) neighborIds[0] = 2;
+		if(node.getId() == 2) neighborIds[0] = 1;
+		
 	}
 	
-	void calculateNextTransmissionTime(UInt32 globalTime,float rate){
-
-		int mod = globalTime.modulus(TDMASchedule4x4Grid.EPOCH);		
+	public void reschedule(UInt32 globalTime,float rate){
 		
-		if(mod < myId*1000000){
-			remainingTicks = TDMASchedule4x4Grid.EPOCH + myId*1000000 - mod;
-		}
-		else {
-			remainingTicks = TDMASchedule4x4Grid.EPOCH + - mod + myId*1000000;
-		}
+		schedules = null;
+		schedules = new Vector<Schedule>();
 		
-		remainingTicks = (int) ((double)remainingTicks/(1.0f+rate));
+		logical.setValue(globalTime, node.getClock().getValue());
+		logical.rate = rate;
 		
-		setSchedules(rate);
-	}
-
-	
-	public int getNextSchedule(){
+		UInt32 currentEpoch = globalTime.shiftRight(24);
+		currentEpoch = currentEpoch.shiftLeft(24);
 		
-		int nextSchedule = 0;
-	
-		for (int i = 0; i < schedules.length; i++) {
-			if(!schedules[i].expired ){
-				nextSchedule = schedules[i].time;
-				schedules[i].expired = true;
-				break;
+		UInt32 nextEpoch = globalTime.shiftRight(24);
+		nextEpoch = nextEpoch.increment();
+		nextEpoch = nextEpoch.shiftLeft(24);
+		
+		UInt32 nextTransmission = nextEpoch.add(0xFFFFF*(node.getId()-1));
+		
+		for (int i = 0; i < neighborIds.length; i++) {	
+			if(neighborIds[i] > node.getId()){
+				schedules.add(new Schedule(ScheduleType.RECEIVE, currentEpoch.add(0xFFFFF*(neighborIds[i]-1))));
+			}
+			else{
+				schedules.add(new Schedule(ScheduleType.RECEIVE, nextEpoch.add(0xFFFFF*(neighborIds[i]-1))));
 			}
 		}
 		
-		return nextSchedule;
+		schedules.add(new Schedule(ScheduleType.SEND, nextTransmission));		
+	}
+	
+	public Schedule getTransmissionSchedule(){
+		logical.update(node.getClock().getValue());
+		UInt32 globalTime = logical.getValue(node.getClock().getValue());		
+	
+		Schedule s = schedules.lastElement();
+		schedules.remove(s);
+		
+		int remaining = (s.time.subtract(globalTime)).toInteger();
+		remaining = (int) ((double)remaining/(1.0f+logical.rate));
+		s.time = new UInt32(remaining);
+		
+		return s;
+	}
+
+	
+	public Schedule getNextSchedule(){
+		logical.update(node.getClock().getValue());
+		UInt32 globalTime = logical.getValue(node.getClock().getValue());		
+	
+		Schedule s = schedules.remove(0);
+		
+		if(s !=null){
+			int remaining = (s.time.subtract(globalTime)).toInteger();
+			remaining = (int) ((double)remaining/(1.0f+logical.rate));
+			s.time = new UInt32(remaining);
+			
+			return s;
+		}
+		
+		return null;
 	}
 }

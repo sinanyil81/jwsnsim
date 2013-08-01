@@ -54,6 +54,10 @@ public class UInt32 implements Comparable<UInt32>{
 		return add(new UInt32(x));
 	}
 	
+	public UInt32 increment(){
+		return this.add(1);
+	}
+	
 	public UInt32 twosComplement(){
 		long result = value;
 		
@@ -114,5 +118,20 @@ public class UInt32 implements Comparable<UInt32>{
 	public int modulus(int mod){
 		return (int) (this.value % mod);
 	}
-
+	
+	public UInt32 shiftRight(int numBits){
+		return new UInt32(this.value >> numBits);
+	}
+	
+	public UInt32 shiftLeft(int numBits){
+		return new UInt32(this.value << numBits);
+	}
+	
+	public UInt32 or(UInt32 val){
+		return new UInt32(this.value | val.toLong());
+	}
+	
+	public UInt32 and(UInt32 val){
+		return new UInt32(this.value & val.toLong());
+	}
 }
