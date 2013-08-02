@@ -1,6 +1,5 @@
 package sim.jprowler.applications.LowPower;
 
-import sim.jprowler.Event;
 import sim.jprowler.Mica2NodeNonCSMA;
 import sim.jprowler.Protocol;
 import sim.jprowler.RadioListener;
@@ -30,7 +29,7 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 		super(radioModel, clock);
 		
 		transmitTimer = new Timer(clock, this);
-	
+		setListener(this);
 	}
 	
 	public void start(){
@@ -52,14 +51,16 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 	public void fireEvent(Timer timer) {
 		if(timer == transmitTimer){
 			switch (currentSchedule.type) {
-			case SEND:				
+			case SEND:
+				stopSleepTimer();
 				insertLogicalClockAndTimestampPacketToSend();
 				super.sendMessage(scheduledPacket, protocol);							
 				break;
 				
 			case RECEIVE:
+				stopSleepTimer();
 				wakeUp();
-				startSleepTimer(wakeUpTime + generateGuardTime());
+				startSleepTimer(wakeUpTime + 2*generateGuardTime());
 				break;
 
 			default:
@@ -69,8 +70,7 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 	}
 	
 	private int generateGuardTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 2*synchronizer.getMaxError();
 	}
 
 	private void insertLogicalClockAndTimestampPacketToSend() {
@@ -85,7 +85,7 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 
 	@Override
 	public void startedReceiving() {
-				
+		stopSleepTimer();		
 	}
 
 	@Override
@@ -93,9 +93,10 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 		if (!corrupted)
 			synchronizer.synchronize(receivedPacket);	
 		
-		stopSleepTimer();
-		sleep();
-		nextAction();
+		if(isSleepingAllowed){
+			stopSleepTimer();
+			nextAction();			
+		}
 	}
 
 	@Override
@@ -108,16 +109,15 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 		synchronizer.logicalClock.update(getClock().getValue());	
 		UInt32 global = synchronizer.logicalClock.getValue(getClock().getValue());
 		
-		schedule.reschedule(global, synchronizer.logicalClock.rate);	
+		schedule.reschedule(global, synchronizer.logicalClock.rate);
 		
-		if(synchronizer.maxError < 10000){
+		synchronizer.nextHistorySlot();		
+		if(synchronizer.getMaxError() < 10000){
 			isSleepingAllowed = true;
 		}
 		else{
 			isSleepingAllowed = false;
-		}
-		
-		synchronizer.maxError = 0;
+		}	
 		
 		nextAction();
 	}
@@ -126,8 +126,10 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 	protected void nextAction() {
 		int remainingTime = 0;
 		
-		if(isSleepingAllowed){
-			sleep();
+		stopSleepTimer();
+		
+		if(isSleepingAllowed){			
+			sleep();			
 			currentSchedule = schedule.getNextSchedule();
 			remainingTime -= wakeUpTime;			
 		}
@@ -137,7 +139,13 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,RadioList
 		
 		if(currentSchedule.type == ScheduleType.SEND)
 			remainingTime -= processingTime;
-		
+		else if (currentSchedule.type == ScheduleType.RECEIVE){
+			if(isSleepingAllowed){
+				remainingTime -= generateGuardTime();
+			}
+		}
+					
+		remainingTime += currentSchedule.time.toInteger();
 		transmitTimer.startOneshot(remainingTime);
 	}
 

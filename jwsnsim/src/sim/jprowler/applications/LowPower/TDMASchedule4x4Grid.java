@@ -22,7 +22,7 @@ public class TDMASchedule4x4Grid {
 	private LogicalClock logical = new LogicalClock();
 	private Node node = null;
 	
-	Vector<Schedule> schedules = new Vector<Schedule>();
+	Vector<Schedule> schedules = null;
 	
 	int[] neighborIds = null;
 	
@@ -57,7 +57,6 @@ public class TDMASchedule4x4Grid {
 	
 	public void reschedule(UInt32 globalTime,float rate){
 		
-		schedules = null;
 		schedules = new Vector<Schedule>();
 		
 		logical.setValue(globalTime, node.getClock().getValue());
@@ -72,13 +71,17 @@ public class TDMASchedule4x4Grid {
 		
 		UInt32 nextTransmission = nextEpoch.add(0xFFFFF*(node.getId()-1));
 		
+		Schedule s;
+		
 		for (int i = 0; i < neighborIds.length; i++) {	
 			if(neighborIds[i] > node.getId()){
-				schedules.add(new Schedule(ScheduleType.RECEIVE, currentEpoch.add(0xFFFFF*(neighborIds[i]-1))));
+				s = new Schedule(ScheduleType.RECEIVE, currentEpoch.add(0xFFFFF*(neighborIds[i]-1)));
 			}
 			else{
-				schedules.add(new Schedule(ScheduleType.RECEIVE, nextEpoch.add(0xFFFFF*(neighborIds[i]-1))));
+				s = new Schedule(ScheduleType.RECEIVE, nextEpoch.add(0xFFFFF*(neighborIds[i]-1)));
 			}
+			
+			schedules.add(s);
 		}
 		
 		schedules.add(new Schedule(ScheduleType.SEND, nextTransmission));		

@@ -12,7 +12,19 @@ public class TimeSync {
 
 	public LogicalClock logicalClock = new LogicalClock();
 	
-	int maxError = 0;
+	int MAX_HISTORY = 4;
+	int[] errorHistory = new int[MAX_HISTORY];
+	int index = 0;
+	
+	int maxError = -1;
+	
+	public TimeSync(){
+		for (int i = 0; i < errorHistory.length; i++) {
+			errorHistory[i] = -1;
+		}
+		
+		index = 0;
+	}
 
 	public int calculateSkew(RadioPacket packet) {
 		UInt32 neighborClock = packet.getClock();
@@ -50,5 +62,25 @@ public class TimeSync {
 
 		return false;
 	}
-
+	
+	public void nextHistorySlot(){
+		errorHistory[index] = maxError;
+		maxError = -1;
+		
+		index = (index + 1)%MAX_HISTORY;
+	}
+	
+	public int getMaxError(){
+		int max = -1;
+		
+		for (int i = 0; i < errorHistory.length; i++) {
+			
+			if(errorHistory[i] == -1)
+				return Integer.MAX_VALUE;
+			else if(errorHistory[i]> max)
+				max = errorHistory[i];
+		}
+		
+		return max;
+	}
 }
