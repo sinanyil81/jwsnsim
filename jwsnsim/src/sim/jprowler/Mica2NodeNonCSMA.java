@@ -226,6 +226,8 @@ public class Mica2NodeNonCSMA extends Node {
 			
 			if(listener != null)
 				listener.stoppedTransmitting();
+			
+			stats.startEpoch();
 		}
 	}
 	
@@ -238,8 +240,13 @@ public class Mica2NodeNonCSMA extends Node {
 	 * @param radioModel
 	 *            the RadioModel used on this mote
 	 */
-	public Mica2NodeNonCSMA(RadioModel radioModel,Clock clock) {
+	
+	protected RadioStats stats;
+	public Mica2NodeNonCSMA(int id, RadioModel radioModel,Clock clock) {
 		super(radioModel,clock);
+		setId(id);
+		stats = new RadioStats(this);
+		stats.on();
 	}
 	
 	public void setListener(RadioListener listener){
@@ -285,6 +292,7 @@ public class Mica2NodeNonCSMA extends Node {
 			this.sentPacket = packet.clone();
 			senderApplication = app;
 			wakeUp();
+			break;
 			
 		default:
 			success = false;
@@ -372,7 +380,9 @@ public class Mica2NodeNonCSMA extends Node {
 			break;
 
 		default:
+			System.out.println("Packet lost "+ this.id);
 			noiseStrength += level;
+			stats.incrementPacketLoss();
 			break;
 		}
 	}
@@ -404,7 +414,8 @@ public class Mica2NodeNonCSMA extends Node {
 				if(listener != null)
 					listener.stoppedReceiving();
 
-				if (!corrupted) {					
+				if (!corrupted) {
+//					System.out.println("Packet received "+ this.id);
 					this.getApplication().receiveMessage(receivedPacket);
 				}
 				else{
@@ -430,6 +441,7 @@ public class Mica2NodeNonCSMA extends Node {
 	
 	protected void wakeUp(){
 		if(radioState == RadioStates.OFF){
+			stats.on();
 			radioState = RadioStates.WAKEUP;				
 			wakeUpEvent.register(wakeUpTime);
 		}
@@ -445,7 +457,10 @@ public class Mica2NodeNonCSMA extends Node {
 	}
 	
 	protected void sleep(){
-		if(radioState == RadioStates.IDLE)
+		if(radioState == RadioStates.IDLE){
 			radioState = RadioStates.OFF;
-	}
+			stats.off();
+		}
+			
+	}		
 }

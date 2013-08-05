@@ -12,13 +12,16 @@ public class TimeSync {
 
 	public LogicalClock logicalClock = new LogicalClock();
 	
-	int MAX_HISTORY = 4;
-	int[] errorHistory = new int[MAX_HISTORY];
+	int MAX_HISTORY = 8;
+	int[] errorHistory = null;
 	int index = 0;
 	
 	int maxError = -1;
 	
-	public TimeSync(){
+	public TimeSync(int numNeigbors){
+		MAX_HISTORY *=numNeigbors;
+		
+		errorHistory = new int[MAX_HISTORY];
 		for (int i = 0; i < errorHistory.length; i++) {
 			errorHistory[i] = -1;
 		}
@@ -64,10 +67,12 @@ public class TimeSync {
 	}
 	
 	public void nextHistorySlot(){
-		errorHistory[index] = maxError;
-		maxError = -1;
-		
-		index = (index + 1)%MAX_HISTORY;
+		if(maxError !=- 1){
+			errorHistory[index] = maxError;
+			maxError = -1;
+			
+			index = (index + 1)%MAX_HISTORY;			
+		}
 	}
 	
 	public int getMaxError(){

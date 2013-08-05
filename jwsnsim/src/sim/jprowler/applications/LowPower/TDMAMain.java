@@ -1,5 +1,8 @@
 package sim.jprowler.applications.LowPower;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 import sim.jprowler.GaussianRadioModel;
 import sim.jprowler.Mica2Node;
 import sim.jprowler.Mica2NodeNonCSMA;
@@ -14,7 +17,7 @@ import sim.jprowler.clock.TimerHandler;
 
 public class TDMAMain implements TimerHandler{
 	
-	public final static int NUMNODES = 2;
+	public final static int NUMNODES = 16;
 	
 	static TDMAProtocol protocol[] = new TDMAProtocol[NUMNODES];
 	static sim.jprowler.applications.Logger logger = null;
@@ -23,7 +26,17 @@ public class TDMAMain implements TimerHandler{
 		createNodes();		
 		System.out.println("Nodes created");
 		startLogging("deneme");
-        Simulator.getInstance().run(50000);       
+        Simulator.getInstance().run(50000);  
+        killNodes();
+	}
+
+	private static void killNodes() {
+		Vector<Node> nodes = Simulator.getInstance().getNodes();
+		
+		for (Iterator<Node> iterator = nodes.iterator(); iterator.hasNext();) {
+			TDMANode node = (TDMANode) iterator.next();
+			node.destroy();
+		}		
 	}
 
 	private static void startLogging(String filename) {
@@ -40,10 +53,9 @@ public class TDMAMain implements TimerHandler{
 		
 		for(int i = 0; i<NUMNODES ;i++){
 //			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
-			Node node = new TDMANode(radioModel,new ConstantDriftClock());
+			Node node = new TDMANode(i+1,radioModel,new ConstantDriftClock());
 			node.setPosition( Topology.getNext4x4GridPosition());
 			System.out.println(node.getPosition());
-			node.setId(i+1);
 			((TDMANode)node).start();
 			Simulator.getInstance().register(node);				
 			protocol[i] = new TDMAProtocol(node);

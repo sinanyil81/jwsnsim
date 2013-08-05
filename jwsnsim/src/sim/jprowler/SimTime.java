@@ -102,6 +102,16 @@ public class SimTime {
 		return (double)timeHigh + timeLow; 
 	}
 	
+	public long getSecond(){
+		
+		return timeHigh/1024/1024; 
+	}
+	
+	public long getMillisecond(){
+		
+		return timeHigh/1024; 
+	}
+	
 	public String toString(){
 		return String.valueOf(timeHigh);
 	}

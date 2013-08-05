@@ -39,8 +39,7 @@ public class PIMain implements TimerHandler{
 		System.out.println("creating nodes...");
 		
 		for(int i = 0; i<NUMNODES ;i++){
-//			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
-			Node node = new Mica2NodeNonCSMA(radioModel,new ConstantDriftClock());
+			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
 			node.setPosition( Topology.getNextLinePosition());
 //			node.setPosition( Topology.getNextRingPosition(NUMNODES));
 //			node.setPosition( Topology.getNextDensePosition(5));
