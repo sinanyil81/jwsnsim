@@ -1,4 +1,6 @@
-package sim.jprowler;
+package sim.jprowler.radio;
+
+import sim.jprowler.UInt32;
 
 public class RadioPacket implements Cloneable{
 

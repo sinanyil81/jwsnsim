@@ -1,16 +1,15 @@
 package sim.jprowler.applications.PISync;
 
-import sim.jprowler.GaussianRadioModel;
-import sim.jprowler.Mica2Node;
-import sim.jprowler.Mica2NodeNonCSMA;
+import java.util.Iterator;
+import java.util.Vector;
+
 import sim.jprowler.Node;
-import sim.jprowler.Position;
 import sim.jprowler.Simulator;
-import sim.jprowler.applications.Logger;
 import sim.jprowler.applications.Topology;
 import sim.jprowler.clock.ConstantDriftClock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
+import sim.jprowler.mac.CSMAMac;
 
 public class PIMain implements TimerHandler{
 	
@@ -23,7 +22,7 @@ public class PIMain implements TimerHandler{
 		createNodes();		
 //		createRandomNodes(300, 5);
 		startLogging("deneme");
-        Simulator.getInstance().run(50000);       
+        Simulator.getInstance().run(100000);       
 	}
 
 	private static void startLogging(String filename) {
@@ -33,38 +32,62 @@ public class PIMain implements TimerHandler{
 		logger = new sim.jprowler.applications.Logger(filename);
 	}
 
-	private static void createNodes() {
-		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
-		
+//	private static void createNodes() {
+//		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
+//		
+//		System.out.println("creating nodes...");
+//		
+//		for(int i = 0; i<NUMNODES ;i++){
+//			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
+//			node.setPosition( Topology.getNextLinePosition());
+////			node.setPosition( Topology.getNextRingPosition(NUMNODES));
+////			node.setPosition( Topology.getNextDensePosition(5));
+//			System.out.println(node.getPosition());
+//			node.setId(i+1);
+//			Simulator.getInstance().register(node);				
+//			protocol[i] = new PIProtocol(node);
+//		}
+//				
+//		radioModel.updateNeighborhoods();
+//	}
+	
+//	public static void createRandomNodes(double areaWidth, double maxElevation) { 
+//		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
+//		
+//		System.out.println("creating nodes...");
+//		
+//		for( int i=0; i< NUMNODES; ++i ){
+//			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
+//			node.setPosition( new Position(areaWidth * Simulator.random.nextDouble(), 
+//										   areaWidth * Simulator.random.nextDouble(), 
+//										   maxElevation * Simulator.random.nextDouble()));
+//			node.setId( 1 + i);
+//			Simulator.getInstance().register(node);				
+//			protocol[i] = new PIProtocol(node);           
+//		}
+//	}
+	
+	private static void createNodes() {		
 		System.out.println("creating nodes...");
 		
 		for(int i = 0; i<NUMNODES ;i++){
-			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
+			Node node = new Node(i+1,new ConstantDriftClock());
 			node.setPosition( Topology.getNextLinePosition());
+			CSMAMac mac = new CSMAMac(node);
+						
 //			node.setPosition( Topology.getNextRingPosition(NUMNODES));
 //			node.setPosition( Topology.getNextDensePosition(5));
 			System.out.println(node.getPosition());
-			node.setId(i+1);
+			
 			Simulator.getInstance().register(node);				
-			protocol[i] = new PIProtocol(node);
-		}
-				
-		radioModel.updateNeighborhoods();
-	}
-	
-	public static void createRandomNodes(double areaWidth, double maxElevation) { 
-		GaussianRadioModel radioModel = new GaussianRadioModel(Simulator.getInstance());	
+			protocol[i] = new PIProtocol(node,mac);
+		}		
 		
-		System.out.println("creating nodes...");
+		Vector<Node> nodes = Simulator.getInstance().getNodes();
 		
-		for( int i=0; i< NUMNODES; ++i ){
-			Node node = new Mica2Node(radioModel,new ConstantDriftClock());
-			node.setPosition( new Position(areaWidth * Simulator.random.nextDouble(), 
-										   areaWidth * Simulator.random.nextDouble(), 
-										   maxElevation * Simulator.random.nextDouble()));
-			node.setId( 1 + i);
-			Simulator.getInstance().register(node);				
-			protocol[i] = new PIProtocol(node);           
+		for (Iterator<Node> iterator = nodes.iterator(); iterator.hasNext();) {
+			Node node = (Node) iterator.next();
+			node.getRadio().getNeighbors().updateNeighborhood();			
 		}
 	}
 

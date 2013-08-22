@@ -1,14 +1,15 @@
 package sim.jprowler.applications.PISync;
 
 import sim.jprowler.Node;
-import sim.jprowler.Protocol;
-import sim.jprowler.RadioPacket;
 import sim.jprowler.Simulator;
 import sim.jprowler.UInt32;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
+import sim.jprowler.mac.CSMAMac;
+import sim.jprowler.mac.MacListener;
+import sim.jprowler.radio.RadioPacket;
 
-public class PIProtocol extends Protocol implements TimerHandler{
+public class PIProtocol implements TimerHandler,MacListener{
 	
 	private static final int BEACON_RATE = 30000000;
 	private static final float MAX_PPM = 0.0001f;
@@ -18,12 +19,18 @@ public class PIProtocol extends Protocol implements TimerHandler{
 	
 	Timer timer0 = null;
 	PIClock piClock = new PIClock();
+	
+	Node node;
+	CSMAMac mac;
 		
-	public PIProtocol(Node node){
-		super (node);	
+	public PIProtocol(Node node,CSMAMac mac){
+		this.mac = mac;
+		mac.addListener(this);
 		
-		getNode().turnOn();
-		timer0 = new Timer(getNode().getClock(), this);
+		this.node = node;
+		node.turnOn();
+		
+		timer0 = new Timer(node.getClock(), this);
 		timer0.startPeriodic(BEACON_RATE);
 	}
 	
@@ -66,7 +73,7 @@ public class PIProtocol extends Protocol implements TimerHandler{
 	public void receiveMessage(RadioPacket packet){
 		PIPayload payload = (PIPayload)packet.getPayload();
 //		System.out.println("------------------------------------------------------------");
-//		System.out.println("Node:"+getNode().getId() + " receiving from node " + payload.nodeid);
+//		System.out.println("Node:"+node.getId() + " receiving from node " + payload.nodeid);
 //		System.out.println("r clock value:"+payload.clock.toLong());
 //		System.out.println("m clock value:"+piClock.getValue(packet.getEventTime()));
 //		System.out.println("------------------------------------------------------------");
@@ -77,40 +84,53 @@ public class PIProtocol extends Protocol implements TimerHandler{
 	private void send(){
 		UInt32 localTime, globalTime;
 
-		localTime = getNode().getClock().getValue();
+		localTime = node.getClock().getValue();
 		globalTime = piClock.getValue(localTime);
 
 		PIPayload outgoingMsg = new PIPayload();
-		outgoingMsg.nodeid = getNode().getId();
+		outgoingMsg.nodeid = node.getId();
 		outgoingMsg.clock = globalTime;
 
 		RadioPacket packet = new RadioPacket(outgoingMsg);
 		packet.setEventTime(new UInt32(localTime));
-		sendMessage(packet);
-	}	
-	
-	public void sendMessageDone(boolean sendSuccess){
-		
+		mac.sendPacket(packet);
 	}	
 	
 	@Override
 	public void fireEvent(Timer timer) {
 		if(timer == timer0){
 			send();
-		}
-		
+		}		
 	}
 	
 	public String toString(){
 		String s = "" + Simulator.getInstance().getSecond();
 
-		s += " " + getNode().getId();
-		s += " " + piClock.getValue(getNode().getClock().getValue()).toString();
-		s += " " + Float.floatToIntBits((1.0f+piClock.rate)*(float)(1.0f+getNode().getClock().getDrift()));
+		s += " " + node.getId();
+		s += " " + piClock.getValue(node.getClock().getValue()).toString();
+		s += " " + Float.floatToIntBits((1.0f+piClock.rate)*(float)(1.0f+node.getClock().getDrift()));
 		
 		System.out.println(s);
 		
 		return s;
+	}
+
+	@Override
+	public void on() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void off() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void packetLost() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

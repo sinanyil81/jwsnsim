@@ -1,7 +1,7 @@
 package sim.jprowler.applications.LowPower;
 
-import sim.jprowler.RadioPacket;
 import sim.jprowler.UInt32;
+import sim.jprowler.radio.RadioPacket;
 
 public class TimeSync {
 	

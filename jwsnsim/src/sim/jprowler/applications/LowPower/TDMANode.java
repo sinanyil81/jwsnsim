@@ -1,19 +1,17 @@
 package sim.jprowler.applications.LowPower;
 
-import sim.jprowler.Mica2NodeNonCSMA;
-import sim.jprowler.Protocol;
-import sim.jprowler.RadioListener;
-import sim.jprowler.RadioModel;
-import sim.jprowler.RadioPacket;
+import sim.jprowler.Node;
 import sim.jprowler.UInt32;
 import sim.jprowler.applications.LowPower.TDMASchedule4x4Grid.Schedule;
 import sim.jprowler.applications.LowPower.TDMASchedule4x4Grid.ScheduleType;
-import sim.jprowler.clock.Clock;
 import sim.jprowler.clock.Timer;
 import sim.jprowler.clock.TimerHandler;
+import sim.jprowler.mac.MacListener;
+import sim.jprowler.mac.NonCSMAMac;
+import sim.jprowler.radio.RadioPacket;
+import sim.jprowler.radio.RadioProcessor;
 
-public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
-		RadioListener {
+public class TDMANode implements TimerHandler,MacListener {
 
 	public TimeSync synchronizer = new TimeSync(4);
 	public TDMASchedule4x4Grid schedule = null;
@@ -22,30 +20,31 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
 	boolean isSleepingAllowed = false;
 
 	RadioPacket scheduledPacket = null;
-	Protocol protocol = null;
-
 	Schedule currentSchedule = null;
+	
+	Node node;
+	NonCSMAMac mac;
+	RadioStats stats;
 
-	public TDMANode(int id,RadioModel radioModel, Clock clock) {
-		super(id,radioModel, clock);
-
-		transmitTimer = new Timer(clock, this);
-		setListener(this);
+	public TDMANode(Node node,NonCSMAMac mac) {
+		this.mac = mac;
+		mac.addListener(this);
+		
+		this.node = node;
+		node.turnOn();
+		transmitTimer = new Timer(node.getClock(), this);
+		start();
+		
+		stats = new RadioStats(this);
+		stats.on();
 	}
 
 	public void start() {
 
-		schedule = new TDMASchedule4x4Grid(this);
-		schedule.reschedule(getClock().getValue(), 0.0f);
+		schedule = new TDMASchedule4x4Grid(node);
+		schedule.reschedule(node.getClock().getValue(), 0.0f);
 		currentSchedule = schedule.getTransmissionSchedule();
 		transmitTimer.startOneshot(currentSchedule.time.toInteger());
-	}
-
-	public boolean sendMessage(RadioPacket packet, Protocol app) {
-		scheduledPacket = packet.clone();
-		protocol = app;
-
-		return true;
 	}
 
 	@Override
@@ -54,15 +53,17 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
 			
 			switch (currentSchedule.type) {
 			case SEND:
-				stopSleepTimer();
+				scheduledPacket = new RadioPacket(null); 
 				insertLogicalClockAndTimestampPacketToSend();
-				super.sendMessage(scheduledPacket, protocol);
+				mac.sendPacket(scheduledPacket, isSleepingAllowed);
+
+				nextAction();
+				stats.startEpoch();
 				break;
 
 			case RECEIVE:
-				stopSleepTimer();
-				wakeUp();
-				startSleepTimer(wakeUpTime + 2 * generateGuardTime());
+				mac.wakeUp(generateGuardTime());
+				nextAction();
 				break;
 
 			default:
@@ -78,7 +79,7 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
 	}
 
 	private void insertLogicalClockAndTimestampPacketToSend() {
-		UInt32 localTime = getClock().getValue();
+		UInt32 localTime = node.getClock().getValue();
 		scheduledPacket.setTimestamp(localTime);
 		scheduledPacket.setEventTime(localTime);
 
@@ -87,60 +88,35 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
 		scheduledPacket.setClock(globalTime);
 	}
 
-	@Override
-	public void startedReceiving() {
-		stopSleepTimer();
-	}
-
-	@Override
-	public void stoppedReceiving() {
-		if (!corrupted)
-			synchronizer.synchronize(receivedPacket);
-
-		if (isSleepingAllowed) {
-			stopSleepTimer();
-			nextAction();
-		}
-	}
-
-	@Override
-	public void startedTransmitting() {
-		stopSleepTimer();
-	}
-
-	@Override
-	public void stoppedTransmitting() {
-		synchronizer.logicalClock.update(getClock().getValue());
-		UInt32 global = synchronizer.logicalClock.getValue(getClock()
-				.getValue());
-
-		schedule.reschedule(global, synchronizer.logicalClock.rate);
-
-		synchronizer.nextHistorySlot();
-		if (synchronizer.getMaxError() < 1000) {
-			isSleepingAllowed = true;
-		} else {
-			isSleepingAllowed = false;
-		}
-
-		nextAction();
-	}
-
 	protected void nextAction() {
+		
+		if(currentSchedule.type == ScheduleType.SEND){
+			synchronizer.logicalClock.update(node.getClock().getValue());
+			UInt32 global = synchronizer.logicalClock.getValue(node.getClock()
+					.getValue());
+
+			schedule.reschedule(global, synchronizer.logicalClock.rate);
+
+			synchronizer.nextHistorySlot();
+			
+			if (synchronizer.getMaxError() < 1000) {
+				isSleepingAllowed = true;
+			} else {
+				isSleepingAllowed = false;
+			}
+		}
+		
 		int remainingTime = 0;
 
-		stopSleepTimer();
-
 		if (isSleepingAllowed) {
-			sleep();
 			currentSchedule = schedule.getNextSchedule();
-			remainingTime -= wakeUpTime;
+			remainingTime -= RadioProcessor.wakeUpTime;
 		} else {
 			currentSchedule = schedule.getTransmissionSchedule();
 		}
 
 		if (currentSchedule.type == ScheduleType.SEND)
-			remainingTime -= processingTime;
+			remainingTime -= RadioProcessor.processingTime;
 		else if (currentSchedule.type == ScheduleType.RECEIVE) {
 			if (isSleepingAllowed) {
 				remainingTime -= generateGuardTime();
@@ -153,18 +129,35 @@ public class TDMANode extends Mica2NodeNonCSMA implements TimerHandler,
 		} else {
 			System.out.println("ERORR");
 		}
-		
-//		System.out.println("NODE: "+ getId()+" " + currentSchedule.type);
+	}
+
+	public void destroy(){
+		new DutyCycleGraph(node.getId(), stats.getDutyCycle());
+		new LocalSkewGraph(node.getId(), stats.getLocalSkew());
+		new PacketLossGraph(node.getId(), stats.getLostPackets());
 	}
 
 	@Override
-	public void sleepTimerExpired() {
-		nextAction();
+	public void receiveMessage(RadioPacket packet) {
+		if (packet != null)
+			synchronizer.synchronize(packet);		
 	}
-	
-	public void destroy(){
-		new DutyCycleGraph(getId(), stats.getDutyCycle());
-		new LocalSkewGraph(getId(), stats.getLocalSkew());
-		new PacketLossGraph(getId(), stats.getLostPackets());
+
+	@Override
+	public void on() {
+		stats.on();
+		
+	}
+
+	@Override
+	public void off() {
+		stats.off();
+		
+	}
+
+	@Override
+	public void packetLost() {
+		stats.incrementPacketLoss();
+		
 	}
 }

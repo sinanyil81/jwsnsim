@@ -7,6 +7,8 @@ import sim.jprowler.Node;
 import sim.jprowler.UInt32;
 
 public class TDMASchedule4x4Grid {
+	
+	public static final int TRANSMIT_GUARD = 3000;
 
 	public enum ScheduleType {
 		RECEIVE, SEND
@@ -86,30 +88,23 @@ public class TDMASchedule4x4Grid {
 			 if((node.getId()-1) > 0) neighborIds[i++] = node.getId()-1;
 			 if((node.getId()+1) < 17) neighborIds[i++] = node.getId()+1;
 			 if((node.getId()+4) < 17) neighborIds[i++] = node.getId()+4;
-		 }		
-
-//		neighborIds = new int[1];
-//
-//		if (node.getId() == 1)
-//			neighborIds[0] = 2;
-//		if (node.getId() == 2)
-//			neighborIds[0] = 1;
-
+		 }
 	}
 
 	private UInt32 getNextSchedule(int id,UInt32 time) {
 		UInt32 currentEpoch = time.shiftRight(24);
 		currentEpoch = currentEpoch.shiftLeft(24);
 		UInt32 nextTransmission = currentEpoch.add(0xFFFFF * (id - 1));
+		
+		int remainingTime =nextTransmission.subtract(time).toInteger(); 
 
-		if((nextTransmission.subtract(time)).toInteger() <= 0){
+		if(remainingTime <= 0){
 			currentEpoch = time.shiftRight(24);
 			currentEpoch = currentEpoch.increment();
 			currentEpoch = currentEpoch.shiftLeft(24);
 			
 			nextTransmission = currentEpoch.add(0xFFFFF * (id - 1));
-		}
-		
+		}		
 		
 		return nextTransmission;
 	}		
@@ -121,7 +116,7 @@ public class TDMASchedule4x4Grid {
 		logical.setValue(globalTime, node.getClock().getValue());
 		logical.rate = rate;
 
-		UInt32 nextTransmission = getNextSchedule(node.getId(), globalTime);
+		UInt32 nextTransmission = getNextSchedule(node.getId(), globalTime.add(TRANSMIT_GUARD));
 		schedules.add(new Schedule(ScheduleType.SEND, nextTransmission));
 		
 
@@ -156,7 +151,7 @@ public class TDMASchedule4x4Grid {
 		UInt32 globalTime = logical.getValue(node.getClock().getValue());
 
 		Schedule s = schedules.remove(0);
-
+		
 		if (s != null) {
 			int remaining = (s.time.subtract(globalTime)).toInteger();
 			remaining = (int) ((double) remaining / (1.0f + logical.rate));

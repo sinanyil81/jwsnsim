@@ -6,9 +6,9 @@ import java.util.Random;
 import java.util.Vector;
 
 public class Simulator {
-//	static private long SIMULATOR_SEED = 0x123456L;	
-//	static public Random random = new Random(SIMULATOR_SEED);
-	static public Random random = new Random();
+	static private long SIMULATOR_SEED = 0x123456L;	
+	static public Random random = new Random(SIMULATOR_SEED);
+//	static public Random random = new Random();
 	
 	private static Simulator simulator = null;
 	private SimTime simTime = new SimTime();

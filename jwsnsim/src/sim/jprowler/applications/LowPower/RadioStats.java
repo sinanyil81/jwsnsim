@@ -1,8 +1,9 @@
-package sim.jprowler;
+package sim.jprowler.applications.LowPower;
 
 import org.jfree.data.xy.XYSeries;
 
-import sim.jprowler.applications.LowPower.TDMANode;
+import sim.jprowler.Node;
+import sim.jprowler.Simulator;
 
 public class RadioStats {
 	long startEpoch = -1;
@@ -17,14 +18,14 @@ public class RadioStats {
 	
 	double dutyCycle = 1.0;
 	
-	Node node = null;
+	TDMANode node = null;
 //	Logger logger = null;
 	
-	XYSeries duty = new XYSeries("On/Off Cycle");
+    XYSeries duty = new XYSeries("On/Off Cycle");
 	XYSeries sync = new XYSeries("Max Local Error");
 	XYSeries packet = new XYSeries("LostPackets");
 	
-	public RadioStats(Node node){
+	public RadioStats(TDMANode node){
 		this.node = node;
 //		logger = new Logger("DutyCycle"+node.getId()+".txt");
 	}
