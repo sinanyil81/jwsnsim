@@ -51,6 +51,20 @@ public class FtspNode extends Node implements TimerHandler{
 		ROOT_ID = NODE_ID;
 		sequence = 0;
 		
+		/* to start clock with a random value */
+//		if(this.NODE_ID == 1){
+//			CLOCK.setValue(new UInt32(0));
+//			CLOCK.setDrift(0.0001);
+//		}
+//		else if(this.NODE_ID == 20){
+//			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
+//			CLOCK.setDrift(0.000150);
+//		}
+//		else
+//			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		
 		for (int i = 0; i < table.length; i++) {
 			table[i] = new RegressionEntry();
 		}
@@ -235,7 +249,7 @@ public class FtspNode extends Node implements TimerHandler{
 		
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-		s += " " + Float.floatToIntBits(ls.getSlope());
+		s += " " + Float.floatToIntBits((float) ((1.0f + ls.getSlope())*(this.CLOCK.getDrift()+1.0f)));
 		
 //		if (this.NODE_ID == 20){
 //			s += "\n";

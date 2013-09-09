@@ -30,24 +30,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 		
-		/* to start clock with a random value */
-		if(this.NODE_ID == 1){
-//			CLOCK.setValue(new UInt32(0));
-//			CLOCK.setDrift(0.0001f);
-			CLOCK.setDrift(0.000050f);
-		}
-		/* to start clock with a random value */
-		else if(this.NODE_ID == 2){
-//			CLOCK.setValue(new UInt32(0));
-		}
-		else if(this.NODE_ID == 20){
-//			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
-//			CLOCK.setDrift(0.0002f);
-		}
-		else
-//			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
-		
-		CLOCK.setValue(new UInt32(0));
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+//		System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);		
 	
@@ -65,6 +49,13 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		return neighborClock.subtract(myClock).toInteger();
 	}
 	
+	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
+//	private static final float BOUNDARY = 10000.0f;
+	float beta = 1.0f;
+
+	float K_max = 0.000004f/BOUNDARY;
+//	float K_max = (beta*beta)/120000000.0f;
+	
 	private void algorithm1(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
@@ -81,244 +72,27 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		}
 	
 		int skew = calculateSkew(packet);
-		float K_p = 0.5f;
-		float K_i = 0.0f;
-		
-		float boundary = 2.0f*MAX_PPM*(float)BEACON_RATE; // + maybe a tolerance;
-		
+//		System.out.println(K_max);		
 		/*  initial offset compensation */ 
-		if(Math.abs(skew) > boundary){
+		if(Math.abs(skew) > BOUNDARY){
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
 			return;
 		}
 
-		K_i = (boundary - Math.abs(skew))*0.00000001f/boundary;  
-		logicalClock.setValue(logicalClock.getValue(updateTime).add((int)((float)skew*K_p)),updateTime);			
-		logicalClock.rate += K_i*0.5f*(float)skew;
+		float x = BOUNDARY - Math.abs(skew);					
+		float K_i = x*K_max/BOUNDARY;
+					
+		logicalClock.rate += K_i*(float)skew;
+		
+		int addedValue = (int) (((float)skew)*beta);
+//		System.out.println(addedValue + " " + BOUNDARY);
+  
+		logicalClock.setValue(logicalClock.getValue(updateTime).add(addedValue),updateTime);			
 	}
 
-	float K_i = 0.0f;	
-	float K_max_20 = 0.00002f/(2.0f*MAX_PPM*(float)BEACON_RATE);	
 
-	float K_min = 0.00004f/(2.0f*MAX_PPM*(float)BEACON_RATE);
-	
-	float increment = 0.0f;
-	
-//	private static final float TURNING_POINT1 = 2.0f*MAX_PPM*(float)BEACON_RATE;
-	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
-	float K_max_10 = 0.000004f/BOUNDARY;
-	int counter = 0;
-	
-	private void algorithm2(RadioPacket packet) {
-		UInt32 updateTime = packet.getEventTime();
-		logicalClock.update(updateTime);
-		PIFloodingMessage msg = (PIFloodingMessage)packet.getPayload();
-
-		if( msg.rootid < outgoingMsg.rootid) {
-			outgoingMsg.rootid = msg.rootid;
-			outgoingMsg.sequence = msg.sequence;
-			counter = 2;
-		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
-			outgoingMsg.sequence = msg.sequence;
-		}
-		else {
-			return;
-		}
-	
-		int skew = calculateSkew(packet);	
-								
-		/*  initial offset compensation */ 
-		if(Math.abs(skew) <= BOUNDARY){	
-			
-//			if(this.NODE_ID == 20)
-//				System.out.println(skew);
-						
-//			if(Math.abs(skew) < TURNING_POINT1){
-////				float x = boundary - Math.abs(skew);					
-////				K_i = x*K_max_10/(boundary-TURNING_POINT1);				
-////				
-////				K_i += (TURNING_POINT1-Math.abs(skew))/TURNING_POINT1*(K_min-K_i);
-//				K_i = Math.abs(skew)*(K_max_10-K_min)/TURNING_POINT1 + K_min;
-//			}
-//			else{
-//				float x = BOUNDARY - Math.abs(skew);					
-//				K_i = x*K_max_10/(BOUNDARY-TURNING_POINT1);
-////				K_i = x*K_max_10/boundary;
-//			}
-			
-			float x = BOUNDARY - Math.abs(skew);					
-			K_i = x*K_max_10/BOUNDARY;
-			
-//			if(Math.abs(skew) < BOUNDARY/2){
-//				float x = BOUNDARY - Math.abs(skew);
-//				K_i = (K_max_10/BOUNDARY)*(x/Math.abs(skew))*Math.abs(skew);
-//			}
-//			else{
-//				float x = BOUNDARY - Math.abs(skew);					
-//				K_i = x*K_max_10/BOUNDARY;
-//			}
-			
-//			if(Math.abs(skew) < BOUNDARY/10){
-////				K_i = 2.0f*Math.abs(skew)*K_max_10/BOUNDARY;
-//				float x = BOUNDARY - Math.abs(skew);					
-//				K_i = x*K_max_10/BOUNDARY;
-//				
-//			}	
-//			else{								
-//				K_i = (2.0f*K_max_10/BOUNDARY)*(((Math.abs(skew)-BOUNDARY)*(Math.abs(skew)-BOUNDARY))/Math.abs(skew));
-//			}
-			
-			logicalClock.rate += K_i*(float)skew;
-			increment = K_i*(float)skew;
-//			
-//			if(this.NODE_ID == 2)
-//				System.out.println(increment);
-		}	
-		else{
-//			System.out.println(Simulator.getInstance().getSecond() + " " + this.NODE_ID + " " + skew + " " + BOUNDARY);
-		}
-				
-//		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
-		
-//		logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
-		
-		if(Math.abs(skew)>2)
-			logicalClock.setValue(((PIFloodingMessage) packet.getPayload()).clock,updateTime);
-		else{
-			float x = (2.0f - Math.abs(skew))/2.0f;
-			skew *= x;
-			logicalClock.setValue(logicalClock.getValue(updateTime).add((int)x),updateTime);			
-		}
-		
-//		if(this.NODE_ID ==100 )
-//			System.out.println(Simulator.getInstance().getSecond() + " " + logicalClock.rate + " " + skew);
-		
-//		if (counter == 1){		
-//			timer0.stop();
-//			timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
-//			counter--;
-//		}
-//		else if(counter > 0)
-//		{
-//			timer0.startOneshot(5000);
-//			counter--;
-//		}
-	}
-	
-//	float K_max = 0.00001f/(2.0f*MAX_PPM*(float)BEACON_RATE);
-//	public AvtSimple alpha = new AvtSimple(0.0f, K_max, 0.0f, 0.00000000001f, 0.00001f); /* 0.00000000001f*/
-//	int previousSkew = 0;
-//	
-//	private void algorithm3(RadioPacket packet) {
-//		UInt32 updateTime = packet.getEventTime();
-//		logicalClock.update(updateTime);
-//		PIFloodingMessage msg = (PIFloodingMessage)packet.getPayload();
-//
-//		if( msg.rootid < outgoingMsg.rootid) {
-//			outgoingMsg.rootid = msg.rootid;
-//			outgoingMsg.sequence = msg.sequence;
-//		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
-//			outgoingMsg.sequence = msg.sequence;
-//		}
-//		else {
-//			return;
-//		}
-//	
-//		int skew = calculateSkew(packet);	
-//				
-//		
-//		float boundary = 2.0f*MAX_PPM*(float)BEACON_RATE; // + maybe a tolerance;
-//		
-//		/*  initial offset compensation */ 
-//		if(Math.abs(skew) <= boundary){			
-//			
-//			if ((skew > 0 && previousSkew > 0) || (skew < 0 && previousSkew < 0)){
-//				alpha.adjustValue(AvtSimple.FEEDBACK_GREATER);
-//			}
-//			else if ((skew > 0 && previousSkew <= 0) || (skew < 0 && previousSkew >= 0)) {
-////				alpha.adjustValue(AvtSimple.FEEDBACK_LOWER);
-//				alpha.setValue(0.0f);
-//				alpha.resetDelta();
-//			} else {
-//				alpha.adjustValue(AvtSimple.FEEDBACK_GOOD);
-//			}		
-//			
-//			previousSkew = skew;
-//									
-//			logicalClock.rate += alpha.getValue()*(float)skew;					
-//				
-//		}
-//		else{
-//			previousSkew = 0;
-//		}
-//		
-//		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);		
-//	}
-		
-//	float K_max = 1.0f/(float)BEACON_RATE;
-//	float K_max = 1.0f/((float)BEACON_RATE*2.0f*MAX_PPM);
-//	
-//	float alpha = 0.0f;
-//	final float INCREMENT  = 0.000001f/((float)BEACON_RATE*2.0f*MAX_PPM);
-//	float incrementAmount = INCREMENT;	
-//	int previousSkew = 0;
-//	
-//	private void algorithm3(RadioPacket packet) {
-//		UInt32 updateTime = packet.getEventTime();
-//		logicalClock.update(updateTime);
-//		PIFloodingMessage msg = (PIFloodingMessage)packet.getPayload();
-//
-//		if( msg.rootid < outgoingMsg.rootid) {
-//			outgoingMsg.rootid = msg.rootid;
-//			outgoingMsg.sequence = msg.sequence;
-//		} else if (outgoingMsg.rootid == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0) {
-//			outgoingMsg.sequence = msg.sequence;
-//		}
-//		else {
-//			return;
-//		}
-//	
-//		int skew = calculateSkew(packet);					
-//		
-//		float boundary = 2.0f*MAX_PPM*(float)BEACON_RATE + 10000; // + maybe a tolerance;
-//		
-//		/*  initial offset compensation */ 
-//		if(Math.abs(skew) <= boundary){			
-//			
-//			if ((skew > 0 && previousSkew > 0) || (skew < 0 && previousSkew < 0)){
-//				alpha += incrementAmount;
-//				incrementAmount *= 2.0f;
-//				
-////				if(alpha > K_max){
-////					alpha = K_max;
-////					incrementAmount /= 2.0f;
-////				}
-//				
-//			}
-//			else if ((skew > 0 && previousSkew < 0) || (skew < 0 && previousSkew > 0)) {
-//				alpha = 0.0f;
-//				incrementAmount = INCREMENT;
-//			}
-//			
-//			previousSkew = skew;
-//			
-//			logicalClock.rate += alpha*(float)skew;
-//				
-//		}
-////		else{
-////			previousSkew = 0;
-////			alpha = 0.0f;
-////			incrementAmount = INCREMENT;
-////		}
-//		
-//		logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);		
-//	}
-//
-	
 	void processMsg() {
-//		algorithm1(processedMsg);
-		algorithm2(processedMsg);
-//		algorithm3(processedMsg);
+		algorithm1(processedMsg);
 	}
 
 	@Override

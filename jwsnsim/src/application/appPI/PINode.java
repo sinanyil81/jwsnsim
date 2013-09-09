@@ -1,6 +1,5 @@
 package application.appPI;
 
-import application.appPIFlooding.PIFloodingMessage;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -43,8 +42,8 @@ public class PINode extends Node implements TimerHandler {
 
 		timer0 = new Timer(CLOCK, this);
 
-		System.out.println("Node:" + this.NODE_ID + ":"
-				+ (int) (CLOCK.getDrift() * 1000000.0));
+//		System.out.println("Node:" + this.NODE_ID + ":"
+//				+ (int) (CLOCK.getDrift() * 1000000.0));
 	}
 
 	int calculateSkew(RadioPacket packet) {

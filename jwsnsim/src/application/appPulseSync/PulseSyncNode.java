@@ -58,6 +58,9 @@ public class PulseSyncNode extends Node implements TimerHandler{
 		/* init variables */
 		outgoingMsg.rootid = NODE_ID;
 		outgoingMsg.sequence = 0;
+		
+		/* to start clock with a random value */
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
 	}
 	
 	@Override

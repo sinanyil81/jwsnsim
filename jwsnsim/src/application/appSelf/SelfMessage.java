@@ -10,7 +10,7 @@ public class SelfMessage {
 	public UInt32 hardwareClock = new UInt32();
 	public float rateMultiplier = 0.0f;
 	
-	public int sequence = -1;
+	public int sequence = -1;	
 
 	public SelfMessage(int nodeid, UInt32 clock, UInt32 offset, int sequence) {
 		this.nodeid = nodeid;

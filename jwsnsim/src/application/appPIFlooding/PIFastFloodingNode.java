@@ -1,8 +1,6 @@
-package application.appSelfFlooding;
+package application.appPIFlooding;
 
-import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
-import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -13,43 +11,31 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.type.UInt32;
 
-public class SelfFloodingNode extends Node implements TimerHandler {
+public class PIFastFloodingNode extends Node implements TimerHandler {
 
 	private static final int BEACON_RATE = 30000000;  
-	private static final int TOLERANCE = 1;
+	private static final float MAX_PPM = 0.0001f;
+	
+	int ROOT_ID = 1; // fixed root
 
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
 	RadioPacket processedMsg = null;
-	SelfFloodingMessage outgoingMsg = new SelfFloodingMessage();
+	PIFloodingMessage outgoingMsg = new PIFloodingMessage();
     
-	public SelfFloodingNode(int id, Position position) {
+	public PIFastFloodingNode(int id, Position position) {
 		super(id, position);
 
-//		CLOCK = new ConstantDriftClock();
-		CLOCK = new DynamicDriftClock();
+		CLOCK = new ConstantDriftClock();
+		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
+		
+		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+//		System.out.println(CLOCK.getDrift());
 
-		timer0 = new Timer(CLOCK, this);
-		
-		/* to start clock with a random value */
-		if(this.NODE_ID == 1){
-			CLOCK.setValue(new UInt32(0));
-			CLOCK.setDrift(0.000050f);
-		}
-		/* to start clock with a random value */
-		else if(this.NODE_ID == 2){
-			CLOCK.setValue(new UInt32(0));
-		}
-		else if(this.NODE_ID == 20){
-			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
-//			CLOCK.setDrift(0.0f);
-		}
-		else
-			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
-		
+		timer0 = new Timer(CLOCK, this);		
 	
 		outgoingMsg.sequence = 0;
 		outgoingMsg.rootid = NODE_ID;
@@ -57,18 +43,25 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	}
 	
 	int calculateSkew(RadioPacket packet) {
-		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
+		PIFloodingMessage msg = (PIFloodingMessage) packet.getPayload();
 
 		UInt32 neighborClock = msg.clock;
 		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
 
-		return myClock.subtract(neighborClock).toInteger();
+		return neighborClock.subtract(myClock).toInteger();
 	}
 	
+	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
+//	private static final float BOUNDARY = 10000.0f;
+	float beta = 1.0f;
 
-	private void adjustClock(RadioPacket packet) {
-		logicalClock.update(packet.getEventTime());
-		SelfFloodingMessage msg = (SelfFloodingMessage)packet.getPayload();
+	float K_max = 0.000004f/BOUNDARY;
+//	float K_max = (beta*beta)/120000000.0f;
+	
+	private void algorithm1(RadioPacket packet) {
+		UInt32 updateTime = packet.getEventTime();
+		logicalClock.update(updateTime);
+		PIFloodingMessage msg = (PIFloodingMessage)packet.getPayload();
 
 		if( msg.rootid < outgoingMsg.rootid) {
 			outgoingMsg.rootid = msg.rootid;
@@ -81,22 +74,30 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		}
 	
 		int skew = calculateSkew(packet);
-		logicalClock.setValue(msg.clock, packet.getEventTime());
-		
-		if (skew > TOLERANCE) {
-//			logicalClock.rate.adjustValue(Feedback.LOWER);
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
-		} else if (skew < -TOLERANCE) {
-//			logicalClock.rate.adjustValue(Feedback.GREATER);
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
-		} else {
-//			logicalClock.rate.adjustValue(Feedback.GOOD);
-			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
+//		System.out.println(K_max);		
+		/*  initial offset compensation */ 
+		if(Math.abs(skew) > BOUNDARY){
+			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
+			return;
 		}
+
+		float x = BOUNDARY - Math.abs(skew);					
+		float K_i = x*K_max/BOUNDARY;
+					
+		logicalClock.rate += K_i*(float)skew;
+		
+		int addedValue = (int) (((float)skew)*beta);
+//		System.out.println(addedValue + " " + BOUNDARY);
+  
+		logicalClock.setValue(logicalClock.getValue(updateTime).add(addedValue),updateTime);
+		
+		/* for sending data */
+        timer0.startOneshot(1000000);
 	}
-	
+
+
 	void processMsg() {
-		adjustClock(processedMsg);
+		algorithm1(processedMsg);
 	}
 
 	@Override
@@ -123,7 +124,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 			outgoingMsg.clock = new UInt32(globalTime);	
 		}
 		
-		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
+		RadioPacket packet = new RadioPacket(new PIFloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
 		MAC.sendPacket(packet);	
@@ -135,23 +136,23 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	@Override
 	public void on() throws Exception {
 		super.on();
-		timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
+		if(NODE_ID == ROOT_ID)
+			timer0.startPeriodic(BEACON_RATE);
 	}
 
 	public UInt32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 
-	boolean changed = false;
+//	boolean changed = false;
 	public String toString() {
 		String s = "" + Simulator.getInstance().getSecond();
 
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-						.getValue()) * (1.0 + CLOCK.getDrift())));
-		
+				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK.getDrift())));
+//				+ Float.floatToIntBits((float) (increment));//		
 //		if(Simulator.getInstance().getSecond()>=100000)
 //		{
 //			/* to start clock with a random value */
@@ -162,8 +163,9 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 //				}				
 //			}
 //		}
+//		+ Float.floatToIntBits(K_i);
 //		System.out.println("" + NODE_ID + " "
-//				+ (1.0 + (double) logicalClock.rate.getValue())
+//				+ (1.0 + (double) logicalClock.rate)
 //				* (1.0 + CLOCK.getDrift()));
 
 		return s;

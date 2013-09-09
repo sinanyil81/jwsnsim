@@ -1,7 +1,5 @@
 package application.appSelf;
 
-import java.util.Vector;
-
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -23,7 +21,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 	Timer timer0;
 
-	SelfMessage outgoingMsg = new SelfMessage();
+	SelfMessage outgoingMsg = new SelfMessage();	
 
 	public SelfNode(int id, Position position) {
 		super(id, position);
@@ -54,29 +52,31 @@ public class SelfNode extends Node implements TimerHandler {
 	}
 
 	private void adjustClock(RadioPacket packet) {
-		SelfMessage msg = (SelfMessage)packet.getPayload();
+		SelfMessage msg = (SelfMessage) packet.getPayload();
 		logicalClock.update(packet.getEventTime());
 
-		double skew = calculateSkew(packet);
+		double skew = calculateSkew(packet);		
 
+		adjustRate(skew);
+
+		adjustOffset(skew / 2);
+	}
+
+	private void adjustRate(double skew) {
 		// aynı anda başladıklarında bir dahaki mesaja kadar aralarında
-		// olabilecek en fazla saat farkını hesapla
-		double threshold = 0.0002 * BEACON_RATE;
+		// olabilecek en fazla saat farkını hesapla				
+		double threshold = 0.0002 * BEACON_RATE;		
 
 		if (skew < -threshold) {
-			logicalClock.setValue(msg.clock, packet.getEventTime());
+			// adjustOffset(skew);
 		} else if (skew > threshold) {
 			// do nothing
 		} else if (skew > TOLERANCE) {
-			 logicalClock.rate.adjustValue(Feedback.LOWER);
-//			 logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			logicalClock.rate.adjustValue(Feedback.LOWER);
 		} else if (skew < (-1.0) * TOLERANCE) {
 			logicalClock.rate.adjustValue(Feedback.GREATER);
-//			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GREATER);
-			logicalClock.setValue(msg.clock, packet.getEventTime());
 		} else {
 			logicalClock.rate.adjustValue(Feedback.GOOD);
-//			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_GOOD);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class SelfNode extends Node implements TimerHandler {
 		sendMsg();
 	}
 
-	private void sendMsg() {
+	private void sendMsg() {		
 		UInt32 localTime, globalTime;
 
 		localTime = CLOCK.getValue();
@@ -107,6 +107,8 @@ public class SelfNode extends Node implements TimerHandler {
 		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;
 
+		double delta = logicalClock.rate.getAdvancedAVT().getDeltaManager()
+				.getDelta();
 		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new UInt32(localTime));
@@ -124,17 +126,31 @@ public class SelfNode extends Node implements TimerHandler {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 
+	boolean on = false;
 	public String toString() {
-		String s = "" + Simulator.getInstance().getSecond();
+		String s = "" + Simulator.getInstance().getSecond();	
 
+		if(Simulator.getInstance().getSecond() > 150000){
+			if( (this.NODE_ID == 50) && (on == false)){
+				try {
+					on = true;
+					this.on();					
+				} catch (Exception e) {
+					
+				}
+			}
+			
+		}
+		
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+		s += " " + Float.floatToIntBits((float) ((1.0 + logicalClock.rate
 						.getValue()) * (1.0 + CLOCK.getDrift())));
-//		System.out.println("" + NODE_ID + " "
-//				+ (1.0 + (double) logicalClock.rate.getValue())
-//				* (1.0 + CLOCK.getDrift()));
+//		s += " " + Float.floatToIntBits((float) (logicalClock.rate
+//				.getAdvancedAVT().getDeltaManager().getDelta()));
+		// System.out.println("" + NODE_ID + " "
+		// + (1.0 + (double) logicalClock.rate.getValue())
+		// * (1.0 + CLOCK.getDrift()));
 
 		return s;
 	}

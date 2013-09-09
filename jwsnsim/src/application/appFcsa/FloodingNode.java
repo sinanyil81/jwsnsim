@@ -157,6 +157,10 @@ public class FloodingNode extends Node implements TimerHandler {
 	}
 
 	private void updateClockRate() {
+		
+//		if(this.NODE_ID == outgoingMsg.rootid)
+//			return;
+		
 		float rateSum = (float) logicalClock.rate;
 		int numNeighbors = 0;
 		
