@@ -23,6 +23,9 @@ public class PIFastFloodingNode extends Node implements TimerHandler {
 
 	RadioPacket processedMsg = null;
 	PIFloodingMessage outgoingMsg = new PIFloodingMessage();
+	
+    UInt32 pulse;
+    UInt32 pulseTime;
     
 	public PIFastFloodingNode(int id, Position position) {
 		super(id, position);
@@ -72,6 +75,9 @@ public class PIFastFloodingNode extends Node implements TimerHandler {
 		else {
 			return;
 		}
+		
+		pulse = new UInt32(msg.clock);
+        pulseTime = packet.getEventTime();
 	
 		int skew = calculateSkew(packet);
 //		System.out.println(K_max);		
@@ -112,16 +118,17 @@ public class PIFastFloodingNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		UInt32 localTime;
 		
 		localTime = CLOCK.getValue();
-		globalTime = logicalClock.getValue(localTime);
 		
 		if( outgoingMsg.rootid == NODE_ID ) {
 			outgoingMsg.clock = new UInt32(localTime);
 		}
 		else{
-			outgoingMsg.clock = new UInt32(globalTime);	
+			UInt32 elapsed = localTime.subtract(pulseTime);
+        	elapsed = elapsed.add(elapsed.multiply(logicalClock.rate));               	        		
+			outgoingMsg.clock = new UInt32(pulse.add(elapsed));	
 		}
 		
 		RadioPacket packet = new RadioPacket(new PIFloodingMessage(outgoingMsg));
