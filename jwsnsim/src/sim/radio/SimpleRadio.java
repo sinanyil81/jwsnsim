@@ -214,7 +214,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 
 	/**
-	 * Calls the {@link Mica2Node#removeNoise} method. See also 
+	 * Calls the {@link Mica2NodeNonCSMA#removeNoise} method. See also 
 	 * {@link Node#receptionEnd} for more information.
 	 */
 	public void receptionEnd(RadioPacket packet) {
