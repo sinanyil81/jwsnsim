@@ -11,11 +11,15 @@ public class Main {
 //		diameterSimulations("application.appPIFlooding.PIFloodingNode");
 //		diameterSimulations("application.appEgtsp.GradientNode");
 //		diameterSimulations("application.appFcsa.FloodingNode");
-		diameterSimulations("application.appFtsp.FtspNode");
+//		diameterSimulations("application.appFtsp.FtspNode");
 //		diameterSimulations("application.appPulseSync.PulseSyncNode");
 //		diameterSimulations("application.appSelfFlooding.SelfFloodingNode");
 //		diameterSimulations("application.appPIFlooding.PIFastFloodingNode");
 		/*------------------------------------------*/
+		
+		new Application("application.appPIFlooding.PIFloodingNode",2,"PI.txt", Application.LINE, 0);
+//		new Application("application.appPI.PINode",2,"PI.txt", Application.LINE, 0);
+		
 	}
 	
 	private static void diameterSimulations(String className) {
