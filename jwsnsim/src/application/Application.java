@@ -16,7 +16,7 @@ public class Application implements TimerHandler {
 	
 	private int PERIOD = 20000000;
 	
-	public static long MAXSECOND =1000000;
+	public static long MAXSECOND =10000;
 	protected int NUMNODES = 20;
 	protected Node[] nodes = null;
 	
@@ -108,8 +108,6 @@ public class Application implements TimerHandler {
 	}
 
 	private void log() {
-		if(Simulator.getInstance().getSecond()< 990000) return;
-		
 		for(int i=0;i<nodes.length;i++){
 			logger.log(nodes[i].toString());
 		}
