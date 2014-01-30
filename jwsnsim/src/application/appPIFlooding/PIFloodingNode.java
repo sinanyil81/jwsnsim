@@ -51,10 +51,11 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
 //	private static final float BOUNDARY = 10000.0f;
-	float beta = 1.0f;
+	float beta = 2.0f;
 
-	float K_max = 0.000004f/BOUNDARY;
+//	float K_max = 0.000004f/BOUNDARY;
 //	float K_max = (beta*beta)/120000000.0f;
+	float K_max = 1.0f/(10.0f*(float)BEACON_RATE);
 	
 	private void algorithm1(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -82,7 +83,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		float x = BOUNDARY - Math.abs(skew);					
 		float K_i = x*K_max/BOUNDARY;
 					
-		logicalClock.rate += K_i*(float)skew;
+//		logicalClock.rate += K_i*(float)skew;
+		logicalClock.rate += K_max*(float)skew;
 		
 		int addedValue = (int) (((float)skew)*beta);
 //		System.out.println(addedValue + " " + BOUNDARY);
