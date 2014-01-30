@@ -56,7 +56,8 @@ public class PINode extends Node implements TimerHandler {
 	}
 	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
-	float K_max = 0.000004f/BOUNDARY;
+//	float K_max = 0.000004f/BOUNDARY;
+	float K_max = 1.0f/(10.0f*(float)BEACON_RATE);
 	
 	private void algorithmPI(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -70,7 +71,8 @@ public class PINode extends Node implements TimerHandler {
 			float x = BOUNDARY - Math.abs(skew);					
 			float K_i = x*K_max/BOUNDARY;
 						
-			logicalClock.rate += K_i*0.5*(float)skew;
+//			logicalClock.rate += K_i*(float)skew;
+			logicalClock.rate += K_max*0.25*(float)skew;
 		}	
 		
 		if(skew > 1000){
