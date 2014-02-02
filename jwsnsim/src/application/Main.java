@@ -17,7 +17,7 @@ public class Main {
 //		diameterSimulations("application.appPIFlooding.PIFastFloodingNode");
 		/*------------------------------------------*/
 		
-		new Application("application.appPIFlooding.PIFloodingNode",2,"PI.txt", Application.LINE, 0);
+		new Application("application.appPIFlooding.PIFloodingNode",60,"PI.txt", Application.LINE, 0);
 //		new Application("application.appPI.PINode",2,"PI.txt", Application.LINE, 0);
 		
 	}

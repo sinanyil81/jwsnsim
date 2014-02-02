@@ -16,7 +16,7 @@ public class Application implements TimerHandler {
 	
 	private int PERIOD = 20000000;
 	
-	public static long MAXSECOND =50000;
+	public static long MAXSECOND =20000;
 	protected int NUMNODES = 20;
 	protected Node[] nodes = null;
 	
