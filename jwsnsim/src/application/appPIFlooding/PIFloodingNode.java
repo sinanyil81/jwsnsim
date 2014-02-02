@@ -30,6 +30,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 		
+		if(this.NODE_ID == 1)
+			CLOCK.setDrift(0.0f);
 		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
 //		System.out.println(CLOCK.getDrift());
 
@@ -51,11 +53,11 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
 //	private static final float BOUNDARY = 10000.0f;
-	float beta = 2.0f;
+	float beta = 1.0f;
 
 //	float K_max = 0.000004f/BOUNDARY;
 //	float K_max = (beta*beta)/120000000.0f;
-	float K_max = 1.0f/(10.0f*(float)BEACON_RATE);
+	float K_max = 1.0f/(float)(BEACON_RATE);
 	
 	private void algorithm1(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -79,12 +81,45 @@ public class PIFloodingNode extends Node implements TimerHandler {
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
 			return;
 		}
+		
+		float offArea = 10.0f;
+		float K_i = 0.0f;
+		
+		if(Math.abs(skew)>offArea){
+			float x = BOUNDARY - Math.abs(skew);					
+//			K_i = x*K_max/(BOUNDARY-offArea);
+			K_i = x*K_max*0.1f/BOUNDARY;
+			
+//			K_i = (1.0f-Math.abs(skew)/BOUNDARY)*(1.0f+Math.abs(skew)/BOUNDARY);
+//			K_i *= K_max*0.1;
+//			K_i *= K_max*0.1;
+//			K_i = (float) Math.sqrt(K_i);
+			
+//			K_i = (1.0f-(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
+//			K_i *=(1.0f+(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
+//			K_i *= K_max*0.01f;
+//			K_i *= K_max*0.01f;
+//			K_i = (float) Math.sqrt(K_i);
+			
+		}
+		else{
+			K_i = K_max*0.01f;
+		}
+		
+		if(Math.abs(skew)>100){
+			K_i = K_max*0.1f;
+		}
+		else if(Math.abs(skew)>10){
+			K_i = K_max*0.01f;
+		}
+		else{
+			K_i = K_max*0.001f;
+		}
+		
 
-		float x = BOUNDARY - Math.abs(skew);					
-		float K_i = x*K_max/BOUNDARY;
 					
-//		logicalClock.rate += K_i*(float)skew;
-		logicalClock.rate += K_max*(float)skew;
+		logicalClock.rate += K_i*(float)skew;
+//		logicalClock.rate += 0.1f*K_max*(float)skew;
 		
 		int addedValue = (int) (((float)skew)*beta);
 //		System.out.println(addedValue + " " + BOUNDARY);
