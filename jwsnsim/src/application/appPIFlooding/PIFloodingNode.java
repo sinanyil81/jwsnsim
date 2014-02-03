@@ -58,6 +58,11 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //	float K_max = 0.000004f/BOUNDARY;
 //	float K_max = (beta*beta)/120000000.0f;
 	float K_max = 1.0f/(float)(BEACON_RATE);
+	float K_min = 1.0f/(10000.0f*(float)(BEACON_RATE));
+//	float K_min = K_max;
+	float K_i = K_min;
+	
+	int lastDirection = 0;
 	
 	private void algorithm1(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -82,40 +87,65 @@ public class PIFloodingNode extends Node implements TimerHandler {
 			return;
 		}
 		
-		float offArea = 10.0f;
-		float K_i = 0.0f;
+//	
+//		float offArea = 10.0f;
+//		float K_i = 0.0f;
+//		
+//		if(Math.abs(skew)>offArea){
+//			float x = BOUNDARY - Math.abs(skew);					
+////			K_i = x*K_max/(BOUNDARY-offArea);
+//			K_i = x*K_max*0.1f/BOUNDARY;
+//			
+////			K_i = (1.0f-Math.abs(skew)/BOUNDARY)*(1.0f+Math.abs(skew)/BOUNDARY);
+////			K_i *= K_max*0.1;
+////			K_i *= K_max*0.1;
+////			K_i = (float) Math.sqrt(K_i);
+//			
+////			K_i = (1.0f-(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
+////			K_i *=(1.0f+(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
+////			K_i *= K_max*0.01f;
+////			K_i *= K_max*0.01f;
+////			K_i = (float) Math.sqrt(K_i);
+//			
+//		}
+//		else{
+//			K_i = K_max*0.01f;
+//		}
+//		
+//		if(Math.abs(skew)>100){
+//			K_i = K_max*0.1f;
+//		}
+//		else if(Math.abs(skew)>10){
+//			K_i = K_max*0.01f;
+//		}
+//		else{
+//			K_i = K_max*0.001f;
+//		}
 		
-		if(Math.abs(skew)>offArea){
-			float x = BOUNDARY - Math.abs(skew);					
-//			K_i = x*K_max/(BOUNDARY-offArea);
-			K_i = x*K_max*0.1f/BOUNDARY;
-			
-//			K_i = (1.0f-Math.abs(skew)/BOUNDARY)*(1.0f+Math.abs(skew)/BOUNDARY);
-//			K_i *= K_max*0.1;
-//			K_i *= K_max*0.1;
-//			K_i = (float) Math.sqrt(K_i);
-			
-//			K_i = (1.0f-(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
-//			K_i *=(1.0f+(Math.abs(skew)-BOUNDARY/2.0f)/BOUNDARY/2.0f);
-//			K_i *= K_max*0.01f;
-//			K_i *= K_max*0.01f;
-//			K_i = (float) Math.sqrt(K_i);
-			
-		}
-		else{
-			K_i = K_max*0.01f;
-		}
+		int currentDirection = 0;
+		if(skew>0)
+			currentDirection = 1;
+		else if(skew <0)
+			currentDirection = -1;
+		else
+			currentDirection = 0;
 		
-		if(Math.abs(skew)>100){
-			K_i = K_max*0.1f;
+		if(currentDirection == 0){
+//			K_i /=10.0f; 
+//			if(K_i<K_min) K_i = K_min;
 		}
-		else if(Math.abs(skew)>10){
-			K_i = K_max*0.01f;
+		else if(currentDirection == lastDirection){
+			K_i = K_i*10.0f;
+			if(K_i>K_max) K_i = K_max;
 		}
-		else{
-			K_i = K_max*0.001f;
+		else {
+			K_min /=10.0f;
+			if(K_min < K_max/100000.0f)
+				K_min = K_max/100000.0f;
+			K_i= K_min; 
 		}
-		
+			
+		lastDirection = currentDirection;
 
 					
 		logicalClock.rate += K_i*(float)skew;
