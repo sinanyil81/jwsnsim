@@ -60,9 +60,49 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	float K_max = 1.0f/(float)(BEACON_RATE);
 	float K_min = 1.0f/(10000.0f*(float)(BEACON_RATE));
 //	float K_min = K_max;
-	float K_i = K_min;
+	float K_i = K_max;
 	
 	int lastDirection = 0;
+	
+	void updateAlpha(int skew){
+		int currentDirection = 0;
+		
+		if(skew>0)
+			currentDirection = 1;
+		else if(skew <0)
+			currentDirection = -1;
+		else
+			currentDirection = 0;
+		
+		if(currentDirection == 0){
+			K_i /=3.0f;
+			if(K_i < K_min)
+				K_i = K_min;
+		}
+		else if(currentDirection == lastDirection){
+			K_i = K_i*2.0f;
+			if(K_i>K_max) K_i = K_max;
+		}
+		else {
+			K_i /=3.0f;
+			if(K_i < K_min)
+				K_i = K_min;
+		}
+			
+		lastDirection = currentDirection;
+	}
+	
+	void updateAlpha2(int skew){
+		if(Math.abs(skew)<100.0f) 		
+			K_i = Math.abs(skew)*K_max/100.0f;
+		else
+			K_i = K_max;
+	}
+	
+	
+	void updateAlpha3(int skew){
+		K_i = K_max/10.0f;
+	}
 	
 	private void algorithm1(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -82,11 +122,18 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		int skew = calculateSkew(packet);
 //		System.out.println(K_max);		
 		/*  initial offset compensation */ 
+		if(this.NODE_ID==40)
+			System.out.println(skew);
+		
 		if(Math.abs(skew) > BOUNDARY){
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),updateTime);
+			logicalClock.rate = 0;
+			K_i = K_max;
+
 			return;
 		}
 		
+	
 //	
 //		float offArea = 10.0f;
 //		float K_i = 0.0f;
@@ -122,32 +169,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //			K_i = K_max*0.001f;
 //		}
 		
-		int currentDirection = 0;
-		if(skew>0)
-			currentDirection = 1;
-		else if(skew <0)
-			currentDirection = -1;
-		else
-			currentDirection = 0;
-		
-		if(currentDirection == 0){
-//			K_i /=10.0f; 
-//			if(K_i<K_min) K_i = K_min;
-		}
-		else if(currentDirection == lastDirection){
-			K_i = K_i*10.0f;
-			if(K_i>K_max) K_i = K_max;
-		}
-		else {
-			K_min /=10.0f;
-			if(K_min < K_max/100000.0f)
-				K_min = K_max/100000.0f;
-			K_i= K_min; 
-		}
-			
-		lastDirection = currentDirection;
 
-					
+		updateAlpha3(skew);
 		logicalClock.rate += K_i*(float)skew;
 //		logicalClock.rate += 0.1f*K_max*(float)skew;
 		
@@ -214,6 +237,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		s += " " + local2Global().toString();
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK.getDrift())));
+//				+ Float.floatToIntBits(K_i);
 //				+ Float.floatToIntBits((float) (increment));//		
 //		if(Simulator.getInstance().getSecond()>=100000)
 //		{
@@ -229,6 +253,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 //		System.out.println("" + NODE_ID + " "
 //				+ (1.0 + (double) logicalClock.rate)
 //				* (1.0 + CLOCK.getDrift()));
+		
+		System.out.println(NODE_ID +" " + K_i);
 
 		return s;
 	}
