@@ -3,7 +3,8 @@ package application;
 public class Main {
 
 	public static void main(String[] args) {
-		
+
+		new Application("application.appSelf.SelfNode", 100, "Self.txt",Application.LINE, 0);
 //		new Application("application.appPI.PINode", 100, "AvgPISync.txt",Application.LINE, 0);
 
 		/*------------------------------------------*/
@@ -16,9 +17,6 @@ public class Main {
 //		diameterSimulations("application.appSelfFlooding.SelfFloodingNode");
 //		diameterSimulations("application.appPIFlooding.PIFastFloodingNode");
 		/*------------------------------------------*/
-		
-		new Application("application.appPIFlooding.PIFloodingNode",60,"PI.txt", Application.LINE, 0);
-//		new Application("application.appPI.PINode",2,"PI.txt", Application.LINE, 0);
 		
 	}
 	
