@@ -185,7 +185,7 @@ public class SimpleRadio extends Radio implements EventObserver{
         if(receiving){
 			noiseStrength += getNoise(packet);
 			
-            if(isMessageCorrupted() )
+            if(isMessageCorrupted())
                 corrupted = true;
         } else{
             if(!transmitting){
