@@ -8,10 +8,6 @@ import sim.gui.NodePanel;
 public class Main {
 
 	public static void main(String[] args) {
-
-		MainFrame myFrame = new MainFrame();
-
-		
 		
 		new Application("application.appSelf.SelfNode", 100, "Self.txt",Application.LINE, 0);
 //		new Application("application.appPI.PINode", 100, "AvgPISync.txt",Application.LINE, 0);
