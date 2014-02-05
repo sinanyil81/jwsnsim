@@ -2,6 +2,7 @@ package sim.mobility;
 
 import java.util.Random;
 
+import sim.configuration.AreaConfiguration;
 import sim.configuration.MobilityConfiguration;
 import sim.node.Node;
 import sim.node.Position;
@@ -90,11 +91,11 @@ public class RandomWayPoint {
 	 * @return the next waypoint where this node moves after having waited. 
 	 */
 	protected Position getNextWayPoint() {
-		double randx = random.nextDouble() * MobilityConfiguration.dimX;
-		double randy = random.nextDouble() * MobilityConfiguration.dimY;
+		double randx = random.nextDouble() * AreaConfiguration.dimX;
+		double randy = random.nextDouble() * AreaConfiguration.dimY;
 		double randz = 0;
-		if(MobilityConfiguration.numDimentions == 3) {
-			randz = random.nextDouble() * MobilityConfiguration.dimZ;
+		if(AreaConfiguration.numDimentions == 3) {
+			randz = random.nextDouble() * AreaConfiguration.dimZ;
 		}
 		return new Position(randx, randy, randz);
 	}

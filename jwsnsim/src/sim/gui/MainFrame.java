@@ -2,6 +2,8 @@ package sim.gui;
 
 import javax.swing.JFrame;
 
+import sim.configuration.AreaConfiguration;
+
 public class MainFrame extends JFrame{
 
 	/**
@@ -12,7 +14,8 @@ public class MainFrame extends JFrame{
 	public MainFrame(){
 		NodePanel p = new NodePanel();
 		add(p);
-		setSize()
+		setSize(AreaConfiguration.dimX,AreaConfiguration.dimY);
+		setVisible(true);
 	}
 	
 
