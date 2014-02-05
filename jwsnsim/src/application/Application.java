@@ -1,10 +1,12 @@
 package application;
 
 import java.lang.reflect.Constructor;
+
 import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
+import sim.gui.MainFrame;
 import sim.node.Node;
 import sim.node.Position;
 import sim.simulator.Simulator;
@@ -40,6 +42,8 @@ public class Application implements TimerHandler {
 				e.printStackTrace();
 			}
 		}
+		
+		MainFrame myFrame = new MainFrame();
 
 		run();
 	}
