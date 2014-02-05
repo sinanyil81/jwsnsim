@@ -2,6 +2,7 @@ package sim.mobility;
 
 import java.util.Random;
 
+import sim.configuration.MobilityConfiguration;
 import sim.node.Node;
 import sim.node.Position;
 import sim.statistics.Distribution;

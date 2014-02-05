@@ -1,4 +1,4 @@
-package sim.mobility;
+package sim.configuration;
 
 public class MobilityConfiguration {
 	static final public int numDimentions = 2;
