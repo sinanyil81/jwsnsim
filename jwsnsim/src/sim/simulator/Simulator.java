@@ -22,7 +22,7 @@ public class Simulator {
 	
 	protected Simulator(){
 		events = new Vector<Event>();
-		nodes = new Vector<Node>();
+		nodes = new Vector<Node>();		
 	}
 
 	public static Simulator getInstance() {
