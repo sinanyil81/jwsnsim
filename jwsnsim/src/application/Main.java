@@ -1,7 +1,7 @@
 package application;
 
 import sim.configuration.MobilityConfiguration;
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.gui.GUI;
 import sim.gui.MainFrame;
 import sim.mobility.MobilityManager;
@@ -11,23 +11,21 @@ import sim.topology.RandomDeployment;
 public class Main {
 
 	public static void main(String[] args) {
-//		sample();	
-		mobilitySample();
+		sample();	
+//		mobilitySample();
 	}
 	
 	static void sample(){
 		/* create nodes */
-		NodeConfiguration.createNodes("application.appPI.PINode", 100, new Line2D());
-		
-		GUI.start();
-		
+		NodeFactory.createNodes("application.appPI.PINode", 20, new Line2D());
+			
 		/* start simulation */
 		new Simulation("logFile.txt",20000);
 	}
 	
 	static void mobilitySample(){
 		/* create nodes */
-		NodeConfiguration.createNodes("application.appPI.PINode", 200, new RandomDeployment());
+		NodeFactory.createNodes("application.appPI.PINode", 200, new RandomDeployment());
 		new MobilityManager("sim.mobility.RandomWayPoint");
 		
 		GUI.start();

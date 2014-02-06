@@ -6,12 +6,12 @@ import sim.node.Node;
 import sim.node.Position;
 import sim.topology.Topology;
 
-public class NodeConfiguration {
+public class NodeFactory {
 	static public int numNodes;
 	static public Node[] nodes = null;
 	
 	public static void createNodes(String classToLoad, int numNodes,Topology topology){
-		NodeConfiguration.numNodes = numNodes;
+		NodeFactory.numNodes = numNodes;
 		topology.initialize();
 		nodes = new Node[numNodes];	
 		for(int i=0;i<numNodes;i++){

@@ -4,7 +4,7 @@ import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
@@ -21,9 +21,9 @@ public class Simulation implements TimerHandler {
 		clock.start();
 		timer.startOneshot(PERIOD);	
 		
-		for(int i=0;i<NodeConfiguration.numNodes;i++){
+		for(int i=0;i<NodeFactory.numNodes;i++){
 			try {
-				NodeConfiguration.nodes[i].on();
+				NodeFactory.nodes[i].on();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -56,8 +56,8 @@ public class Simulation implements TimerHandler {
 	}
 
 	private void log() {
-		for(int i=0;i<NodeConfiguration.nodes.length;i++){
-			logger.log(NodeConfiguration.nodes[i].toString());
+		for(int i=0;i<NodeFactory.nodes.length;i++){
+			logger.log(NodeFactory.nodes[i].toString());
 		}
 	}
 }

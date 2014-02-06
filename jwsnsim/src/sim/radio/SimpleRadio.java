@@ -27,7 +27,7 @@ package sim.radio;
 import java.util.Iterator;
 import java.util.Vector;
 
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.node.Node;
 import sim.node.Position;
 import sim.simulator.Event;
@@ -97,20 +97,20 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 	
 	public void on() {		
-		for(int i=0; i<NodeConfiguration.nodes.length;i++){
-			((SimpleRadio)(NodeConfiguration.nodes[i].getRadio())).updateNeighborhood();
+		for(int i=0; i<NodeFactory.nodes.length;i++){
+			((SimpleRadio)(NodeFactory.nodes[i].getRadio())).updateNeighborhood();
 		}
 	}
 
 	public void updateNeighborhood() {
   
-        Node[] neighbors = new Node[NodeConfiguration.numNodes];
+        Node[] neighbors = new Node[NodeFactory.numNodes];
 
         int i = 0;
         
         
-        for (int j = 0; j<NodeConfiguration.numNodes; j++){
-        	Node node1 = NodeConfiguration.nodes[j];
+        for (int j = 0; j<NodeFactory.numNodes; j++){
+        	Node node1 = NodeFactory.nodes[j];
         	
         	if(node1.isRunning()){
 				double distance = node.getPosition().distanceTo(node1.getPosition());

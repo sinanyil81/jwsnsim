@@ -6,7 +6,7 @@ import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.gui.GUI;
 import sim.node.Position;
 
@@ -19,21 +19,21 @@ public class MobilityManager implements TimerHandler {
 		clock.start();
 		timer.startPeriodic(1000000);	
 		
-		models = new MobilityModel[NodeConfiguration.numNodes];
-		for (int i = 0; i < NodeConfiguration.numNodes; i++) {
+		models = new MobilityModel[NodeFactory.numNodes];
+		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			models[i] = createModel(mobilityClassName);
 		}
 	}
 	
 	@Override
 	public void fireEvent(Timer timer) {
-		for (int i = 0; i < NodeConfiguration.numNodes; i++) {
-			Position pos = models[i].getNextPos(NodeConfiguration.nodes[i]);
-			NodeConfiguration.nodes[i].setPosition(pos);
+		for (int i = 0; i < NodeFactory.numNodes; i++) {
+			Position pos = models[i].getNextPos(NodeFactory.nodes[i]);
+			NodeFactory.nodes[i].setPosition(pos);
 		}
 		
-		for (int i = 0; i < NodeConfiguration.numNodes; i++) {
-			NodeConfiguration.nodes[i].getRadio().updateNeighborhood();
+		for (int i = 0; i < NodeFactory.numNodes; i++) {
+			NodeFactory.nodes[i].getRadio().updateNeighborhood();
 		}
 		
 		GUI.refresh();

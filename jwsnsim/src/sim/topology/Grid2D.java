@@ -1,7 +1,7 @@
 package sim.topology;
 
 import sim.configuration.AreaConfiguration;
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.node.Position;
 
 public class Grid2D extends Topology {
@@ -13,7 +13,7 @@ public class Grid2D extends Topology {
 	 * @see sinalgo.models.DistributionModel#initialize()
 	 */
 	public void initialize() {
-		double a = 1 - NodeConfiguration.numNodes;
+		double a = 1 - NodeFactory.numNodes;
 		double b = - (AreaConfiguration.dimX + AreaConfiguration.dimY); // kind of a hack
 		double c =  AreaConfiguration.dimX * AreaConfiguration.dimY;
 		double tmp = b * b - 4 * a * c;

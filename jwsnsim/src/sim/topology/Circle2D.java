@@ -1,6 +1,6 @@
 package sim.topology;
 
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.node.Position;
 
 public class Circle2D extends Topology{
@@ -11,7 +11,7 @@ public class Circle2D extends Topology{
 	}
 	
 	public Position getNextPosition() {
-		double oneStep = 360.0 / NodeConfiguration.numNodes;		
+		double oneStep = 360.0 / NodeFactory.numNodes;		
 		double radius = 15.0*360.0/(oneStep*2.0*Math.PI);
 
 		

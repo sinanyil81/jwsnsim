@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
-import sim.configuration.NodeConfiguration;
+import sim.configuration.NodeFactory;
 import sim.node.Node;
 
 public class NodePanel extends JPanel {
@@ -43,8 +43,8 @@ public class NodePanel extends JPanel {
 
 		g.setColor(Color.BLACK);
 
-		for (int i = 0; i < NodeConfiguration.numNodes; i++) {
-			Node node = NodeConfiguration.nodes[i];
+		for (int i = 0; i < NodeFactory.numNodes; i++) {
+			Node node = NodeFactory.nodes[i];
 			sim.node.Position pos1 = node.getPosition();
 
 			g.setColor(Color.RED);
