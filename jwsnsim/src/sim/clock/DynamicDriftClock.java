@@ -2,6 +2,7 @@ package sim.clock;
 
 import sim.simulator.SimTime;
 import sim.simulator.Simulator;
+import sim.statistics.GaussianDistribution;
 import sim.type.UInt32;
 /**
  * 
@@ -35,7 +36,7 @@ public class DynamicDriftClock implements Clock {
 	private SimTime lastRead = new SimTime();
 	
 	public DynamicDriftClock(){
-		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);
+		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE);
 		if(drift < 0)
 			drift = 0;
 		
@@ -55,7 +56,7 @@ public class DynamicDriftClock implements Clock {
 		clock += amount + amount*drift;
 		
 		/* Add dynamic noise */
-		double noise = NOISE_MEAN + Simulator.random.nextGaussian() * Math.sqrt(NOISE_VARIANCE);
+		double noise = GaussianDistribution.nextGaussian(NOISE_MEAN, NOISE_VARIANCE);
 		noise /= 10000000.0;
 //		System.out.println(amount*noise);
 		clock += amount*noise;

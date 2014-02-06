@@ -2,6 +2,8 @@ package sim.clock;
 
 import sim.simulator.SimTime;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
+import sim.statistics.GaussianDistribution;
 import sim.type.UInt32;
 /**
  * 
@@ -32,7 +34,7 @@ public class ConstantDriftClock implements Clock {
 	private SimTime lastRead = new SimTime();
 	
 	public ConstantDriftClock(){
-		drift = MEAN_DRIFT + Simulator.random.nextGaussian() * Math.sqrt(DRIFT_VARIANCE);
+		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE); 
 //		if(drift < 0)
 //			drift = 0;
 		System.out.println(drift);

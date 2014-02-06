@@ -9,6 +9,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class PIFastFloodingNode extends Node implements TimerHandler {
@@ -35,7 +36,7 @@ public class PIFastFloodingNode extends Node implements TimerHandler {
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 		
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 //		System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);		

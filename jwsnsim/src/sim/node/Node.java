@@ -80,7 +80,6 @@ public abstract class Node {
 			throw new Exception("MAC object must be assigned");
 
 		running = true;
-		Simulator.getInstance().register(this);
 		CLOCK.start();
 		RADIO.on();
 	}

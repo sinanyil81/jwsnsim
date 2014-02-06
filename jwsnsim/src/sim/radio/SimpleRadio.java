@@ -27,6 +27,7 @@ package sim.radio;
 import java.util.Iterator;
 import java.util.Vector;
 
+import sim.configuration.NodeConfiguration;
 import sim.node.Node;
 import sim.node.Position;
 import sim.simulator.Event;
@@ -95,34 +96,30 @@ public class SimpleRadio extends Radio implements EventObserver{
 		this.listener= listener;
 	}
 	
-	public void on() {
-		Vector<Node> nodes = Simulator.getInstance().getNodes();
-		
-		for (Iterator<Node> iterator = nodes.iterator(); iterator.hasNext();) {
-			Node node = (Node) iterator.next();			
-			((SimpleRadio)node.getRadio()).updateNeighborhood();
+	public void on() {		
+		for(int i=0; i<NodeConfiguration.nodes.length;i++){
+			((SimpleRadio)(NodeConfiguration.nodes[i].getRadio())).updateNeighborhood();
 		}
 	}
 
 	public void updateNeighborhood() {
-		Vector<Node> nodes = Simulator.getInstance().getNodes();
-		int nodeNum = nodes.size();
-        
-        Node[] neighbors = new Node[nodeNum];
+  
+        Node[] neighbors = new Node[NodeConfiguration.numNodes];
 
         int i = 0;
         
-        for (Iterator<Node> iterator = nodes.iterator(); iterator.hasNext();) {
-			Node node1 = (Node) iterator.next();
-						
-			if(node1.isRunning()){
+        
+        for (int j = 0; j<NodeConfiguration.numNodes; j++){
+        	Node node1 = NodeConfiguration.nodes[j];
+        	
+        	if(node1.isRunning()){
 				double distance = node.getPosition().distanceTo(node1.getPosition());
 				if( distance <= MAX_DISTANCE && node != node1){
 					neighbors[i] = node1;                   
 					i++;
 				}				
 			}
-		}                        
+        }
         
 		this.neighbors = new Node[i];
         System.arraycopy( neighbors, 0,this.neighbors, 0, i );
@@ -253,6 +250,12 @@ public class SimpleRadio extends Radio implements EventObserver{
 	protected boolean isChannelFree() {
 		
 		return true;
+	}
+
+	@Override
+	public Node[] getNeighbors() {
+		// TODO Auto-generated method stub
+		return neighbors;
 	}
 }
 

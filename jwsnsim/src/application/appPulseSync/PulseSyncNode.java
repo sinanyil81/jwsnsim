@@ -12,6 +12,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class PulseSyncNode extends Node implements TimerHandler{
@@ -60,7 +61,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 		outgoingMsg.sequence = 0;
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import sim.clock.TimerHandler;
 import sim.configuration.NodeConfiguration;
 import sim.gui.MainFrame;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 
 public class Simulation implements TimerHandler {
 	
@@ -16,7 +17,7 @@ public class Simulation implements TimerHandler {
 	protected Timer timer = new Timer(clock,this);
 	protected Logger logger;
 	
-	public Simulation(String logFile){
+	public Simulation(String logFile, int durationTime){
 		logger = new Logger(logFile);
 		clock.start();
 		timer.startOneshot(PERIOD);	
@@ -31,7 +32,8 @@ public class Simulation implements TimerHandler {
 		}
 		
 		MainFrame myFrame = new MainFrame();
-
+		
+		MAXSECOND = durationTime;
 		run();
 	}
 	
@@ -53,7 +55,7 @@ public class Simulation implements TimerHandler {
 	@Override
 	public void fireEvent(Timer timer) {
 		log();
-		timer.startOneshot((int) (PERIOD + ((Simulator.random.nextInt() % 4) + 1)*1000000));
+		timer.startOneshot((int) (PERIOD + ((Distribution.getRandom().nextInt() % 4) + 1)*1000000));
 	}
 
 	private void log() {

@@ -9,6 +9,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class PIFloodingNode extends Node implements TimerHandler {
@@ -32,7 +33,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		
 		if(this.NODE_ID == 1)
 			CLOCK.setDrift(0.0f);
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 //		System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);		
@@ -222,7 +223,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	public void on() throws Exception {
 		super.on();
 		
-		timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
+		timer0.startPeriodic(BEACON_RATE+((Distribution.getRandom().nextInt() % 100) + 1)*10000);
 	}
 
 	public UInt32 local2Global() {

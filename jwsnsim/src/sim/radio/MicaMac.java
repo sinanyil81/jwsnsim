@@ -6,6 +6,7 @@ import sim.node.Node;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 
 public class MicaMac extends MacLayer implements EventObserver {
 
@@ -116,7 +117,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	 */
 	public static int generateWaitingTime() {
 		return sendMinWaitingTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomWaitingTime);
+				+ (int) (Distribution.getRandom().nextDouble() * sendRandomWaitingTime);
 	}
 
 	/**
@@ -127,7 +128,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	 */
 	protected static int generateBackOffTime() {
 		return sendMinBackOffTime
-				+ (int) (Simulator.random.nextDouble() * sendRandomBackOffTime);
+				+ (int) (Distribution.getRandom().nextDouble() * sendRandomBackOffTime);
 	}
 
 	@Override

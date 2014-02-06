@@ -11,6 +11,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class FtspNode extends Node implements TimerHandler{
@@ -63,7 +64,7 @@ public class FtspNode extends Node implements TimerHandler{
 //		else
 //			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
 		
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		for (int i = 0; i < table.length; i++) {
 			table[i] = new RegressionEntry();

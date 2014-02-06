@@ -9,6 +9,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class PINode extends Node implements TimerHandler {
@@ -35,7 +36,7 @@ public class PINode extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -163,7 +164,7 @@ public class PINode extends Node implements TimerHandler {
 	public void on() throws Exception {
 		super.on();
 		timer0.startPeriodic(BEACON_RATE
-				+ ((Simulator.random.nextInt() % 100) + 1) * 10000);
+				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
 	public UInt32 local2Global() {

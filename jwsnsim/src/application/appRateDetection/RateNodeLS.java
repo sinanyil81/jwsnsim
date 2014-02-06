@@ -10,6 +10,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
+import sim.statistics.Distribution;
 import sim.type.UInt32;
 
 public class RateNodeLS extends Node implements TimerHandler {
@@ -157,7 +158,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 	@Override
 	public void on() throws Exception {
 		super.on();
-		timer0.startPeriodic(BEACON_RATE+((Simulator.random.nextInt() % 100) + 1)*10000);
+		timer0.startPeriodic(BEACON_RATE+((Distribution.getRandom().nextInt() % 100) + 1)*10000);
 	}
 
 	public String toString() {

@@ -10,19 +10,14 @@ import sim.clock.Clock;
 import sim.node.Node;
 
 public class Simulator {
-	static private long SIMULATOR_SEED = 0x123456L;	
-//	static public Random random = new Random(SIMULATOR_SEED);
-	static public Random random = new Random();
 	
 	private static Simulator simulator = null;
 	private SimTime simTime = new SimTime();
 	
-	private Vector<Node> nodes = null;
 	private Vector<Event> events = null;
 	
 	protected Simulator(){
 		events = new Vector<Event>();
-		nodes = new Vector<Node>();		
 	}
 
 	public static Simulator getInstance() {
@@ -31,18 +26,6 @@ public class Simulator {
 		}
 
 		return simulator;
-	}
-	
-	public void register(Node node){
-		nodes.add(node);
-	}
-	
-	public void unregister(Node node){
-		nodes.removeElement(node);
-	}
-	
-	public Vector<Node> getNodes(){
-		return nodes;
 	}
 	
 	public void register(Event event) {
@@ -73,12 +56,8 @@ public class Simulator {
 	
 	
 	public void reset(){
-		events.removeAllElements();
-		nodes.removeAllElements();
-		
-		events = new Vector<Event>();
-		nodes = new Vector<Node>();	
-		
+		events.removeAllElements();		
+		events = new Vector<Event>();		
 		simTime = new SimTime();
 //		random.setSeed(SIMULATOR_SEED);
 	}

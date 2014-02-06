@@ -1,5 +1,7 @@
 package sim.radio;
 
+import sim.node.Node;
+
 public abstract class Radio {
 
 	/** The current sending intensity of this radio. The intensity lies between 
@@ -21,4 +23,6 @@ public abstract class Radio {
 	public abstract void receptionEnd(RadioPacket stream);
 
 	protected abstract boolean isChannelFree();
+	
+	public abstract Node[] getNeighbors();
 }
