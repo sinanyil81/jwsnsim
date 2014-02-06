@@ -17,7 +17,7 @@ public class MobilityManager implements TimerHandler {
 	
 	public MobilityManager(String mobilityClassName) {
 		clock.start();
-		timer.startPeriodic(10000000);	
+		timer.startPeriodic(1000000);	
 		
 		models = new MobilityModel[NodeFactory.numNodes];
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
@@ -29,6 +29,7 @@ public class MobilityManager implements TimerHandler {
 	public void fireEvent(Timer timer) {
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			Position pos = models[i].getNextPos(NodeFactory.nodes[i]);
+			System.out.println(NodeFactory.nodes[i].getPosition().distanceTo(pos));
 			NodeFactory.nodes[i].setPosition(pos);
 		}
 		

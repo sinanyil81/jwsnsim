@@ -1,8 +1,6 @@
 package application;
 
-import sim.configuration.MobilityConfiguration;
 import sim.gui.GUI;
-import sim.gui.MainFrame;
 import sim.mobility.MobilityManager;
 import sim.node.NodeFactory;
 import sim.topology.Line2D;
@@ -31,7 +29,7 @@ public class Main {
 		GUI.start();
 		
 		/* start simulation */
-		new Simulation("logFile.txt",20000);
+		new Simulation("logFile.txt",2000000);
 	}
 	
 //	private static void diameterSimulations(String className) {

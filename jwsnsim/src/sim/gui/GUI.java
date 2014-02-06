@@ -21,5 +21,6 @@ public class GUI {
 	
 	public static void refresh(){
 		getInstance().frame.repaint();
+		getInstance().frame.getComponents()[0].repaint();
 	}
 }
