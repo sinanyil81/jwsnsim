@@ -16,12 +16,6 @@ public class NodePanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor for the GraphPanel class.
-	 * 
-	 * @param p
-	 *            The parent Frame (GUI) where the Graph Panel is added.
-	 */
 	public NodePanel() {
 
 	}
@@ -31,7 +25,8 @@ public class NodePanel extends JPanel {
 	 * 
 	 * @see java.awt.Component#paint(java.awt.Graphics)
 	 */
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		draw(g);
 	}
 

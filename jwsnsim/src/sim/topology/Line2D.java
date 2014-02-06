@@ -15,7 +15,7 @@ public class Line2D extends Topology{
 	 */
 	public void initialize() {
 		dy = 0;
-		dx = ((double) AreaConfiguration.dimX) / (NodeFactory.numNodes + 1);
+		dx = (int)((double) AreaConfiguration.dimX) / (NodeFactory.numNodes + 1);
 		
 		if(dx<10) dx = 10;
 		

@@ -23,13 +23,13 @@ public class MobilityManager implements TimerHandler {
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			models[i] = createModel(mobilityClassName);
 		}
+		
 	}
 	
 	@Override
 	public void fireEvent(Timer timer) {
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			Position pos = models[i].getNextPos(NodeFactory.nodes[i]);
-			System.out.println(NodeFactory.nodes[i].getPosition().distanceTo(pos));
 			NodeFactory.nodes[i].setPosition(pos);
 		}
 		
@@ -38,6 +38,13 @@ public class MobilityManager implements TimerHandler {
 		}
 		
 		GUI.refresh();
+		
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	static MobilityModel createModel(String className){

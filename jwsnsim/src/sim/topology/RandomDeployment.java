@@ -18,6 +18,6 @@ public class RandomDeployment extends Topology{
 		if(AreaConfiguration.numDimentions == 3) {
 			randomPosZ = rand.nextDouble() * AreaConfiguration.dimZ;
 		}
-		return new Position(randomPosX, randomPosY, randomPosZ);
+		return new Position((int)randomPosX, (int)randomPosY, (int)randomPosZ);
 	}
 }
