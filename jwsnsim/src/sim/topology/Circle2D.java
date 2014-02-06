@@ -1,6 +1,6 @@
 package sim.topology;
 
-import sim.configuration.NodeFactory;
+import sim.node.NodeFactory;
 import sim.node.Position;
 
 public class Circle2D extends Topology{

@@ -1,7 +1,7 @@
 package sim.topology;
 
 import sim.configuration.AreaConfiguration;
-import sim.configuration.NodeFactory;
+import sim.node.NodeFactory;
 import sim.node.Position;
 
 public class Line2D extends Topology{

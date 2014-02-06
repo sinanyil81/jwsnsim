@@ -1,9 +1,7 @@
-package sim.configuration;
+package sim.node;
 
 import java.lang.reflect.Constructor;
 
-import sim.node.Node;
-import sim.node.Position;
 import sim.topology.Topology;
 
 public class NodeFactory {

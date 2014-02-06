@@ -5,8 +5,8 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
-import sim.configuration.NodeFactory;
 import sim.node.Node;
+import sim.node.NodeFactory;
 
 public class NodePanel extends JPanel {
 	/**

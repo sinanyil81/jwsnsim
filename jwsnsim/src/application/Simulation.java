@@ -4,7 +4,7 @@ import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
-import sim.configuration.NodeFactory;
+import sim.node.NodeFactory;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 

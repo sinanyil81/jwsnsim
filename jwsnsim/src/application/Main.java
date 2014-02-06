@@ -1,10 +1,10 @@
 package application;
 
 import sim.configuration.MobilityConfiguration;
-import sim.configuration.NodeFactory;
 import sim.gui.GUI;
 import sim.gui.MainFrame;
 import sim.mobility.MobilityManager;
+import sim.node.NodeFactory;
 import sim.topology.Line2D;
 import sim.topology.RandomDeployment;
 

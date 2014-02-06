@@ -27,8 +27,8 @@ package sim.radio;
 import java.util.Iterator;
 import java.util.Vector;
 
-import sim.configuration.NodeFactory;
 import sim.node.Node;
+import sim.node.NodeFactory;
 import sim.node.Position;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
