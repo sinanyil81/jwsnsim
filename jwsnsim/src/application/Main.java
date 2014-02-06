@@ -9,8 +9,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		new Application("application.appSelf.SelfNode", 100, "Self.txt",Application.LINE, 0);
-//		new Application("application.appPI.PINode", 100, "AvgPISync.txt",Application.LINE, 0);
+//		new Application("application.appSelf.SelfNode", 100, "Self.txt",Application.LINE, 0);
+		new Simulation("application.appPI.PINode", 100, "PISync.txt",Simulation.LINE, 0);
 
 		/*------------------------------------------*/
 //		diameterSimulations("application.appPI.PINode");
@@ -31,9 +31,9 @@ public class Main {
 			for (int i = 10; i <= 100; i += 10) {
 				for (int j = 1; j <= 5; j++) {
 					System.out.println("Diamater:" + i + " Counter:" + j);
-					new Application(className,i,className 
+					new Simulation(className,i,className 
 							+"_diameter:" + i 
-							+"_count:" + j +".txt", Application.LINE, 0);					
+							+"_count:" + j +".txt", Simulation.LINE, 0);					
 				}
 			}
 		} catch (Exception e) {
