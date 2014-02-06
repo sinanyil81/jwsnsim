@@ -25,4 +25,6 @@ public abstract class Radio {
 	protected abstract boolean isChannelFree();
 	
 	public abstract Node[] getNeighbors();
+	
+	public abstract void updateNeighborhood();
 }

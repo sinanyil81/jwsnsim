@@ -10,7 +10,7 @@ import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
 import sim.statistics.PoissonDistribution;
 
-public class RandomWayPoint {
+public class RandomWayPoint extends MobilityModel{
 	// we assume that these distributions are the same for all nodes
 	protected static Distribution speedDistribution;
 	protected static Distribution waitingTimeDistribution;

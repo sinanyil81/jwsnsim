@@ -11,7 +11,7 @@ import sim.statistics.Distribution;
 public class Simulation implements TimerHandler {
 	
 	private int PERIOD = 20000000;
-	public static long MAXSECOND =20000;	
+	protected long MAXSECOND =20000;	
 	protected Clock clock = new ConstantDriftClock(1.0);
 	protected Timer timer = new Timer(clock,this);
 	protected Logger logger;
