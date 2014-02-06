@@ -3,6 +3,8 @@ package application;
 import sim.gui.GUI;
 import sim.mobility.MobilityManager;
 import sim.node.NodeFactory;
+import sim.topology.Circle2D;
+import sim.topology.Grid2D;
 import sim.topology.Line2D;
 import sim.topology.RandomDeployment;
 
@@ -17,6 +19,8 @@ public class Main {
 		/* create nodes */
 		NodeFactory.createNodes("application.appPI.PINode", 20, new Line2D());
 			
+		GUI.start();
+		
 		/* start simulation */
 		new Simulation("logFile.txt",20000);
 	}

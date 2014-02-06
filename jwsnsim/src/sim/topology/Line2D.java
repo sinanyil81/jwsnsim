@@ -3,6 +3,7 @@ package sim.topology;
 import sim.configuration.AreaConfiguration;
 import sim.node.NodeFactory;
 import sim.node.Position;
+import sim.radio.SimpleRadio;
 
 public class Line2D extends Topology{
 	private double dx;
@@ -15,9 +16,8 @@ public class Line2D extends Topology{
 	 */
 	public void initialize() {
 		dy = 0;
-		dx = (int)((double) AreaConfiguration.dimX) / (NodeFactory.numNodes + 1);
-		
-		if(dx<10) dx = 10;
+		AreaConfiguration.dimX = (NodeFactory.numNodes+1)*SimpleRadio.MAX_DISTANCE;				
+		dx = SimpleRadio.MAX_DISTANCE;
 		
 		previousPositionX = 0;
 		previousPositionY = AreaConfiguration.dimY / 2;

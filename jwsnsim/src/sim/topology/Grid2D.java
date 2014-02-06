@@ -3,6 +3,7 @@ package sim.topology;
 import sim.configuration.AreaConfiguration;
 import sim.node.NodeFactory;
 import sim.node.Position;
+import sim.radio.SimpleRadio;
 
 public class Grid2D extends Topology {
 	private double size; // the cell-size of the gird
@@ -24,6 +25,7 @@ public class Grid2D extends Topology {
 		size = (-b - Math.sqrt(tmp)) / (2*a);
 		numNodesPerLine = (int) Math.round(AreaConfiguration.dimX / size) - 1;
 		i=0; j=1;
+		SimpleRadio.MAX_DISTANCE = (int)size + 1;
 	}
 	
 	/* (non-Javadoc)
