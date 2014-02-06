@@ -5,7 +5,6 @@ import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.configuration.NodeConfiguration;
-import sim.gui.MainFrame;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
@@ -30,9 +29,7 @@ public class Simulation implements TimerHandler {
 				e.printStackTrace();
 			}
 		}
-		
-		MainFrame myFrame = new MainFrame();
-		
+						
 		MAXSECOND = durationTime;
 		run();
 	}

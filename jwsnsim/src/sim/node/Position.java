@@ -2,17 +2,23 @@ package sim.node;
 
 public class Position {
 
-	public double xCoord;
-	public double yCoord;
-	public double zCoord;
+	public int xCoord;
+	public int yCoord;
+	public int zCoord;
 
 	public Position() {
 		xCoord = 0;
 		yCoord = 0;
 		zCoord = 0;
 	}
-
+	
 	public Position(double x, double y, double z) {
+		xCoord = (int)x;
+		yCoord = (int)y;
+		zCoord = (int)z;
+	}
+
+	public Position(int x, int y, int z) {
 		xCoord = x;
 		yCoord = y;
 		zCoord = z;
@@ -24,7 +30,7 @@ public class Position {
 		zCoord = p.zCoord;
 	}
 
-	public void set(double x, double y, double z) {
+	public void set(int x, int y, int z) {
 		xCoord = x;
 		yCoord = y;
 		zCoord = z;

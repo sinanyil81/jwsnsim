@@ -60,6 +60,10 @@ public abstract class Node {
 	public Position getPosition() {
 		return position;
 	}
+	
+	public void setPosition(Position p){
+		position.set(p);
+	}
 
 	public int getID() {
 		return NODE_ID;

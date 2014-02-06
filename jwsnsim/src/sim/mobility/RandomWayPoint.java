@@ -61,9 +61,9 @@ public class RandomWayPoint {
 			double dx = nextDestination.xCoord - n.getPosition().xCoord;
 			double dy = nextDestination.yCoord - n.getPosition().yCoord;
 			double dz = nextDestination.zCoord - n.getPosition().zCoord;
-			moveVector.xCoord = dx / rounds;
-			moveVector.yCoord = dy / rounds;
-			moveVector.zCoord = dz / rounds;
+			moveVector.xCoord = (int) (dx / rounds);
+			moveVector.yCoord = (int) (dy / rounds);
+			moveVector.zCoord = (int) (dz / rounds);
 		}
 		if(remaining_hops <= 1) { // don't add the moveVector, as this may move over the destination.
 			nextPosition.xCoord = nextDestination.xCoord;
@@ -76,9 +76,9 @@ public class RandomWayPoint {
 			double newx = n.getPosition().xCoord + moveVector.xCoord; 
 			double newy = n.getPosition().yCoord + moveVector.yCoord; 
 			double newz = n.getPosition().zCoord + moveVector.zCoord; 
-			nextPosition.xCoord = newx;
-			nextPosition.yCoord = newy;
-			nextPosition.zCoord = newz;
+			nextPosition.xCoord = (int) newx;
+			nextPosition.yCoord = (int) newy;
+			nextPosition.zCoord = (int) newz;
 			remaining_hops --;
 		}
 		currentPosition.set(nextPosition);
@@ -97,7 +97,7 @@ public class RandomWayPoint {
 		if(AreaConfiguration.numDimentions == 3) {
 			randz = random.nextDouble() * AreaConfiguration.dimZ;
 		}
-		return new Position(randx, randy, randz);
+		return new Position((int)randx, (int)randy, (int)randz);
 	}
 	
 	/**

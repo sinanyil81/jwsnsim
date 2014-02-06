@@ -2,17 +2,22 @@ package application;
 
 import sim.configuration.MobilityConfiguration;
 import sim.configuration.NodeConfiguration;
+import sim.gui.MainFrame;
 import sim.topology.Line2D;
+import sim.topology.RandomDeployment;
 
 public class Main {
 
 	public static void main(String[] args) {
-		sample();				
+//		sample();	
+		mobilitySample();
 	}
 	
 	static void sample(){
 		/* create nodes */
 		NodeConfiguration.createNodes("application.appPI.PINode", 100, new Line2D());
+		
+		MainFrame frame = new MainFrame();
 		
 		/* start simulation */
 		new Simulation("logFile.txt",20000);
@@ -22,7 +27,9 @@ public class Main {
 		MobilityConfiguration.mobility = true;
 		
 		/* create nodes */
-		NodeConfiguration.createNodes("application.appPI.PINode", 100, new Line2D());
+		NodeConfiguration.createNodes("application.appPI.PINode", 200, new RandomDeployment());
+		
+		MainFrame frame = new MainFrame();
 		
 		/* start simulation */
 		new Simulation("logFile.txt",20000);
