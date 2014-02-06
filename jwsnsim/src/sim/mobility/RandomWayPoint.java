@@ -61,9 +61,9 @@ public class RandomWayPoint extends MobilityModel{
 			double dx = nextDestination.xCoord - n.getPosition().xCoord;
 			double dy = nextDestination.yCoord - n.getPosition().yCoord;
 			double dz = nextDestination.zCoord - n.getPosition().zCoord;
-			moveVector.xCoord = (int) (dx / rounds);
-			moveVector.yCoord = (int) (dy / rounds);
-			moveVector.zCoord = (int) (dz / rounds);
+			moveVector.xCoord = dx / rounds;
+			moveVector.yCoord = dy / rounds;
+			moveVector.zCoord = dz / rounds;
 		}
 		if(remaining_hops <= 1) { // don't add the moveVector, as this may move over the destination.
 			nextPosition.xCoord = nextDestination.xCoord;
@@ -76,9 +76,9 @@ public class RandomWayPoint extends MobilityModel{
 			double newx = n.getPosition().xCoord + moveVector.xCoord; 
 			double newy = n.getPosition().yCoord + moveVector.yCoord; 
 			double newz = n.getPosition().zCoord + moveVector.zCoord; 
-			nextPosition.xCoord = (int) newx;
-			nextPosition.yCoord = (int) newy;
-			nextPosition.zCoord = (int) newz;
+			nextPosition.xCoord = newx;
+			nextPosition.yCoord = newy;
+			nextPosition.zCoord = newz;
 			remaining_hops --;
 		}
 		currentPosition.set(nextPosition);
@@ -97,7 +97,7 @@ public class RandomWayPoint extends MobilityModel{
 		if(AreaConfiguration.numDimentions == 3) {
 			randz = random.nextDouble() * AreaConfiguration.dimZ;
 		}
-		return new Position((int)randx, (int)randy, (int)randz);
+		return new Position(randx,randy,randz);
 	}
 	
 	/**

@@ -17,7 +17,7 @@ public class MobilityManager implements TimerHandler {
 	
 	public MobilityManager(String mobilityClassName) {
 		clock.start();
-		timer.startPeriodic(1000000);	
+		timer.startPeriodic(10000000);	
 		
 		models = new MobilityModel[NodeFactory.numNodes];
 		for (int i = 0; i < NodeFactory.numNodes; i++) {

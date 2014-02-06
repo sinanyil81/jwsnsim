@@ -68,7 +68,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	private double ambientNoise = 0; 
 	
 	/** max neighborhood distance */
-	public final static int MAX_DISTANCE = 10; 
+	public final static int MAX_DISTANCE = 20; 
 	
 	protected RadioPacket packetToTransmit = null;
 	protected RadioPacket receivingPacket = null;

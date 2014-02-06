@@ -11,8 +11,8 @@ import sim.topology.RandomDeployment;
 public class Main {
 
 	public static void main(String[] args) {
-		sample();	
-//		mobilitySample();
+//		sample();	
+		mobilitySample();
 	}
 	
 	static void sample(){
@@ -25,7 +25,7 @@ public class Main {
 	
 	static void mobilitySample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appPI.PINode", 200, new RandomDeployment());
+		NodeFactory.createNodes("application.appPI.PINode", 1, new RandomDeployment());
 		new MobilityManager("sim.mobility.RandomWayPoint");
 		
 		GUI.start();

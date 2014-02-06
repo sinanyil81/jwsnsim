@@ -1,7 +1,9 @@
 package sim.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
@@ -41,20 +43,22 @@ public class NodePanel extends JPanel {
 	 */
 	private void draw(Graphics g) {
 
-		g.setColor(Color.BLACK);
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setColor(Color.BLACK);
 
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			Node node = NodeFactory.nodes[i];
 			sim.node.Position pos1 = node.getPosition();
 
-			g.setColor(Color.RED);
-			g.fillOval(pos1.xCoord-3, pos1.yCoord-3, 6, 6);
+			g2.setColor(Color.RED);
+			g2.fillOval((int)pos1.xCoord-6, (int)pos1.yCoord-6, 12, 12);
 
 			Node[] neighbors = node.getRadio().getNeighbors();
 			for (int j = 0; j < neighbors.length; j++) {
 				sim.node.Position pos2 = neighbors[j].getPosition();
-				g.setColor(Color.BLUE);
-				g.drawLine(pos1.xCoord, pos1.yCoord, pos2.xCoord, pos2.yCoord);
+				g2.setColor(Color.BLUE);
+				g2.setStroke(new BasicStroke(5));
+				g2.drawLine((int)pos1.xCoord, (int)pos1.yCoord, (int)pos2.xCoord, (int)pos2.yCoord);
 			}
 		}
 	}

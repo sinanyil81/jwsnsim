@@ -2,9 +2,9 @@ package sim.node;
 
 public class Position {
 
-	public int xCoord;
-	public int yCoord;
-	public int zCoord;
+	public double xCoord;
+	public double yCoord;
+	public double zCoord;
 
 	public Position() {
 		xCoord = 0;
@@ -16,12 +16,6 @@ public class Position {
 		xCoord = (int)x;
 		yCoord = (int)y;
 		zCoord = (int)z;
-	}
-
-	public Position(int x, int y, int z) {
-		xCoord = x;
-		yCoord = y;
-		zCoord = z;
 	}
 
 	public void set(Position p) {
@@ -47,6 +41,6 @@ public class Position {
 	}
 
 	public boolean equals(Position p) {
-		return p.xCoord == xCoord && p.yCoord == yCoord && p.zCoord == zCoord;
+		return (p.xCoord == xCoord && p.yCoord == yCoord && p.zCoord == zCoord);
 	}
 }
