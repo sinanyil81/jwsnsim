@@ -1,8 +1,9 @@
 package sim.configuration;
 
 public class AreaConfiguration {
-	static final public int numDimentions = 2;
-	static final public int dimX	= 500;
-	static final public int dimY	= 500;
-	static final public int dimZ	= 500;
+	static public int numDimentions = 2;
+	static public int dimX	= 500;
+	static public int dimY	= 500;
+	static public int dimZ	= 500;
+	
 }

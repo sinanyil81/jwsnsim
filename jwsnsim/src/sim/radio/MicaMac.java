@@ -1,7 +1,7 @@
 package sim.radio;
 
 
-import application.Application;
+import application.Simulation;
 import sim.node.Node;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
@@ -12,7 +12,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	/**
 	 * This is the message being sent, on reception it is extracted and the
 	 * message part is forwarded to the appropriate application, see
-	 * {@link Application#receiveMessage}.
+	 * {@link Simulation#receiveMessage}.
 	 */
 	protected RadioPacket sendingPacket = null;
 
