@@ -45,14 +45,18 @@ public class NodePanel extends JPanel {
 			Node node = NodeFactory.nodes[i];
 			sim.node.Position pos1 = node.getPosition();
 
-			g2.setColor(Color.RED);
+			if(node.getID() == 1)
+				g2.setColor(Color.RED);
+			else
+				g2.setColor(Color.LIGHT_GRAY);
+			
 			g2.fillOval((int)pos1.xCoord-6, (int)pos1.yCoord-6, 12, 12);
 
 			Node[] neighbors = node.getRadio().getNeighbors();
 			for (int j = 0; j < neighbors.length; j++) {
 				sim.node.Position pos2 = neighbors[j].getPosition();
 				g2.setColor(Color.BLUE);
-				g2.setStroke(new BasicStroke(5));
+				g2.setStroke(new BasicStroke(2));
 				g2.drawLine((int)pos1.xCoord, (int)pos1.yCoord, (int)pos2.xCoord, (int)pos2.yCoord);
 			}
 		}
