@@ -27,7 +27,7 @@ public class Main {
 	
 	static void mobilitySample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 100, new RandomDeployment());
+		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 500, new RandomDeployment());
 		new MobilityManager("sim.mobility.RandomWayPoint");
 		
 		GUI.start();

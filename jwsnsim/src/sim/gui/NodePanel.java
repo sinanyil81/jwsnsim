@@ -76,6 +76,12 @@ public class NodePanel extends JPanel implements EventObserver {
 	@Override
 	public void signal(Event event) {
 		event.register(1000000);
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.repaint();
 	}
 }

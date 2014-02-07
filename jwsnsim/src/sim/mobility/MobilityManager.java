@@ -33,14 +33,7 @@ public class MobilityManager implements TimerHandler {
 		
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			NodeFactory.nodes[i].getRadio().updateNeighborhood();
-		}
-		
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}		
 	}
 	
 	static MobilityModel createModel(String className){
