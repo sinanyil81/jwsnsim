@@ -5,8 +5,12 @@ import java.util.Random;
 public abstract class Distribution {
 	
 	protected static Random randomGenerator; // the singleton instance of the random object. Be sure to initialize before using the first time! 
-	private static long randomSeed; // the seed used for the random object
+	private static long randomSeed = -1; // the seed used for the random object
 
+	public static void setSeed(long seed){
+		randomSeed = seed;
+	}
+	
 	public static long getSeed() {
 		getRandom(); // initialize the random generator if it's not already done
 		return randomSeed;
@@ -29,7 +33,8 @@ public abstract class Distribution {
 	public static Random getRandom() {
 		// construct the singleton random object if it does not yet exist
 		if(randomGenerator == null) {
-			randomSeed = (new java.util.Random()).nextLong();
+			if(randomSeed == -1)
+				randomSeed = (new java.util.Random()).nextLong();
 			randomGenerator = new Random(randomSeed); // use a random seed
 		}
 		return randomGenerator;
