@@ -1,6 +1,7 @@
 package sim.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,7 +45,8 @@ public class InfoPanel extends JPanel implements EventObserver{
 		       } 
 	    });
 		
-		setSize(w,h);
+		this.setSize(w,h);
+		this.setPreferredSize(new Dimension(w, h));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
 		numNodesCaption.setForeground(Color.RED);

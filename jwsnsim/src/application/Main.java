@@ -17,7 +17,7 @@ public class Main {
 	
 	static void sample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appPI.PINode", 20, new Grid2D());
+		NodeFactory.createNodes("application.appPI.PINode", 100, new Grid2D());
 			
 		GUI.start();
 		

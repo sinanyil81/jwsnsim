@@ -2,9 +2,11 @@ package sim.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import sim.node.Node;
@@ -21,6 +23,7 @@ public class NodePanel extends JPanel implements EventObserver {
 
 	public NodePanel(int w, int h) {
 		this.setSize(w, h);
+		this.setPreferredSize(new Dimension(w, h));
 		event.register(1000000);
 	}
 
@@ -32,6 +35,7 @@ public class NodePanel extends JPanel implements EventObserver {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		this.setBackground(Color.WHITE);	
+		this.setBorder(BorderFactory.createLineBorder(Color.black));
 		draw(g);
 	}
 
@@ -45,7 +49,7 @@ public class NodePanel extends JPanel implements EventObserver {
 
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setColor(Color.BLACK);
-
+		
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			Node node = NodeFactory.nodes[i];
 			sim.node.Position pos1 = node.getPosition();
