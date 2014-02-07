@@ -9,12 +9,18 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import sim.clock.Clock;
+import sim.clock.ConstantDriftClock;
+import sim.clock.Timer;
+import sim.clock.TimerHandler;
 import sim.simulator.Simulator;
 
-public class InfoPanel extends JPanel{
+public class InfoPanel extends JPanel implements TimerHandler{
 	
 	JLabel simulationSecond = new JLabel("0");
 	JButton stopButton = new JButton("Exit");
+	protected Clock clock = new ConstantDriftClock(1.0);
+	protected Timer timer = new Timer(clock,this);
 	
 	/**
 	 * 
@@ -33,6 +39,9 @@ public class InfoPanel extends JPanel{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(simulationSecond);
 		add(stopButton);
+		
+		clock.start();
+		timer.startOneshot(1000000);	
 	}
 
 	/*
@@ -52,6 +61,12 @@ public class InfoPanel extends JPanel{
 	 *            The graphics to paint to
 	 */
 	private void draw(Graphics g) {
-		simulationSecond.setText(""+Simulator.getInstance().getSecond());		
+		simulationSecond.setText("Simulation second:"+Simulator.getInstance().getSecond());		
+	}
+
+	@Override
+	public void fireEvent(Timer timer) {
+		this.repaint();
+		timer.startOneshot(1000000);	
 	}
 }
