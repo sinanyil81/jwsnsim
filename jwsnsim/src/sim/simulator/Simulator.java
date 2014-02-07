@@ -1,13 +1,9 @@
 package sim.simulator;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.Vector;
 
-import sim.clock.Clock;
-import sim.node.Node;
 
 public class Simulator {
 	
@@ -15,6 +11,8 @@ public class Simulator {
 	private SimTime simTime = new SimTime();
 	
 	private Vector<Event> events = null;
+	
+	private Simulation simulation = null;
 	
 	protected Simulator(){
 		events = new Vector<Event>();
@@ -26,6 +24,17 @@ public class Simulator {
 		}
 
 		return simulator;
+	}
+	
+	public void startSimulation(Simulation simulation){
+		this.simulation = simulation;
+		simulation.run();
+	}
+	
+	public void stopSimulation(){
+		if(this.simulation != null){
+			simulation.exit();
+		}
 	}
 	
 	public void register(Event event) {
@@ -59,7 +68,6 @@ public class Simulator {
 		events.removeAllElements();		
 		events = new Vector<Event>();		
 		simTime = new SimTime();
-//		random.setSeed(SIMULATOR_SEED);
 	}
 	
 	public SimTime getTime(){

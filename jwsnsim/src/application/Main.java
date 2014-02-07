@@ -17,12 +17,12 @@ public class Main {
 	
 	static void sample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appPI.PINode", 20, new Line2D());
+		NodeFactory.createNodes("application.appPI.PINode", 20, new Grid2D());
 			
 		GUI.start();
 		
 		/* start simulation */
-		new Simulation("logFile.txt",20000);
+		new SynchronizationSimulation("logFile.txt",20000);
 	}
 	
 	static void mobilitySample(){
@@ -33,6 +33,6 @@ public class Main {
 		GUI.start();
 		
 		/* start simulation */
-		new Simulation("logFile.txt",2000000);
+		new SynchronizationSimulation("logFile.txt",2000000);
 	}
 }

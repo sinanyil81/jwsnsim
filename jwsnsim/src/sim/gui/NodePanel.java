@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+import sim.configuration.AreaConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
 
@@ -16,8 +17,8 @@ public class NodePanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public NodePanel() {
-
+	public NodePanel(int w, int h) {
+		this.setSize(w, h);
 	}
 
 	/*
@@ -27,6 +28,7 @@ public class NodePanel extends JPanel {
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		this.setBackground(Color.WHITE);	
 		draw(g);
 	}
 
@@ -53,11 +55,13 @@ public class NodePanel extends JPanel {
 			g2.fillOval((int)pos1.xCoord-6, (int)pos1.yCoord-6, 12, 12);
 
 			Node[] neighbors = node.getRadio().getNeighbors();
-			for (int j = 0; j < neighbors.length; j++) {
-				sim.node.Position pos2 = neighbors[j].getPosition();
-				g2.setColor(Color.BLUE);
-				g2.setStroke(new BasicStroke(2));
-				g2.drawLine((int)pos1.xCoord, (int)pos1.yCoord, (int)pos2.xCoord, (int)pos2.yCoord);
+			if(neighbors!=null){
+				for (int j = 0; j < neighbors.length; j++) {
+					sim.node.Position pos2 = neighbors[j].getPosition();
+					g2.setColor(Color.BLUE);
+					g2.setStroke(new BasicStroke(2));
+					g2.drawLine((int)pos1.xCoord, (int)pos1.yCoord, (int)pos2.xCoord, (int)pos2.yCoord);
+				}				
 			}
 		}
 	}

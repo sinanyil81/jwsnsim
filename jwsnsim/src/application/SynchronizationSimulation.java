@@ -5,10 +5,11 @@ import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.NodeFactory;
+import sim.simulator.Simulation;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
-public class Simulation implements TimerHandler {
+public class SynchronizationSimulation extends Simulation implements TimerHandler {
 	
 	private int PERIOD = 20000000;
 	protected long MAXSECOND =20000;	
@@ -16,7 +17,9 @@ public class Simulation implements TimerHandler {
 	protected Timer timer = new Timer(clock,this);
 	protected Logger logger;
 	
-	public Simulation(String logFile, int durationTime){
+	public SynchronizationSimulation(String logFile, int durationTime){
+		super(durationTime);
+		
 		logger = new Logger(logFile);
 		clock.start();
 		timer.startOneshot(PERIOD);	
@@ -29,24 +32,14 @@ public class Simulation implements TimerHandler {
 				e.printStackTrace();
 			}
 		}
-						
-		MAXSECOND = durationTime;
-		run();
+
+		Simulator.getInstance().startSimulation(this);
 	}
 	
-	public void run(){
-		
-		while(Simulator.getInstance().getSecond() < MAXSECOND){
-			Simulator.getInstance().tick();
-		}
-		
-		Simulator.getInstance().reset();
-		
-		exit();
-	}
-	
+	@Override
 	public void exit() {
-		logger.close();		
+		logger.close();	
+		System.out.println("Simulation finished!");
 	}
 
 	@Override
