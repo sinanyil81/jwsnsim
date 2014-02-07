@@ -27,6 +27,7 @@ public class SynchronizationSimulation extends Simulation implements EventObserv
 			}
 		}
 
+		event.register((int) (PERIOD + ((Distribution.getRandom().nextInt() % 4) + 1)*1000000));
 		Simulator.getInstance().startSimulation(this);
 	}
 	

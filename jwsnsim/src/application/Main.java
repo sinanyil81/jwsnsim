@@ -27,12 +27,12 @@ public class Main {
 	
 	static void mobilitySample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 500, new RandomDeployment());
+		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 100, new RandomDeployment());
 		new MobilityManager("sim.mobility.RandomWayPoint");
 		
 		GUI.start();
 		
 		/* start simulation */
-		new SynchronizationSimulation("logFile.txt",2000000);
+		new SynchronizationSimulation("logFile.txt",50000);
 	}
 }
