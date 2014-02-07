@@ -11,13 +11,13 @@ import sim.topology.RandomDeployment;
 public class Main {
 
 	public static void main(String[] args) {
-//		sample();	
-		mobilitySample();
+		sample();	
+//		mobilitySample();
 	}
 	
 	static void sample(){
 		/* create nodes */
-		NodeFactory.createNodes("application.appPI.PINode", 100, new Grid2D());
+		NodeFactory.createNodes("application.appPI.PINode", 42, new Grid2D());
 			
 		GUI.start();
 		
