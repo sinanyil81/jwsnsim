@@ -7,18 +7,21 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import sim.configuration.AreaConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
+import sim.simulator.Event;
+import sim.simulator.EventObserver;
 
-public class NodePanel extends JPanel {
+public class NodePanel extends JPanel implements EventObserver {
 	/**
 	 * 
-	 */
+	 */	
 	private static final long serialVersionUID = 1L;
+	Event event = new Event(this);
 
 	public NodePanel(int w, int h) {
 		this.setSize(w, h);
+		event.register(1000000);
 	}
 
 	/*
@@ -64,5 +67,11 @@ public class NodePanel extends JPanel {
 				}				
 			}
 		}
+	}
+
+	@Override
+	public void signal(Event event) {
+		event.register(1000000);
+		this.repaint();
 	}
 }

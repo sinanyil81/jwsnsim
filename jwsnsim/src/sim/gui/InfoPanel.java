@@ -1,5 +1,6 @@
 package sim.gui;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,18 +10,25 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import sim.clock.Clock;
-import sim.clock.ConstantDriftClock;
-import sim.clock.Timer;
-import sim.clock.TimerHandler;
+import sim.node.NodeFactory;
+import sim.simulator.Event;
+import sim.simulator.EventObserver;
 import sim.simulator.Simulator;
 
-public class InfoPanel extends JPanel implements TimerHandler{
+public class InfoPanel extends JPanel implements EventObserver{
+	
+	JLabel numNodesCaption = new JLabel("Number of Nodes");
+	JLabel maxSecondCaption = new JLabel("Simulation End Time");
+	JLabel simulationSecondCaption = new JLabel("Simulation Second");
+	
+	
+	JLabel numNodes = new JLabel("Number of Nodes");
+	JLabel maxSecond = new JLabel("0");
+	
 	
 	JLabel simulationSecond = new JLabel("0");
 	JButton stopButton = new JButton("Exit");
-	protected Clock clock = new ConstantDriftClock(1.0);
-	protected Timer timer = new Timer(clock,this);
+	Event event = new Event(this);
 	
 	/**
 	 * 
@@ -28,20 +36,29 @@ public class InfoPanel extends JPanel implements TimerHandler{
 	private static final long serialVersionUID = 1L;
 
 	public InfoPanel(int w, int h) {
-		this.setSize(w, h);
-		
+			
 		stopButton.addActionListener(new ActionListener() {
 		       public void actionPerformed(ActionEvent ae){
 		           Simulator.getInstance().stopSimulation();
 		           System.exit(0);
 		       } 
 	    });
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(simulationSecond);
-		add(stopButton);
 		
-		clock.start();
-		timer.startOneshot(1000000);	
+		setSize(w,h);
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		
+		numNodesCaption.setForeground(Color.RED);
+		maxSecondCaption.setForeground(Color.RED);
+		simulationSecondCaption.setForeground(Color.RED);
+		
+		add(numNodesCaption);
+		add(numNodes);
+		add(simulationSecondCaption);
+		add(simulationSecond);
+		add(maxSecondCaption);
+		add(maxSecond);
+		add(stopButton);
+		event.register(1000000);
 	}
 
 	/*
@@ -61,12 +78,16 @@ public class InfoPanel extends JPanel implements TimerHandler{
 	 *            The graphics to paint to
 	 */
 	private void draw(Graphics g) {
-		simulationSecond.setText("Simulation second:"+Simulator.getInstance().getSecond());		
+		numNodes.setText(""+NodeFactory.numNodes);	
+		if(Simulator.getInstance().getSimulation()!=null){
+			maxSecond.setText(""+Simulator.getInstance().getSimulation().MAXSECOND);	
+		}		
+		simulationSecond.setText(""+Simulator.getInstance().getSecond());		
 	}
 
 	@Override
-	public void fireEvent(Timer timer) {
+	public void signal(Event event) {
 		this.repaint();
-		timer.startOneshot(1000000);	
+		event.register(1000000);		
 	}
 }

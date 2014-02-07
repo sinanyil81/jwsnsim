@@ -1,11 +1,10 @@
 package sim.gui;
 
 public class GUI {
-	protected MainFrame frame = null;
 	protected static GUI instance = null;
 	
 	protected GUI(){
-		frame = new MainFrame();
+		new NodeFrame();
 	}
 	
 	public static void start(){
@@ -17,10 +16,5 @@ public class GUI {
 			instance = new GUI();
 		
 		return instance;		
-	}
-	
-	public static void refresh(){
-		getInstance().frame.repaint();
-		getInstance().frame.getComponents()[0].repaint();
 	}
 }

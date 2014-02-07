@@ -1,7 +1,7 @@
 package sim.simulator;
 
 public abstract class Simulation {
-	protected long MAXSECOND =20000;
+	public long MAXSECOND = 0;
 	
 	protected Simulation(int seconds){
 		this.MAXSECOND = seconds;

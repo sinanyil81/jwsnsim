@@ -6,7 +6,6 @@ import sim.clock.Clock;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
-import sim.gui.GUI;
 import sim.node.NodeFactory;
 import sim.node.Position;
 
@@ -22,8 +21,7 @@ public class MobilityManager implements TimerHandler {
 		models = new MobilityModel[NodeFactory.numNodes];
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			models[i] = createModel(mobilityClassName);
-		}
-		
+		}		
 	}
 	
 	@Override
@@ -36,8 +34,6 @@ public class MobilityManager implements TimerHandler {
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			NodeFactory.nodes[i].getRadio().updateNeighborhood();
 		}
-		
-		GUI.refresh();
 		
 		try {
 			Thread.sleep(1);

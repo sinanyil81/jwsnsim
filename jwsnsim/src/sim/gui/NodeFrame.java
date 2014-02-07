@@ -5,19 +5,17 @@ import javax.swing.JFrame;
 
 import sim.configuration.AreaConfiguration;
 
-public class MainFrame extends JFrame{
+public class NodeFrame extends JFrame{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public MainFrame(){
+	public NodeFrame(){
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
 		getContentPane().add(new NodePanel(AreaConfiguration.dimX,AreaConfiguration.dimY));
-		getContentPane().add(new InfoPanel(100,100));
-		setSize(AreaConfiguration.dimX+100,AreaConfiguration.dimY);
-		setVisible(true);
-		
+		getContentPane().add(new InfoPanel(200,AreaConfiguration.dimY));
+		setVisible(true);		
 	}
 }

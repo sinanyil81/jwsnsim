@@ -37,6 +37,10 @@ public class Simulator {
 		}
 	}
 	
+	public Simulation getSimulation(){
+		return simulation;
+	}
+	
 	public void register(Event event) {
 		events.add(event);
 		Collections.sort(events);		
