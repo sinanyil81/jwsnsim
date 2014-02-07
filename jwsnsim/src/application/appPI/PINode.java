@@ -57,19 +57,9 @@ public class PINode extends Node implements TimerHandler {
 	}
 	
 	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
-//	float K_max = 0.000004f/BOUNDARY;
-//	float K_max = 1.0f/(10.0f*(float)BEACON_RATE);
-	
-//	float K_max = 0.000004f/BOUNDARY;
-//	float K_max = (beta*beta)/120000000.0f;
-	float K_max = 1.0f/(10.0f*(float)(BEACON_RATE));
-//	float K_min = 1.5f/(10000.0f*(float)(BEACON_RATE));
-//	float K_min = K_max;
-	float K_i = K_max;
-	
-//	int lastDirection = 0;
-//	
-//	int numError = 0;
+
+	float beta = 1.0f; 
+	float alpha_max = 1.0f/(50.0f*(float)(BEACON_RATE));
 	
 	private void algorithmPI(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -79,43 +69,12 @@ public class PINode extends Node implements TimerHandler {
 		
 		/*  initial offset compensation */ 
 		if(Math.abs(skew) <= BOUNDARY){	
+			float alpha = alpha_max;
 			
-//			if(skew < -50) return; 
-//			int currentDirection = 0;
-//			
-//			if(skew>0)
-//				currentDirection = 1;
-//			else if(skew <0)
-//				currentDirection = -1;
-//			else
-//				currentDirection = 0;
-//			
-//			if(currentDirection == 0){
-//				K_i /=3.0f;
-//				if(K_i < K_min)
-//					K_i = K_min;
-//			}
-//			else if(currentDirection == lastDirection){
-//				K_i = K_i*2.0f;
-//				if(K_i>K_max) K_i = K_max;
-//			}
-//			else {
-//				K_i /=3.0f;
-//				if(K_i < K_min)
-//					K_i = K_min;
-//			}
-//				
-//			lastDirection = currentDirection;
-
-					
-//			float x = BOUNDARY - Math.abs(skew);					
-//			float K_i = x*K_max/BOUNDARY;
-						
-			logicalClock.rate += K_i*(float)skew;
-//			logicalClock.rate += K_max*(float)skew;
+			logicalClock.rate += alpha*(float)skew;
 			
 			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			logicalClock.setValue(myClock.add(skew),updateTime);
+			logicalClock.setValue(myClock.add((int)(beta*(float)skew)),updateTime);
 		}
 		else{
 			if(skew > BOUNDARY){
