@@ -24,15 +24,12 @@
 
 package sim.radio;
 
-import java.util.Iterator;
-import java.util.Vector;
-
+import sim.configuration.TransmissionConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
 import sim.node.Position;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
-import sim.simulator.Simulator;
 import sim.type.UInt32;
 
 /**
@@ -58,17 +55,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	/** The vector of the neighboring nodes. */
 	protected Node[] neighbors; 
 	
-	/** the path-loss exponent */
-	private int alpha = 2;
-	
-	/** the threshold */
-	private double beta = 0.5;
-	
-	/** the ambient noise */
-	private double ambientNoise = 0; 
-	
-	/** max neighborhood distance */
-	public static int MAX_DISTANCE = 25; 
+
 	
 	protected RadioPacket packetToTransmit = null;
 	protected RadioPacket receivingPacket = null;
@@ -114,7 +101,7 @@ public class SimpleRadio extends Radio implements EventObserver{
         	
         	if(node1.isRunning()){
 				double distance = node.getPosition().distanceTo(node1.getPosition());
-				if( distance <= MAX_DISTANCE && node != node1){
+				if( distance <= TransmissionConfiguration.MAX_DISTANCE && node != node1){
 					neighbors[i] = node1;                   
 					i++;
 				}				
@@ -173,7 +160,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	protected double getNoise(RadioPacket packet) {
 		Position pos = packet.getSender().getPosition();
 		double distance = pos.distanceTo(node.getPosition());
-		double poweredDistance = Math.pow(distance, alpha);
+		double poweredDistance = Math.pow(distance, TransmissionConfiguration.alpha);
 		return packet.getIntensity() / poweredDistance;
 	}
 	
@@ -192,7 +179,7 @@ public class SimpleRadio extends Radio implements EventObserver{
                 receiving		= true;
                 corrupted     	= false;
                 signalStrength 	= getNoise(packet);
-                noiseStrength = ambientNoise;
+                noiseStrength = TransmissionConfiguration.ambientNoise;
                 
                 listener.radioReceptionBegin();
             }
@@ -227,7 +214,7 @@ public class SimpleRadio extends Radio implements EventObserver{
             
             receivingPacket = null;
             signalStrength = 0;
-            noiseStrength -= ambientNoise;
+            noiseStrength -= TransmissionConfiguration.ambientNoise;
             listener.radioReceptionEnd();                        
         }
 		else{
@@ -236,7 +223,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 	
 	public boolean isMessageCorrupted( ){
-		return signalStrength < beta * noiseStrength; 
+		return signalStrength < TransmissionConfiguration.beta * noiseStrength; 
 	}
 
 	@Override
