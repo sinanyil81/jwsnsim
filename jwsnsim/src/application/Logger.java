@@ -37,7 +37,7 @@ public class Logger{
 			out.flush();
 			out.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 	}	
 }
