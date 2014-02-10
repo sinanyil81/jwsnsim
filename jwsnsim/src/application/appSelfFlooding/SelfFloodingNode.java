@@ -36,20 +36,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		timer0 = new Timer(CLOCK, this);
 		
 		/* to start clock with a random value */
-		if(this.NODE_ID == 1){
-			CLOCK.setValue(new UInt32(0));
-			CLOCK.setDrift(0.000050f);
-		}
-		/* to start clock with a random value */
-		else if(this.NODE_ID == 2){
-			CLOCK.setValue(new UInt32(0));
-		}
-		else if(this.NODE_ID == 20){
-			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
-//			CLOCK.setDrift(0.0f);
-		}
-		else
-			CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 		
 	
 		outgoingMsg.sequence = 0;
