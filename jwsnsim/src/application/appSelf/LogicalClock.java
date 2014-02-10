@@ -9,9 +9,9 @@ public class LogicalClock {
 	private UInt32 value = new UInt32();
 
 	public AVT rate = new AVTBuilder()
-							.upperBound(0.0001)
-							.lowerBound(-0.0001)
-							.deltaMin(0.0000000001)			
+							.upperBound(0.0002)
+							.lowerBound(-0.0002)
+							.deltaMin(0.000000000001f)			
 							.deltaMax(0.00001)
 							.startValue(0.00001)
 							.build();	
