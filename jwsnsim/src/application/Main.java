@@ -11,8 +11,8 @@ import sim.topology.RandomDeployment;
 public class Main {
 
 	public static void main(String[] args) {
-		sample();	
-//		mobilitySample();
+//		sample();	
+		mobilitySample();
 	}
 	
 	static void sample(){

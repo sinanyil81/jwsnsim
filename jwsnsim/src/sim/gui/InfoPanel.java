@@ -22,13 +22,16 @@ public class InfoPanel extends JPanel implements EventObserver{
 	JLabel maxSecondCaption = new JLabel("Simulation End Time");
 	JLabel simulationSecondCaption = new JLabel("Simulation Second");
 	
-	
 	JLabel numNodes = new JLabel("Number of Nodes");
 	JLabel maxSecond = new JLabel("0");
 	
 	
 	JLabel simulationSecond = new JLabel("0");
 	JButton stopButton = new JButton("Exit");
+	
+	JButton incrementSimulationSpeed = new JButton("Slow Down");
+	JButton decrementSimulationSpeed = new JButton(" Speed Up ");
+	
 	Event event = new Event(this);
 	
 	/**
@@ -37,14 +40,7 @@ public class InfoPanel extends JPanel implements EventObserver{
 	private static final long serialVersionUID = 1L;
 
 	public InfoPanel(int w, int h) {
-			
-		stopButton.addActionListener(new ActionListener() {
-		       public void actionPerformed(ActionEvent ae){
-		           Simulator.getInstance().stopSimulation();
-		           System.exit(0);
-		       } 
-	    });
-		
+				
 		this.setSize(w,h);
 		this.setPreferredSize(new Dimension(w, h));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -59,7 +55,37 @@ public class InfoPanel extends JPanel implements EventObserver{
 		add(simulationSecond);
 		add(maxSecondCaption);
 		add(maxSecond);
+		add(incrementSimulationSpeed);
+		add(decrementSimulationSpeed);
 		add(stopButton);
+		
+		stopButton.addActionListener(new ActionListener() {
+		       public void actionPerformed(ActionEvent ae){
+		           Simulator.getInstance().stopSimulation();
+		           System.exit(0);
+		       } 
+	    });
+		
+		incrementSimulationSpeed.addActionListener(new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				NodePanel.SimulationSpeed++;
+			}
+		});
+		
+		decrementSimulationSpeed.addActionListener(new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(--NodePanel.SimulationSpeed<0)
+					NodePanel.SimulationSpeed = 0;
+			}
+		});
+		
+		
 		event.register(1000000);
 	}
 

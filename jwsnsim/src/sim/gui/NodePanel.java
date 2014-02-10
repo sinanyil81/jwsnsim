@@ -15,11 +15,11 @@ import sim.simulator.Event;
 import sim.simulator.EventObserver;
 
 public class NodePanel extends JPanel implements EventObserver {
-	/**
-	 * 
-	 */	
+	
 	private static final long serialVersionUID = 1L;
 	Event event = new Event(this);
+	
+	public static int SimulationSpeed = 0;
 
 	public NodePanel(int w, int h) {
 		this.setSize(w, h);
@@ -76,12 +76,15 @@ public class NodePanel extends JPanel implements EventObserver {
 	@Override
 	public void signal(Event event) {
 		event.register(1000000);
-//		try {
-//			Thread.sleep(1);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		
+		if(SimulationSpeed>0){
+			try {
+				Thread.sleep(SimulationSpeed);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
 		this.repaint();
 	}
 }
