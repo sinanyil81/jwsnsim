@@ -55,6 +55,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	/** The vector of the neighboring nodes. */
 	protected Node[] neighbors; 
 	
+	private Node[] receivers;
 
 	
 	protected RadioPacket packetToTransmit = null;
@@ -125,15 +126,21 @@ public class SimpleRadio extends Radio implements EventObserver{
 
 	public void beginTransmission(RadioPacket packet){	
 		
+		if(transmitting==true)
+			return;
+		
 		packetToTransmit = packet;
 		setTransmissionTimestamp();
 		packet.setIntensity(intensity);
 		
 		transmitting = true;
 		
-		int i = neighbors.length;
+		receivers = new Node[neighbors.length];
+		System.arraycopy( neighbors, 0,receivers, 0, neighbors.length );
+		
+		int i = receivers.length;
 		while( --i >= 0 ){
-			neighbors[i].getRadio().receptionBegin(packet);
+			receivers[i].getRadio().receptionBegin(packet);
 		}
 		
 		endTransmissionEvent.register(sendTransmissionTime);
@@ -148,11 +155,12 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 	
 	public void endTransmission(){	
-		int i = neighbors.length;
+		int i = receivers.length;
 		while( --i >= 0 )
-			neighbors[i].getRadio().receptionEnd(packetToTransmit);
+			receivers[i].getRadio().receptionEnd(packetToTransmit);
 		
 		packetToTransmit = null;
+		receivers = null;
 		transmitting = false;
 		listener.radioTransmissionEnd();
 	}
@@ -210,7 +218,7 @@ public class SimpleRadio extends Radio implements EventObserver{
             	node.getMAC().receivePacket(receivingPacket);
             }            
             else
-            	System.out.println("Corruption!");
+            	System.out.println(""+ node.getID()+ " Corruption!");
             
             receivingPacket = null;
             signalStrength = 0;
