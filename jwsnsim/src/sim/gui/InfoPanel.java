@@ -71,7 +71,7 @@ public class InfoPanel extends JPanel implements EventObserver{
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				NodePanel.SimulationSpeed++;
+				NodePanel.SimulationSpeed+=10;
 			}
 		});
 		
@@ -80,7 +80,8 @@ public class InfoPanel extends JPanel implements EventObserver{
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(--NodePanel.SimulationSpeed<0)
+				NodePanel.SimulationSpeed -=10;
+				if(NodePanel.SimulationSpeed<0)
 					NodePanel.SimulationSpeed = 0;
 			}
 		});
