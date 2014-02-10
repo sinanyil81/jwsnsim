@@ -26,13 +26,19 @@ public class Main {
 	}
 	
 	static void mobilitySample(){
+		
+		/* Uncomment to have fixed mobility */
+//		Distribution.setSeed(0x123456L);
+//		RandomDeployment.rand = new Random(0x123456L);
+//		RandomWayPoint.random = new Random(0x123456L);
+		
 		/* create nodes */
-		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 100, new RandomDeployment());
+		NodeFactory.createNodes("application.appSelfFlooding.SelfFloodingNode", 300, new RandomDeployment());
 		new MobilityManager("sim.mobility.RandomWayPoint");
 		
 		GUI.start();
 		
 		/* start simulation */
-		new SynchronizationSimulation("logFile.txt",50000);
+		new SynchronizationSimulation("AVTSMobility.txt",20000);
 	}
 }
