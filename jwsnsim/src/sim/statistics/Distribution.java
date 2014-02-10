@@ -47,5 +47,6 @@ public abstract class Distribution {
 	 * @return the next random sample of this distribution.
 	 */
 	public abstract double nextSample();
+	public abstract double nextSample(Random r);
 
 }

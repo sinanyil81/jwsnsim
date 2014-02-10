@@ -16,7 +16,7 @@ public class RandomWayPoint extends MobilityModel{
 	protected static Distribution waitingTimeDistribution;
 
 	private static boolean initialized = false; // a flag set to true after initialization of the static vars of this class has been done.
-	protected static Random random = Distribution.getRandom(); // a random generator of the framework 
+	public static Random random = Distribution.getRandom(); // a random generator of the framework 
 	
 	protected Position nextDestination = new Position(); // The point where this node is moving to
 	protected Position moveVector = new Position(); // The vector that is added in each step to the current position of this node
@@ -38,7 +38,7 @@ public class RandomWayPoint extends MobilityModel{
 
 		if(remaining_hops == 0) {
 			// determine the speed at which this node moves
-			double speed = Math.abs(speedDistribution.nextSample()); // units per round
+			double speed = Math.abs(speedDistribution.nextSample(random)); // units per round
 			if(speed == 0) 
 				speed = MobilityConfiguration.speedMean;
 
@@ -63,7 +63,7 @@ public class RandomWayPoint extends MobilityModel{
 			nextPosition.yCoord = nextDestination.yCoord;
 			nextPosition.zCoord = nextDestination.zCoord;
 			// set the next waiting time that executes after this mobility phase
-			remaining_waitingTime = (int) Math.ceil(waitingTimeDistribution.nextSample());
+			remaining_waitingTime = (int) Math.ceil(waitingTimeDistribution.nextSample(random));
 			remaining_hops = 0;
 		} else {
 			double newx = n.getPosition().xCoord + moveVector.xCoord; 

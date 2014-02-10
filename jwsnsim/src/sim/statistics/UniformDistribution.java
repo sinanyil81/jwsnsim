@@ -19,6 +19,10 @@ public class UniformDistribution extends Distribution{
 		return min + range * randomGenerator.nextDouble();
 	}
 	
+	public double nextSample(Random r) {
+		return min + range * r.nextDouble();
+	}
+	
 	public static double nextUniform(double minRange, double maxRange) {
 		Random r = Distribution.getRandom();
 		return minRange + r.nextDouble() * (maxRange - minRange);

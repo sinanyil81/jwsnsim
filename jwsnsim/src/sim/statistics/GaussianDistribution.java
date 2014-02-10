@@ -15,6 +15,10 @@ public class GaussianDistribution extends Distribution{
 	public double nextSample() {
 		return mean + randomGenerator.nextGaussian() * Math.sqrt(var);
 	}
+	
+	public double nextSample(Random r) {
+		return mean + r.nextGaussian() * Math.sqrt(var);
+	}
 
 	public static double nextGaussian(double mean, double variance) {
 		Random r = Distribution.getRandom();

@@ -1,12 +1,14 @@
 package sim.topology;
 
+import java.util.Random;
+
 import sim.configuration.AreaConfiguration;
 import sim.node.Position;
 import sim.statistics.Distribution;
 
 public class RandomDeployment extends Topology{
 	// The random-number generator
-	private java.util.Random rand = Distribution.getRandom();
+	static public Random rand = Distribution.getRandom();
 	
 	/* (non-Javadoc)
 	 * @see distributionModels.DistributionModelInterface#getOnePosition()

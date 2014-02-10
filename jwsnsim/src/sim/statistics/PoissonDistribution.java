@@ -32,6 +32,18 @@ public class PoissonDistribution extends Distribution{
 		return result;
 	}
 	
+	public double nextSample(Random r) {
+		double product = 1;
+		int count =  0;
+		int result = 0;
+		while (product >= expLambda) {
+			product *= r.nextDouble();
+			result = count;
+			count++; // keep result one behind
+		}
+		return result;
+	}
+	
 	/**
 	 * Creates a random sample drawn from a poissson distribution with given lambda.
 	 * 
