@@ -16,8 +16,8 @@ public class Line2D extends Topology{
 	 */
 	public void initialize() {
 		dy = 0;
-		AreaConfiguration.dimX = (NodeFactory.numNodes+1)*TransmissionConfiguration.MAX_DISTANCE;				
-		dx = TransmissionConfiguration.MAX_DISTANCE;
+		AreaConfiguration.dimX = (NodeFactory.numNodes+1)*TransmissionConfiguration.MAX_RANGE;				
+		dx = TransmissionConfiguration.MAX_RANGE;
 		
 		previousPositionX = 0;
 		previousPositionY = AreaConfiguration.dimY / 2;

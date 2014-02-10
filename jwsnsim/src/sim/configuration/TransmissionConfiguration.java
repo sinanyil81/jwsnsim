@@ -11,5 +11,5 @@ public class TransmissionConfiguration {
 	public static double ambientNoise = 0; 
 	
 	/** max neighborhood distance */
-	public static int MAX_DISTANCE = 25; 
+	public static int MAX_RANGE = 25; 
 }

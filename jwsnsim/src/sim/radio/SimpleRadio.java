@@ -101,7 +101,7 @@ public class SimpleRadio extends Radio implements EventObserver{
         	
         	if(node1.isRunning()){
 				double distance = node.getPosition().distanceTo(node1.getPosition());
-				if( distance <= TransmissionConfiguration.MAX_DISTANCE && node != node1){
+				if( distance <= TransmissionConfiguration.MAX_RANGE && node != node1){
 					neighbors[i] = node1;                   
 					i++;
 				}				

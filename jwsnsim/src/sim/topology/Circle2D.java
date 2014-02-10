@@ -13,7 +13,7 @@ public class Circle2D extends Topology{
 	
 	public Position getNextPosition() {
 		double oneStep = 360.0 / NodeFactory.numNodes;		
-		double radius = (TransmissionConfiguration.MAX_DISTANCE-2)*360.0/(oneStep*2.0*Math.PI);
+		double radius = (TransmissionConfiguration.MAX_RANGE-2)*360.0/(oneStep*2.0*Math.PI);
 
 		
 		Position position = new Position(radius+radius * Math.cos(Math.toRadians(counter * oneStep)),

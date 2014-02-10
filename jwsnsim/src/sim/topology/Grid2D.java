@@ -25,7 +25,7 @@ public class Grid2D extends Topology {
 		size = (-b - Math.sqrt(tmp)) / (2*a);
 		numNodesPerLine = (int) Math.round(AreaConfiguration.dimX / size) - 1;
 		i=0; j=1;
-		TransmissionConfiguration.MAX_DISTANCE = (int)size + 1;
+		TransmissionConfiguration.MAX_RANGE = (int)size + 1;
 	}
 	
 	/* (non-Javadoc)
