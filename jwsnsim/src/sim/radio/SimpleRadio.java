@@ -125,10 +125,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 
 
 	public void beginTransmission(RadioPacket packet){	
-		
-		if(transmitting==true)
-			return;
-		
+			
 		packetToTransmit = packet;
 		setTransmissionTimestamp();
 		packet.setIntensity(intensity);

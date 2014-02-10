@@ -56,6 +56,8 @@ public class NodePanel extends JPanel implements EventObserver {
 
 			if(node.getID() == 1)
 				g2.setColor(Color.RED);
+			else if(node.getID() == 137)
+				g2.setColor(Color.MAGENTA);
 			else
 				g2.setColor(Color.LIGHT_GRAY);
 			
