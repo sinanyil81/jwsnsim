@@ -14,7 +14,7 @@ import sim.type.UInt32;
 
 public class PIFloodingNode extends Node implements TimerHandler {
 
-	private static final int BEACON_RATE = 30000000;
+	private static final int BEACON_RATE = 10000000;
 	private static final float MAX_PPM = 0.0001f;
 
 	LogicalClock logicalClock = new LogicalClock();
@@ -158,7 +158,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 
-	boolean changed = false;
+//	boolean changed = false;
 
 	public String toString() {
 		String s = "" + Simulator.getInstance().getSecond();
@@ -170,15 +170,15 @@ public class PIFloodingNode extends Node implements TimerHandler {
 						.getDrift())));
 		// + Float.floatToIntBits(K_i);
 		// + Float.floatToIntBits((float) (increment));//
-		if (Simulator.getInstance().getSecond() >= 10000) {
-			/* to start clock with a random value */
-			if (this.NODE_ID == 10) {
-				if (changed == false) {
-					CLOCK.setDrift(0.0001f);
-					changed = true;
-				}
-			}
-		}
+//		if (Simulator.getInstance().getSecond() >= 10000) {
+//			/* to start clock with a random value */
+//			if (this.NODE_ID == 10) {
+//				if (changed == false) {
+//					CLOCK.setDrift(0.0001f);
+//					changed = true;
+//				}
+//			}
+//		}
 		// }
 		// }
 		// + Float.floatToIntBits(K_i);
