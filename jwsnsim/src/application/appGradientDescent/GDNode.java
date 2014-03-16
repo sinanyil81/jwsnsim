@@ -1,5 +1,7 @@
 package application.appGradientDescent;
 
+import java.security.acl.LastOwnerException;
+
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -14,7 +16,7 @@ import sim.type.UInt32;
 
 public class GDNode extends Node implements TimerHandler {
 
-	private static final int BEACON_RATE = 10000000;
+	private static final int BEACON_RATE = 30000000;
 	private static final float MAX_PPM = 0.0001f;
 
 	LogicalClock logicalClock = new LogicalClock();
@@ -53,16 +55,12 @@ public class GDNode extends Node implements TimerHandler {
 	}
 
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
-	float beta = 1.0f;
-	float K_max = 1.0f / (float) (BEACON_RATE);
-	float K_min = K_max / 1000.0f;
-	float K_i = K_max;
 
-	int previousSkew = Integer.MAX_VALUE;
-
+	UInt32 lastEvent; 
+	
 	private void algorithm(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
-		logicalClock.update(updateTime);
+
 		GDMessage msg = (GDMessage) packet.getPayload();
 
 		if (msg.rootid < outgoingMsg.rootid) {
@@ -80,34 +78,19 @@ public class GDNode extends Node implements TimerHandler {
 		if (Math.abs(skew) > BOUNDARY) {
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
 					updateTime);
-
-			previousSkew = skew;
 			logicalClock.rate = 0.0f;
+			lastEvent = new UInt32(updateTime);
 
 			return;
 		}
 
-		if (previousSkew != Integer.MAX_VALUE) {
-			if (Math.abs(skew) == 0)
-				K_i /= 2.0f;
-			else if (Math.abs(skew) >= Math.abs(previousSkew))
-				K_i /= 2.0f;
-			else if (Math.abs(skew) < Math.abs(previousSkew))
-				K_i *= 2.0f;
+		int elapsed = updateTime.subtract(lastEvent).toInteger();
+			
+		lastEvent = new UInt32(updateTime);				
+		float derivative = (float) (skew) / (float) elapsed;
 
-			if (K_i > K_max)
-				K_i = K_max;
-			else if (K_i < K_min)
-				K_i = K_min;
-		}
-
-		previousSkew = skew;
-
-//		K_i = K_max*(BOUNDARY-Math.abs(skew))/(float)BOUNDARY/100.0f;
-		logicalClock.rate += K_i * (float) skew;
-		int addedValue = (int) (((float) skew) * beta);
-		logicalClock.setValue(
-				logicalClock.getValue(updateTime).add(addedValue), updateTime);
+		logicalClock.rate += 0.1f*derivative;
+		logicalClock.setValue(((GDMessage) packet.getPayload()).clock, updateTime);
 	}
 
 	void processMsg() {
@@ -168,10 +151,10 @@ public class GDNode extends Node implements TimerHandler {
 		s += " "
 				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
 						.getDrift())));
-//		 + Float.floatToIntBits(K_i);
+		// + Float.floatToIntBits(K_i);
 		// + Float.floatToIntBits((float) (increment));//
 		if (Simulator.getInstance().getSecond() >= 10000) {
-//			/* to start clock with a random value */
+			// /* to start clock with a random value */
 			if (this.NODE_ID == 10) {
 				if (changed == false) {
 					CLOCK.setDrift(0.0001f);
