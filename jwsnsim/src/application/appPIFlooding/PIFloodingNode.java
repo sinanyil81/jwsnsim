@@ -81,29 +81,23 @@ public class PIFloodingNode extends Node implements TimerHandler {
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
 					updateTime);
 
-			previousSkew = skew;
+			previousSkew = 0;
+			K_i = K_max;
 			logicalClock.rate = 0.0f;
 
 			return;
 		}
 		
-		if (previousSkew != Integer.MAX_VALUE) {
-			if (Math.abs(skew) == 0)
-				K_i = K_i;
-			else if (Math.abs(skew) >= Math.abs(previousSkew))
-				K_i /= 2.0f;
-			else if (Math.abs(skew) < Math.abs(previousSkew))
-				K_i *= 2.0f;
-
-			if (K_i > K_max)
-				K_i = K_max;
-			else if (K_i < K_min)
-				K_i = K_min;
-		}
+		float newK_i = K_i;
+		
+		if((previousSkew-skew) != 0 && previousSkew != 0.0f)
+			newK_i = K_i * (float)previousSkew/(float)(previousSkew - skew);
+		
+		K_i = Math.abs(newK_i);
+		if (K_i > K_max) K_i = K_max;
 
 		previousSkew = skew;
 
-//		K_i = K_max*(BOUNDARY-Math.abs(skew))/(float)BOUNDARY/100.0f;
 		logicalClock.rate += K_i * (float) skew;
 		int addedValue = (int) (((float) skew) * beta);
 		logicalClock.setValue(
