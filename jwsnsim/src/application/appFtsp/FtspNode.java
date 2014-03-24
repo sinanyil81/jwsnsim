@@ -250,7 +250,8 @@ public class FtspNode extends Node implements TimerHandler{
 		
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
-		s += " " + Float.floatToIntBits((float) ((1.0f + ls.getSlope())*(this.CLOCK.getDrift()+1.0f)));
+//		s += " " + Float.floatToIntBits((float) ((1.0f + ls.getSlope())*(this.CLOCK.getDrift()+1.0f)));
+		s += " " + Float.floatToIntBits((float) ls.getSlope());
 		
 //		if (this.NODE_ID == 20){
 //			s += "\n";
