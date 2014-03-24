@@ -1,6 +1,7 @@
 package application.appPI;
 
 import sim.clock.ConstantDriftClock;
+import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -33,7 +34,8 @@ public class PINode extends Node implements TimerHandler {
 	public PINode(int id, Position position) {
 		super(id, position);
 
-		CLOCK = new ConstantDriftClock();
+//		CLOCK = new ConstantDriftClock();
+		CLOCK = new DynamicDriftClock();
 
 		/* to start clock with a random value */
 		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
@@ -56,10 +58,32 @@ public class PINode extends Node implements TimerHandler {
 		return neighborClock.subtract(myClock).toInteger();
 	}
 	
-	private static final float BOUNDARY = 2.0f*MAX_PPM*(float)BEACON_RATE;
+	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
+	float beta = 0.5f;
+	float K_max = (2.0f-beta) / (float) (BEACON_RATE);
+	float K_i = K_max;
+	
+	int previousSkew = Integer.MAX_VALUE;
+	
+	void updateClock(int skew,UInt32 updateTime){
+		float newK_i = K_i;
+		
+		if((previousSkew-skew) != 0 && previousSkew != 0.0f)
+			newK_i = K_i * (float)previousSkew/(float)(previousSkew - skew);
+		
+		K_i = Math.abs(newK_i);
+		if (K_i > K_max) K_i = K_max;
 
-	float beta = 1.0f; 
-	float alpha_max = 1.0f/(50.0f*(float)(BEACON_RATE));
+		previousSkew = skew;
+
+		logicalClock.rate += K_i * (float) skew;
+		
+		int addedValue = (int) ((float) skew);
+		logicalClock.setValue(logicalClock.getValue(updateTime).add(addedValue), updateTime);
+	}
+	
+	int avgSkew = 0;
+	int num = 0;
 	
 	private void algorithmPI(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -69,17 +93,16 @@ public class PINode extends Node implements TimerHandler {
 		
 		/*  initial offset compensation */ 
 		if(Math.abs(skew) <= BOUNDARY){	
-			float alpha = alpha_max;
-			
-			logicalClock.rate += alpha*(float)skew;
-			
-			UInt32 myClock = logicalClock.getValue(packet.getEventTime());
-			logicalClock.setValue(myClock.add((int)(beta*(float)skew)),updateTime);
+			avgSkew += skew;
+			num++;
 		}
 		else{
 			if(skew > BOUNDARY){
 				UInt32 myClock = logicalClock.getValue(packet.getEventTime());
 				logicalClock.setValue(myClock.add(skew),updateTime);
+				previousSkew = 0;
+				avgSkew = 0;
+				num = 0;
 			}			
 		}
 	}
@@ -102,6 +125,11 @@ public class PINode extends Node implements TimerHandler {
 		UInt32 localTime, globalTime;
 
 		localTime = CLOCK.getValue();
+		if(num>0)
+			updateClock(avgSkew/num, localTime);
+		previousSkew = avgSkew;
+		avgSkew = 0;
+		num = 0;
 		globalTime = logicalClock.getValue(localTime);
 
 		outgoingMsg.nodeid = NODE_ID;
@@ -137,8 +165,9 @@ public class PINode extends Node implements TimerHandler {
 				// + " "
 				// + (1.0 + (double) logicalClock.rate.getValue())
 				// * (1.0 + CLOCK.getDrift()));
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
-						.getDrift())));
+				+ Float.floatToIntBits((float)logicalClock.rate);
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
+//						.getDrift())));
 		// + Float.floatToIntBits(K_i);
 		// System.out.println(""
 		// + NODE_ID
