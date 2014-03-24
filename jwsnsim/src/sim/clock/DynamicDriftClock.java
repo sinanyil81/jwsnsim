@@ -21,7 +21,7 @@ public class DynamicDriftClock implements Clock {
 	private static double MAX_CLOCK =  4294967295.0;
 	
 	private static final int NOISE_MEAN = 0;
-	private static final int NOISE_VARIANCE = 1;
+	private static final int NOISE_VARIANCE = 2;
 	
 	/** Constant drift of the hardware clock */
 	private double drift = 0.0;
