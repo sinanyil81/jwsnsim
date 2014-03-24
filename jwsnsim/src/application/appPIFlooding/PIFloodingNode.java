@@ -55,8 +55,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
 	float beta = 1.0f;
 	float K_max = 1.0f / (float) (BEACON_RATE);
-	float K_min = K_max / 1000.0f;
-	float K_i = K_max;
+	float K_i = 0;
 
 	int previousSkew = Integer.MAX_VALUE;
 
@@ -160,9 +159,10 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
-						.getDrift())));
-//		 + Float.floatToIntBits(K_i);
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
+//						.getDrift())));
+				+ Float.floatToIntBits((float) (logicalClock.rate));
+//		 + Float.floatToIntBits(K_i*100000000.0f);
 		// + Float.floatToIntBits((float) (increment));//
 //		if (Simulator.getInstance().getSecond() >= 10000) {
 ////			/* to start clock with a random value */
