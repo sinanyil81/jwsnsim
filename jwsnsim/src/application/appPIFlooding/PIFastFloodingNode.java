@@ -1,6 +1,5 @@
 package application.appPIFlooding;
 
-import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -102,11 +101,12 @@ public class PIFastFloodingNode extends Node implements TimerHandler {
 		int addedValue = (int) (((float) skew) * beta);
 		logicalClock.setValue(
 				logicalClock.getValue(updateTime).add(addedValue), updateTime);
+		
+		timer0.startOneshot(1000000);
 	}
 
 	void processMsg() {
 		algorithm(processedMsg);
-		timer0.startOneshot(1000000);
 	}
 
 	@Override
