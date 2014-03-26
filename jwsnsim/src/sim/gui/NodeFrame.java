@@ -2,7 +2,6 @@ package sim.gui;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import sim.configuration.AreaConfiguration;
 
