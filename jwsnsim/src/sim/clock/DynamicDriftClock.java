@@ -21,7 +21,7 @@ public class DynamicDriftClock implements Clock {
 	private static double MAX_CLOCK =  4294967295.0;
 	
 	private static final int NOISE_MEAN = 0;
-	private static final int NOISE_VARIANCE = 2;
+	private static final int NOISE_VARIANCE = 5;
 	
 	/** Constant drift of the hardware clock */
 	private double drift = 0.0;
@@ -57,7 +57,7 @@ public class DynamicDriftClock implements Clock {
 		
 		/* Add dynamic noise */
 		double noise = GaussianDistribution.nextGaussian(NOISE_MEAN, NOISE_VARIANCE);
-		noise /= 10000000.0;
+		noise /= 100000000.0;
 //		System.out.println(amount*noise);
 		clock += amount*noise;
 		

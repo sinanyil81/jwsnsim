@@ -36,7 +36,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	public static int sendMinWaitingTime = 200;
 
 	/** The variable component of the time spent waiting before a transmission. */
-	public static int sendRandomWaitingTime = 20128;
+	public static int sendRandomWaitingTime = 5000;
 
 	/** The constant component of the backoff time. */
 	public static int sendMinBackOffTime = 100;

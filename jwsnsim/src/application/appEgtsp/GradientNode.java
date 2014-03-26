@@ -2,6 +2,7 @@ package application.appEgtsp;
 
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
+import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -33,7 +34,7 @@ public class GradientNode extends Node implements TimerHandler {
 	public GradientNode(int id, Position position) {
 		super(id, position);
 
-		CLOCK = new ConstantDriftClock();
+		CLOCK = new DynamicDriftClock();
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 
@@ -267,8 +268,8 @@ public class GradientNode extends Node implements TimerHandler {
 		s += " " + logicalClock.getRTValue(CLOCK.getValue()).toString();
 		//s += " " + logicalClock.getValue().toString();
 		//s += " " + logicalClock.getOffset().toLong();
-		s += " " + Float.floatToIntBits((1.0f+logicalClock.getRate())*(float)(1.0f+CLOCK.getDrift()));		
-//		s += " " + Float.floatToIntBits(logicalClock.getRate());
+//		s += " " + Float.floatToIntBits((1.0f+logicalClock.getRate())*(float)(1.0f+CLOCK.getDrift()));		
+		s += " " + Float.floatToIntBits(logicalClock.getRate());
 		//s += " " + CLOCK.getValue().toString();
 		//s += " " + logicalClock.getRootRate();
 

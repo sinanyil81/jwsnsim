@@ -56,6 +56,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 
 	private void adjustClock(RadioPacket packet) {
 		logicalClock.update(packet.getEventTime());
+		
 		SelfFloodingMessage msg = (SelfFloodingMessage)packet.getPayload();
 
 		if( msg.rootid < outgoingMsg.rootid) {

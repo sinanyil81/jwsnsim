@@ -4,6 +4,7 @@ import application.regression.LeastSquares;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
+import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -45,7 +46,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 	public PulseSyncNode(int id, Position position) {
 		super(id,position);
 		
-		CLOCK = new ConstantDriftClock();		
+		CLOCK = new DynamicDriftClock();		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this,MAC);
 		

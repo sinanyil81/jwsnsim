@@ -3,6 +3,7 @@ package application.appFtsp;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
+import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -44,26 +45,14 @@ public class FtspNode extends Node implements TimerHandler{
 	public FtspNode(int id, Position position) {
 		super(id,position);
 		
-		CLOCK = new ConstantDriftClock();		
+		CLOCK = new DynamicDriftClock();		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this,MAC);
 		
 		timer0 = new Timer(CLOCK,this);		
 		ROOT_ID = NODE_ID;
 		sequence = 0;
-		
-		/* to start clock with a random value */
-//		if(this.NODE_ID == 1){
-//			CLOCK.setValue(new UInt32(0));
-//			CLOCK.setDrift(0.0001);
-//		}
-//		else if(this.NODE_ID == 20){
-//			CLOCK.setValue(new UInt32(Integer.MAX_VALUE));
-//			CLOCK.setDrift(0.000150);
-//		}
-//		else
-//			CLOCK.setValue(new UInt32(Math.abs(Simulator.random.nextInt())));
-		
+				
 		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		for (int i = 0; i < table.length; i++) {

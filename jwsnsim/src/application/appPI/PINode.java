@@ -59,8 +59,7 @@ public class PINode extends Node implements TimerHandler {
 	}
 	
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
-	float beta = 0.5f;
-	float K_max = (2.0f-beta) / (float) (BEACON_RATE);
+	float K_max = 1.0f / (float) (BEACON_RATE);
 	float K_i = K_max;
 	
 	int previousSkew = Integer.MAX_VALUE;

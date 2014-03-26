@@ -1,6 +1,7 @@
 package application.appPIFlooding;
 
 import sim.clock.ConstantDriftClock;
+import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
@@ -26,13 +27,11 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	public PIFloodingNode(int id, Position position) {
 		super(id, position);
 
-		CLOCK = new ConstantDriftClock();
+		CLOCK = new DynamicDriftClock();
 
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 
-		if (this.NODE_ID == 1)
-			CLOCK.setDrift(0.0f);
 		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
 		// System.out.println(CLOCK.getDrift());
 
