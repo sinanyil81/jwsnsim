@@ -57,6 +57,8 @@ public class GDNode extends Node implements TimerHandler {
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
 
 	UInt32 lastEvent; 
+	int lastSkew;
+	float alpha = 1.0f;
 	
 	private void algorithm(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -80,16 +82,25 @@ public class GDNode extends Node implements TimerHandler {
 					updateTime);
 			logicalClock.rate = 0.0f;
 			lastEvent = new UInt32(updateTime);
+			lastSkew = 0;
+			alpha = 1.0f;
 
 			return;
 		}
-
+		
 		int elapsed = updateTime.subtract(lastEvent).toInteger();
-			
-		lastEvent = new UInt32(updateTime);				
-		float derivative = (float) (skew) / (float) elapsed;
+		
+		if(skew != 0 && lastSkew != 0)
+			alpha *= (float)lastSkew/(float)skew;
+					
+		float derivative = (float) (skew-lastSkew) / (float) elapsed;
+		
+		lastEvent = new UInt32(updateTime);
+		lastSkew = skew;
+		
+		 
 
-		logicalClock.rate += 0.1f*derivative;
+		logicalClock.rate += alpha*derivative;
 		logicalClock.setValue(((GDMessage) packet.getPayload()).clock, updateTime);
 	}
 
