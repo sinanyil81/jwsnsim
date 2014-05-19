@@ -54,9 +54,11 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
 	float beta = 1.0f;
 	float K_max = 1.0f / (float) (BEACON_RATE);
-	float K_i = 0;
+	float K_i = K_max;
 
 	int previousSkew = Integer.MAX_VALUE;
+	
+	float p = 0;
 
 	private void algorithm(RadioPacket packet) {
 		UInt32 updateTime = packet.getEventTime();
@@ -88,10 +90,19 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		
 		float newK_i = K_i;
 		
-		if((previousSkew-skew) != 0 && previousSkew != 0.0f)
+		if((previousSkew-skew) != 0 && previousSkew != 0.0f){
 			newK_i = K_i * (float)previousSkew/(float)(previousSkew - skew);
+			
+			p = (float)previousSkew/(float)(previousSkew - skew);
+		}
+		else{
+			p = 0;
+		}
+		
+		p = skew;
 		
 		K_i = Math.abs(newK_i);
+//		K_i = newK_i;
 		if (K_i > K_max) K_i = K_max;
 
 		previousSkew = skew;
@@ -160,12 +171,13 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		s += " "
 //				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
 //						.getDrift())));
-				+ Float.floatToIntBits((float) (logicalClock.rate));
-//		 + Float.floatToIntBits(K_i*100000000.0f);
+//				+ Float.floatToIntBits((float) (logicalClock.rate));
+//		 + Float.floatToIntBits(p);
+		+ Float.floatToIntBits(K_i);
 		// + Float.floatToIntBits((float) (increment));//
-//		if (Simulator.getInstance().getSecond() >= 10000) {
+//		if (Simulator.getInstance().getSecond() >= 800) {
 ////			/* to start clock with a random value */
-//			if (this.NODE_ID == 10) {
+//			if (this.NODE_ID == 2) {
 //				if (changed == false) {
 //					CLOCK.setDrift(0.0001f);
 //					changed = true;
