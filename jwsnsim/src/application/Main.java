@@ -1,6 +1,13 @@
 package application;
 
+import graph.XYGraph;
+
 import java.util.Random;
+
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import application.appTheoric.Simulator;
 import sim.gui.GUI;
@@ -17,21 +24,16 @@ import sim.topology.RandomDeployment;
 public class Main {
 
 	public static void main(String[] args) {
-//		sample();	
+		sample();	
 //		mobilitySample();
-		simulations();
+//		simulations();
+//		gradientDescentAlgorithm();
 	}
 	
 	static void sample(){
 		/* create nodes */
 		Distribution.setSeed(0x123456L);
-//		NodeFactory.createNodes("application.appPIFlooding.PIFloodingNode", 20, new Grid2D());
-//		NodeFactory.createNodes("application.appPIFlooding.PIFastFloodingNode", 20, new Line2D());
-//		NodeFactory.createNodes("application.appPulseSync.PulseSyncNode", 20, new Grid2D());
-//		NodeFactory.createNodes("application.appFtsp.FtspNode", 20, new Grid2D());
-//		NodeFactory.createNodes("application.appPI.PINode", 100, new Grid2D());
-		NodeFactory.createNodes("application.appEgtsp.GradientNode", 100, new Line2D());
-
+		NodeFactory.createNodes("application.appSelf.SelfNode", 20, new Line2D());
 			
 		GUI.start();
 		
@@ -66,18 +68,51 @@ public class Main {
 				"application.appPulseSync.PulseSyncNode"
 				};
 		for(int k=0;k<5;k++){
-			for (int i = 10; i <= 150; i+=10) {
+			for (int i = 4; i <= 128; i*=2) {
 				for (int j = 0; j < titles.length; j++) {
 					Simulator.getInstance().reset();
-//					Distribution.setSeed(0x0L);
 					NodeFactory.createNodes(titles[j], i, new Grid2D());
 					GUI.start();
 					/* start simulation */
-					new SynchronizationSimulation(titles[j]+"."+i+"."+k+".txt",10000);
+					new SynchronizationSimulation(titles[j]+"."+i+"."+k+".txt",20000);
 					GUI.stop();
 				}
 			}
 			
 		}				
+	}
+	
+	static void gradientDescentAlgorithm(){
+		double f = 1000000.0;
+		double B = 30;
+		double f_i = 1000100.0; 
+		double delta_i = 1.0;
+		double alpha_i = 1.0;
+		
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		
+		XYSeries err = new XYSeries("asa");
+		
+		for(int j = 0;j<10;j++){
+			for(int i = 0; ;i++){
+				double error = (delta_i*f_i - f);
+				error *= B;
+
+				
+				err.add(i,error);
+				delta_i -= alpha_i*error/(B*f); 
+				
+				if(error == 0){
+					System.out.println("Iteration:"+ i);
+					break;
+				}
+					
+			}
+		}
+				
+
+		dataset.addSeries(err);
+		XYGraph graph = new XYGraph("ss", new NumberAxis("seconds"),new NumberAxis("error (microseconds)"), dataset);
+		
 	}
 }
