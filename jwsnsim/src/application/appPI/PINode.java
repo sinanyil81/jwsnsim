@@ -1,6 +1,5 @@
 package application.appPI;
 
-import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
