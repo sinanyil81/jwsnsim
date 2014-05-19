@@ -265,7 +265,8 @@ public class GradientNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		//s += " " + local2Global().toString();
 		//s += " " + local2Global().toString();
-		s += " " + logicalClock.getRTValue(CLOCK.getValue()).toString();
+//		s += " " + logicalClock.getRTValue(CLOCK.getValue()).toString();
+		s += " " + logicalClock.getValue(CLOCK.getValue()).toString();
 		//s += " " + logicalClock.getValue().toString();
 		//s += " " + logicalClock.getOffset().toLong();
 //		s += " " + Float.floatToIntBits((1.0f+logicalClock.getRate())*(float)(1.0f+CLOCK.getDrift()));		
