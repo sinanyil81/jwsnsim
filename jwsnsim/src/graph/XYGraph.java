@@ -96,4 +96,8 @@ public class XYGraph {
 	public XYPlot getPlot(){
 		return plot;
 	}
+	
+	public XYLineAndShapeRenderer getRenderer(){
+		return renderer;
+	}
 }
