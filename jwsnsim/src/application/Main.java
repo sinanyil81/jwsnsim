@@ -90,30 +90,40 @@ public class Main {
 		double f = 1000000.0;
 		double B = 30;
 		double f_i = 1000100.0;
-		double delta_i = 1.0;
-		double alpha_i = 1.0;
+		double delta_i = 1.0;		
+		double alpha_i = 0.5;
+		
+		double delta_i_1 = 1.0;
+		
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
 
-		XYSeries err = new XYSeries("error");
-		XYSeries drift = new XYSeries("drift");
+		XYSeries drift = new XYSeries("drift 1");
+		XYSeries drift_1 = new XYSeries("Frequency of the logical clock");
 		
-		err.add(0, 0);
-		drift.add(0, delta_i);
+		drift_1.add(0, delta_i_1*f_i);
+		drift.add(0, delta_i*f_i);
 
 		for (int i = 1;i<1000; i++) {
 			double error = (delta_i * f_i - f);
 			error *= B;
-			double delay = GaussianDistribution.nextGaussian(0, 5);
-			error += delay;
 
-			err.add(i, delay);
 			delta_i -= alpha_i * error / (B * f);
-			drift.add(i, 1000000.0*(delta_i-1.0));
+			
+			error = (delta_i_1 * f_i - f);
+			error *= B;
+			double delay = GaussianDistribution.nextGaussian(0, 100);
+			error += delay;
+			
+			delta_i_1 -= alpha_i * error / (B * f);
+			
+			drift.add(i, delta_i*f_i);
+			drift_1.add(i,delta_i_1*f_i);
 		}
 
-		dataset.addSeries(err);
-		dataset.addSeries(drift);		
+//		dataset.addSeries(drift);	
+		dataset.addSeries(drift_1);
+			
 		XYGraph graph = new XYGraph("ss", new NumberAxis("seconds"),
 				new NumberAxis("error (microseconds)"), dataset);
 		
