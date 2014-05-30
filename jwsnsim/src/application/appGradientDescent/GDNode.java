@@ -58,6 +58,7 @@ public class GDNode extends Node implements TimerHandler {
 
 	UInt32 lastEvent; 
 	int lastSkew;
+	float lastDerivative; 
 	float alpha = 1.0f;
 	
 	private void algorithm(RadioPacket packet) {
@@ -84,22 +85,33 @@ public class GDNode extends Node implements TimerHandler {
 			lastEvent = new UInt32(updateTime);
 			lastSkew = 0;
 			alpha = 1.0f;
+			lastDerivative = 0.0f;
 
 			return;
 		}
 		
 		int elapsed = updateTime.subtract(lastEvent).toInteger();
 		
-		if(skew != 0 && lastSkew != 0)
-			alpha *= (float)lastSkew/(float)skew;
+//		if(skew != 0 && lastSkew != 0)
+//			alpha *= (float)lastSkew/(float)(lastSkew-skew);
+
+		float derivative = (float) (skew) / (float) elapsed;
+		
+		if(derivative !=0.0f && lastDerivative != 0.0f){
+			if((lastSkew - skew) !=0)
+				alpha *= (lastDerivative/derivative)*((float)skew/(float)(lastSkew-skew));
+			
+			alpha = Math.abs(alpha);
+			if (alpha > 1.0f) alpha = 1.0f;
+			
+		}
 					
-		float derivative = (float) (skew-lastSkew) / (float) elapsed;
+		
 		
 		lastEvent = new UInt32(updateTime);
 		lastSkew = skew;
-		
-		 
-
+		lastDerivative = derivative;
+				
 		logicalClock.rate += alpha*derivative;
 		logicalClock.setValue(((GDMessage) packet.getPayload()).clock, updateTime);
 	}
@@ -164,15 +176,15 @@ public class GDNode extends Node implements TimerHandler {
 						.getDrift())));
 		// + Float.floatToIntBits(K_i);
 		// + Float.floatToIntBits((float) (increment));//
-		if (Simulator.getInstance().getSecond() >= 10000) {
-			// /* to start clock with a random value */
-			if (this.NODE_ID == 10) {
-				if (changed == false) {
-					CLOCK.setDrift(0.0001f);
-					changed = true;
-				}
-			}
-		}
+//		if (Simulator.getInstance().getSecond() >= 10000) {
+//			// /* to start clock with a random value */
+//			if (this.NODE_ID == 10) {
+//				if (changed == false) {
+//					CLOCK.setDrift(0.0001f);
+//					changed = true;
+//				}
+//			}
+//		}
 		// }
 		// }
 		// + Float.floatToIntBits(K_i);
