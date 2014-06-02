@@ -121,7 +121,7 @@ public class Main {
 		XYSeries drift_k = new XYSeries("alpha=0.1");
 		XYSeries drift_l = new XYSeries("adaptive alpha");
 		
-		XYSeries alpha_adaptive = new XYSeries("adaptive alpha");
+		XYSeries alpha_adaptive = new XYSeries("");
 		
 		drift_i.add(0, delta_i*f_i);
 		drift_j.add(0, delta_j*f_i);
@@ -131,7 +131,6 @@ public class Main {
 
 		for (int i = 1;i<1000; i++) {
 			double delay = GaussianDistribution.nextGaussian(0, 100);
-			delay = 0;
 			
 			error_i = (delta_i * f_i - f);
 			error_i *= B;
@@ -163,7 +162,7 @@ public class Main {
 			
 			if (alpha_l > 1.0f) alpha_l = 1.0f;		
 			
-			alpha_adaptive.add(i,delta_l);
+			alpha_adaptive.add(i,alpha_l);
 			
 //			double delay = GaussianDistribution.nextGaussian(0, 100);
 //			error += delay;
@@ -184,17 +183,18 @@ public class Main {
 		dataset.addSeries(drift_k);
 		
 			
-		XYGraph graph = new XYGraph("ss", new NumberAxis("seconds"),
-				new NumberAxis("error (microseconds)"), dataset);
+		XYGraph graph = new XYGraph("ss", new NumberAxis("iteration"),
+				new NumberAxis("frequency"), dataset);
 		
 		graph.setPlotColor(new Color[] {Color.BLUE,Color.ORANGE,Color.RED,Color.GREEN});
 		graph.setPlotThickness(new float[]{1.3f,1.3f,1.0f,1.0f});
 		graph.getRenderer().setBaseShapesVisible(false);
 		
 		dataset1.addSeries(alpha_adaptive);
-		graph = new XYGraph("ss", new NumberAxis("seconds"),
-				new NumberAxis("error (microseconds)"), dataset1);
+		graph = new XYGraph("ss", new NumberAxis("iteration"),
+				new NumberAxis("step size"), dataset1);
 		
+		graph.getChart().removeLegend();
 		graph.setPlotColor(new Color[] {Color.BLUE,Color.ORANGE,Color.RED,Color.GREEN});
 		graph.setPlotThickness(new float[]{1.3f,1.3f,1.0f,1.0f});
 		graph.getRenderer().setBaseShapesVisible(false);

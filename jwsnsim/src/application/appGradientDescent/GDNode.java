@@ -105,8 +105,15 @@ public class GDNode extends Node implements TimerHandler {
 			if (alpha > 1.0f) alpha = 1.0f;
 			
 		}
-					
 		
+		if(Math.signum(derivative) == Math.signum(lastDerivative)){
+			alpha *= 2.0f;			
+		}
+		else{
+			alpha /=3.0f;
+		}
+		
+		if (alpha > 1.0f) alpha = 1.0f;						
 		
 		lastEvent = new UInt32(updateTime);
 		lastSkew = skew;

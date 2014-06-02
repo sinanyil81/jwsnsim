@@ -100,4 +100,8 @@ public class XYGraph {
 	public XYLineAndShapeRenderer getRenderer(){
 		return renderer;
 	}
+	
+	public JFreeChart getChart(){
+		return chart;
+	}
 }
