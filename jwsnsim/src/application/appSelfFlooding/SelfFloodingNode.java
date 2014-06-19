@@ -6,12 +6,14 @@ import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
+import sim.node.NodeFactory;
 import sim.node.Position;
 import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
+import sim.topology.Grid2D;
 import sim.type.UInt32;
 
 public class SelfFloodingNode extends Node implements TimerHandler {
@@ -138,8 +140,10 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
-						.getValue()) * (1.0 + CLOCK.getDrift())));
+				+ Float.floatToIntBits((float) logicalClock.rate.getValue());
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate
+//						.getValue()) * (1.0 + CLOCK.getDrift())));
+				
 		
 //		if(Simulator.getInstance().getSecond()>=100000)
 //		{
