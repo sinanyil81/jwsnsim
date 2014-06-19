@@ -96,16 +96,7 @@ public class GDNode extends Node implements TimerHandler {
 //			alpha *= (float)lastSkew/(float)(lastSkew-skew);
 
 		float derivative = (float) (skew) / (float) elapsed;
-		
-		if(derivative !=0.0f && lastDerivative != 0.0f){
-			if((lastSkew - skew) !=0)
-				alpha *= (lastDerivative/derivative)*((float)skew/(float)(lastSkew-skew));
 			
-			alpha = Math.abs(alpha);
-			if (alpha > 1.0f) alpha = 1.0f;
-			
-		}
-		
 		if(Math.signum(derivative) == Math.signum(lastDerivative)){
 			alpha *= 2.0f;			
 		}
@@ -113,7 +104,8 @@ public class GDNode extends Node implements TimerHandler {
 			alpha /=3.0f;
 		}
 		
-		if (alpha > 1.0f) alpha = 1.0f;						
+		if (alpha > 1.0f) alpha = 1.0f;		
+		if(alpha < 0.0000000001f) alpha = 0.0000000001f;
 		
 		lastEvent = new UInt32(updateTime);
 		lastSkew = skew;
@@ -179,15 +171,16 @@ public class GDNode extends Node implements TimerHandler {
 		s += " " + NODE_ID;
 		s += " " + local2Global().toString();
 		s += " "
-				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
-						.getDrift())));
-		// + Float.floatToIntBits(K_i);
+//				+ Float.floatToIntBits((float) ((1.0 + logicalClock.rate) * (1.0 + CLOCK
+//						.getDrift())));
+				+ Float.floatToIntBits((float) logicalClock.rate);
+		// + Float.floatToIntBits(alpha);
 		// + Float.floatToIntBits((float) (increment));//
-//		if (Simulator.getInstance().getSecond() >= 10000) {
+//		if (Simulator.getInstance().getSecond() >= 5000) {
 //			// /* to start clock with a random value */
-//			if (this.NODE_ID == 10) {
+//			if (this.NODE_ID == 18) {
 //				if (changed == false) {
-//					CLOCK.setDrift(0.0001f);
+//					CLOCK.setDrift(-0.00005f);
 //					changed = true;
 //				}
 //			}
