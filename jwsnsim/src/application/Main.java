@@ -11,6 +11,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import application.appTheoric.Simulator;
+import application.tools.AvtSimple;
 import sim.gui.GUI;
 import sim.mobility.MobilityManager;
 import sim.mobility.RandomWayPoint;
@@ -29,7 +30,8 @@ public class Main {
 //		sample();
 		// mobilitySample();
 		// simulations();
-		 gradientDescentAlgorithm();
+//		 gradientDescentAlgorithm();
+		avtRobustness();
 	}
 
 	static void sample() {
@@ -199,5 +201,102 @@ public class Main {
 		graph.setPlotThickness(new float[]{1.3f,1.3f,1.0f,1.0f});
 		graph.getRenderer().setBaseShapesVisible(false);
 
+	}
+	
+	static void avtRobustness() {
+		
+		AvtSimple avt1 = new AvtSimple(0, 10, 0, 0.00001f, 10.0f);
+		AvtSimple avt2 = new AvtSimple(0, 10, 0, 0.00001f, 10.0f);
+		AvtSimple avt3 = new AvtSimple(0, 10, 0, 0.00001f, 10.0f);
+		AvtSimple avt4 = new AvtSimple(0, 10, 0, 0.00001f, 10.0f);
+		
+		double value = 5.0f;
+		
+
+		XYSeriesCollection dataset = new XYSeriesCollection();
+
+		XYSeries drift_i = new XYSeries("var=0.5");
+		XYSeries drift_j = new XYSeries("adaptive value tracker");
+		XYSeries drift_k = new XYSeries("var=1.5");
+		XYSeries drift_l = new XYSeries("var=2.0");
+		
+		XYSeries val = new XYSeries("noisy value");
+		
+		drift_l.add(0, 0);
+		drift_k.add(0, 0);
+		drift_j.add(0, 0);
+		drift_i.add(0, 0);			
+
+		for (int i = 1;i < 1000; i++) {
+			double delay = GaussianDistribution.nextGaussian(0, 0.5);
+						
+			double error = avt1.getValue() - value - delay;
+			System.out.println(error);
+			
+			if (error > 0.0) {
+				avt1.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			} else if (error < 0.0) {
+				avt1.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			} else {
+				avt1.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			}	
+			
+			delay = GaussianDistribution.nextGaussian(0, 1);
+			val.add(i, value+delay);
+			
+			error = avt2.getValue() - value - delay;
+			
+			if (error > 0.0) {
+				avt2.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			} else if (error < 0.0) {
+				avt2.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			} else {
+				avt2.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			}	
+			
+			delay = GaussianDistribution.nextGaussian(0, 1.5);
+			error = avt3.getValue() - value - delay;
+			
+			if (error > 0.0) {
+				avt3.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			} else if (error < 0.0) {
+				avt3.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			} else {
+				avt3.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			}	
+			
+			delay = GaussianDistribution.nextGaussian(0, 2);
+			error = avt4.getValue() - value - delay;
+			
+			if (error > 0.0) {
+				avt4.adjustValue(AvtSimple.FEEDBACK_LOWER);
+			} else if (error < 0.0) {
+				avt4.adjustValue(AvtSimple.FEEDBACK_GREATER);
+			} else {
+				avt4.adjustValue(AvtSimple.FEEDBACK_GOOD);
+			}	
+						
+			drift_i.add(i, avt1.getValue());
+			drift_j.add(i, avt2.getValue());
+			drift_k.add(i, avt3.getValue());
+			drift_l.add(i, avt4.getValue());
+		}
+
+		dataset.addSeries(val);
+		
+//		dataset.addSeries(drift_i);
+		dataset.addSeries(drift_j);
+//		dataset.addSeries(drift_k);
+//		dataset.addSeries(drift_l);
+		
+		
+		
+			
+		XYGraph graph = new XYGraph("AVT", new NumberAxis("iteration"),
+				new NumberAxis("value"), dataset);
+		
+		graph.setPlotColor(new Color[] {Color.BLUE,Color.RED,Color.BLUE,Color.RED,Color.GREEN});
+		graph.setPlotThickness(new float[]{1.3f,1.3f,1.0f,1.0f});
+		graph.getRenderer().setBaseShapesVisible(false);
 	}
 }
