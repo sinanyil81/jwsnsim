@@ -1,10 +1,10 @@
 package application.appEgtsp;
 
 import hardware.Register32;
+import hardware.clock.Timer;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;

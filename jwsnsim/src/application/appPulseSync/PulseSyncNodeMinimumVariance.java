@@ -1,11 +1,11 @@
 package application.appPulseSync;
 
 import hardware.Register32;
+import hardware.clock.Timer;
 import application.regression.LeastSquares;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
-import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;

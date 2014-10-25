@@ -48,8 +48,12 @@ public class Interrupt implements EventObserver {
 		this.handler = handler;
 	}
 
-	public void set(int ticks) {
+	public void register(int ticks) {
 		event.register((int) ticks);
+	}
+	
+	public void unregister(){
+		event.unregister();
 	}
 
 	@Override

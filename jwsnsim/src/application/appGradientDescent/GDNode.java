@@ -1,11 +1,11 @@
 package application.appGradientDescent;
 
 import hardware.Register32;
+import hardware.clock.Timer;
 
 import java.security.acl.LastOwnerException;
 
 import sim.clock.ConstantDriftClock;
-import sim.clock.Timer;
 import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
