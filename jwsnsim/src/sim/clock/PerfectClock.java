@@ -14,7 +14,7 @@ import sim.type.Register;
  *
  */
 
-public class PerfectClock implements Clock {
+public class PerfectClock implements Counter32 {
 
 	private static double MAX_CLOCK =  4294967295.0;
 	

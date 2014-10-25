@@ -16,13 +16,13 @@ public class Timer implements EventObserver{
 	private long period = 0;
 	
 	/** The hardware clock on which the timer is built */
-	private Clock clock;
+	private Counter32 clock;
 	/** The object which will be notified for timer events */
 	private TimerHandler handler;
 	/** System event which will be used for timer events */
 	Event event = null;
 	
-	public Timer(Clock clock, TimerHandler handler){
+	public Timer(Counter32 clock, TimerHandler handler){
 		this.handler = handler;
 		this.clock = clock;
 		event = new Event(this);

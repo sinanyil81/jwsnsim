@@ -1,6 +1,6 @@
 package application.appFcsaRt;
 
-import sim.clock.Clock;
+import sim.clock.Counter32;
 import sim.type.Register;
 
 public class LogicalClock {
@@ -10,9 +10,9 @@ public class LogicalClock {
 	private float rate = 0;
 	private float rootRate = 0;
     private Register updateLocalTime = new Register();
-	private Clock clock;
+	private Counter32 clock;
     
-    public LogicalClock(Clock clock){
+    public LogicalClock(Counter32 clock){
     	this.clock = clock;
     }
     

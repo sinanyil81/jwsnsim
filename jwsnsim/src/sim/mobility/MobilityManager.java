@@ -2,7 +2,7 @@ package sim.mobility;
 
 import java.lang.reflect.Constructor;
 
-import sim.clock.Clock;
+import sim.clock.Counter32;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -10,7 +10,7 @@ import sim.node.NodeFactory;
 import sim.node.Position;
 
 public class MobilityManager implements TimerHandler {
-	protected Clock clock = new ConstantDriftClock(1.0);
+	protected Counter32 clock = new ConstantDriftClock(1.0);
 	protected Timer timer = new Timer(clock,this);
 	protected MobilityModel[] models = null;
 	

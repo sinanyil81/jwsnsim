@@ -13,7 +13,7 @@ import sim.type.Register;
  *
  */
 
-public class DynamicDriftClock implements Clock {
+public class DynamicDriftClock implements Counter32 {
 
 	/** Clock specific constants */
 	private static final int MEAN_DRIFT = 50;
