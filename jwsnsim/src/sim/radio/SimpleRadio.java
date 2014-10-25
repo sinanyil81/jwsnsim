@@ -30,7 +30,7 @@ import sim.node.NodeFactory;
 import sim.node.Position;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
-import sim.type.UInt32;
+import sim.type.Register;
 
 /**
  * This radio model determines a quotient q = s / (i+n) between the received
@@ -145,7 +145,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 
 	private void setTransmissionTimestamp() {	
-		UInt32 age = node.getClock().getValue();
+		Register age = node.getClock().getValue();
 		age = age.subtract(packetToTransmit.getEventTime());
 //		System.out.println("Packet age " + age.getValue());
 		packetToTransmit.setEventTime(age);
@@ -195,7 +195,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 
 	private void setReceptionTimestamp() {
-		UInt32 timestamp = node.getClock().getValue();
+		Register timestamp = node.getClock().getValue();
 		receivingPacket.setTimestamp(timestamp);
 //		System.out.println("Receiving age: " + receivingPacket.getEventTime().getValue());
 		timestamp  = timestamp.subtract(receivingPacket.getEventTime());

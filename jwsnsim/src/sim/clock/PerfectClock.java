@@ -4,7 +4,7 @@ import sim.simulator.SimTime;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
-import sim.type.UInt32;
+import sim.type.Register;
 /**
  * 
  * @author K. Sinan YILDIRIM
@@ -47,12 +47,12 @@ public class PerfectClock implements Clock {
 		}
 	}
 	
-	public UInt32 getValue(){
+	public Register getValue(){
 		SimTime currentTime = Simulator.getInstance().getTime();
 		progress(currentTime.sub(lastRead).toDouble());
 		lastRead = currentTime;
 		
-		return new UInt32((long)clock);
+		return new Register((long)clock);
 	}
 
 	public double getDrift() {
@@ -70,7 +70,7 @@ public class PerfectClock implements Clock {
 	}
 
 	@Override
-	public void setValue(UInt32 value) {
+	public void setValue(Register value) {
 		this.clock = value.toDouble();		
 	}
 }
