@@ -1,6 +1,6 @@
 package application.appPIFlooding;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class PIFloodingMessage {
 	public int nodeid = -1;

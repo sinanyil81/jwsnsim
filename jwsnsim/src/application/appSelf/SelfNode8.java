@@ -1,5 +1,7 @@
 package application.appSelf;
 
+import hardware.Register;
+
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -14,7 +16,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class SelfNode8 extends Node implements TimerHandler {
 

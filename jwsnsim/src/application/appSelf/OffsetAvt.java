@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class OffsetAvt {
 	final private float INCREASE_FACTOR = 2.0f;

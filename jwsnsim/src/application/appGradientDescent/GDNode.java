@@ -1,5 +1,7 @@
 package application.appGradientDescent;
 
+import hardware.Register;
+
 import java.security.acl.LastOwnerException;
 
 import sim.clock.ConstantDriftClock;
@@ -12,7 +14,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class GDNode extends Node implements TimerHandler {
 

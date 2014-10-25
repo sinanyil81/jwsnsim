@@ -1,5 +1,6 @@
 package application.appSelf;
 
+import hardware.Register;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -10,7 +11,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class SelfNode6 extends Node implements TimerHandler {
 

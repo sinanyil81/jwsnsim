@@ -1,10 +1,10 @@
 package sim.clock;
 
+import hardware.Register;
 import sim.simulator.SimTime;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
-import sim.type.Register;
 /**
  * 
  * @author K. Sinan YILDIRIM

@@ -1,6 +1,6 @@
 package application.regression;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class RegressionEntry {
 	public Register x = new Register();

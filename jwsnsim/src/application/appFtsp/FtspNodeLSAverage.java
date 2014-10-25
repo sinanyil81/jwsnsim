@@ -1,5 +1,7 @@
 package application.appFtsp;
 
+import hardware.Register;
+
 import java.util.Arrays;
 
 import application.regression.LeastSquares;
@@ -13,7 +15,6 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.Register;
 
 public class FtspNodeLSAverage extends Node implements TimerHandler{
 	

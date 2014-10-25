@@ -1,7 +1,7 @@
 package sim.radio;
 
+import hardware.Register;
 import sim.node.Node;
-import sim.type.Register;
 
 public class RadioPacket {
 	

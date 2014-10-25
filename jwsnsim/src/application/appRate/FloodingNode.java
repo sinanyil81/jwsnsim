@@ -1,5 +1,6 @@
 package application.appRate;
 
+import hardware.Register;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -11,7 +12,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class FloodingNode extends Node implements TimerHandler {
 

@@ -1,6 +1,6 @@
 package application.appFcsa;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class LogicalClock {
 	

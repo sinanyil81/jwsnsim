@@ -1,5 +1,6 @@
 package application.appFtsp;
 
+import hardware.Register;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
@@ -11,7 +12,6 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.Register;
 
 public class FtspNodeMinimumVariance extends Node implements TimerHandler{
 	

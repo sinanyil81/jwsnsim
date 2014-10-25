@@ -1,11 +1,12 @@
 package application.appSelf;
 
+import hardware.Register;
+
 import java.util.Hashtable;
 
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
-import sim.type.Register;
 
 public class ClockSpeedAdapter2 {
 	

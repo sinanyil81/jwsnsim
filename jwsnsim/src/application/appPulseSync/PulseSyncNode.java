@@ -1,5 +1,6 @@
 package application.appPulseSync;
 
+import hardware.Register;
 import application.regression.LeastSquares;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
@@ -14,7 +15,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class PulseSyncNode extends Node implements TimerHandler{
 	

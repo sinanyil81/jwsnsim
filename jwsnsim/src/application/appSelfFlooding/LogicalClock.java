@@ -1,6 +1,6 @@
 package application.appSelfFlooding;
 
-import sim.type.Register;
+import hardware.Register;
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 

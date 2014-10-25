@@ -1,5 +1,6 @@
 package application.appFtsp;
 
+import hardware.Register;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
@@ -13,7 +14,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class FtspNode extends Node implements TimerHandler{
 	

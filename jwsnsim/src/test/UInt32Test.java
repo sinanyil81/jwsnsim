@@ -1,10 +1,9 @@
 package test;
 
 import static org.junit.Assert.assertTrue;
+import hardware.Register;
 
 import org.junit.Test;
-
-import sim.type.Register;
 
 
 public class UInt32Test {

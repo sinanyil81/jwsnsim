@@ -24,13 +24,13 @@
 
 package sim.radio;
 
+import hardware.Register;
 import sim.configuration.TransmissionConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
 import sim.node.Position;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
-import sim.type.Register;
 
 /**
  * This radio model determines a quotient q = s / (i+n) between the received

@@ -1,8 +1,8 @@
 package application.appSelf;
 
+import hardware.Register;
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
-import sim.type.Register;
 
 public class LogicalClock9 {
 

@@ -1,6 +1,6 @@
 package application.appPulseSync;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class PulseSyncMessage {
 	public int nodeid = -1;

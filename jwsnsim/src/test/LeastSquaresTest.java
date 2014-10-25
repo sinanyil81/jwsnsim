@@ -1,12 +1,12 @@
 package test;
 
 import static org.junit.Assert.*;
+import hardware.Register;
 
 import org.junit.Test;
 
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
-import sim.type.Register;
 
 
 public class LeastSquaresTest {

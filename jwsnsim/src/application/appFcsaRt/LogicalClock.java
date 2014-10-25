@@ -1,7 +1,7 @@
 package application.appFcsaRt;
 
+import hardware.Register;
 import sim.clock.Counter32;
-import sim.type.Register;
 
 public class LogicalClock {
 	

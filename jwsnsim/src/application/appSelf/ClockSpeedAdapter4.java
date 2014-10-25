@@ -1,14 +1,14 @@
 package application.appSelf;
 
+import hardware.Register;
+
 import java.util.Hashtable;
 import java.util.Iterator;
 
 import application.appSelf.ClockSpeedAdapter3.NeighborData;
-
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
-import sim.type.Register;
 
 public class ClockSpeedAdapter4 {
 	

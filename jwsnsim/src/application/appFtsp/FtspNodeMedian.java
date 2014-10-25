@@ -1,5 +1,7 @@
 package application.appFtsp;
 
+import hardware.Register;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -14,7 +16,6 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.Register;
 
 public class FtspNodeMedian extends Node implements TimerHandler{
 	

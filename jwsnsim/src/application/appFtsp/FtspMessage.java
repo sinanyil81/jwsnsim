@@ -1,6 +1,6 @@
 package application.appFtsp;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class FtspMessage {
 	public int nodeid = -1;

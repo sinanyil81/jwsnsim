@@ -1,6 +1,6 @@
 package application.appRateDetection;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class RateMessage {
 	public int nodeid = -1;

@@ -1,5 +1,6 @@
 package application.appPIFlooding;
 
+import hardware.Register;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
 import sim.clock.Timer;
@@ -11,7 +12,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class PIFloodingNode extends Node implements TimerHandler {
 

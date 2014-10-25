@@ -1,6 +1,6 @@
 package application.appRateDetection;
 
-import sim.type.Register;
+import hardware.Register;
 import application.regression.RegressionEntry;
 
 public class Neighbor {

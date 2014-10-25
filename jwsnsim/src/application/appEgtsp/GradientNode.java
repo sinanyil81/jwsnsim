@@ -1,5 +1,6 @@
 package application.appEgtsp;
 
+import hardware.Register;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
@@ -12,7 +13,6 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.Register;
 
 public class GradientNode extends Node implements TimerHandler {
 

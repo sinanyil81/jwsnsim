@@ -1,6 +1,6 @@
 package application.appRate;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class FloodingMessage {
 	

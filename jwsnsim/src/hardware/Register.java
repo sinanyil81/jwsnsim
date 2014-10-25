@@ -31,7 +31,7 @@
  *
  */
 
-package sim.type;
+package hardware;
 
 /**
  *

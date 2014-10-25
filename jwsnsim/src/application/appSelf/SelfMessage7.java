@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class SelfMessage7 {
 	public int nodeid = -1;

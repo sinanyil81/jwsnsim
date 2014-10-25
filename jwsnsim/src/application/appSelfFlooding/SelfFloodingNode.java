@@ -1,5 +1,6 @@
 package application.appSelfFlooding;
 
+import hardware.Register;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
@@ -14,7 +15,6 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 import sim.topology.Grid2D;
-import sim.type.Register;
 
 public class SelfFloodingNode extends Node implements TimerHandler {
 

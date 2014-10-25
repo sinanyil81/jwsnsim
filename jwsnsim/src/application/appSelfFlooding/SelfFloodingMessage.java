@@ -1,6 +1,6 @@
 package application.appSelfFlooding;
 
-import sim.type.Register;
+import hardware.Register;
 
 public class SelfFloodingMessage {
 	public int nodeid = -1;
