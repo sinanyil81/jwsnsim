@@ -34,44 +34,22 @@
  */
 
 package hardware.transceiver;
-
 import hardware.Register32;
-import sim.node.Node;
 
 public class Packet {
 	
-	private Node sender;
 	private Object payload;	
 	private Register32 timestamp = new Register32();
 	private Register32 eventTime = new Register32();
-	private double intensity = 1.0;
 	
 	public Packet(Object payload){
 		this.payload = payload;
 	}
 	
 	public Packet(Packet packet){
-		this.sender = packet.getSender();
 		this.payload = packet.getPayload();
 		this.timestamp = new Register32(packet.getTimestamp());
 		this.eventTime = new Register32(packet.getEventTime());
-		this.intensity = packet.intensity;
-	}
-	
-	public void setIntensity(double intensity){
-		this.intensity = intensity;
-	}
-	
-	public double getIntensity(){
-		return intensity;
-	}
-	
-	public void setSender(Node node){
-		this.sender = node;
-	}
-	
-	public Node getSender() {
-		return sender;
 	}
 
 	public void setPayload(Object payload){

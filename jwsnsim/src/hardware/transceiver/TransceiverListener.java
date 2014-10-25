@@ -36,9 +36,6 @@
 package hardware.transceiver;
 
 public interface TransceiverListener {
-	public void transmissionBegin();
-	public void transmissionEnd();
-	public void receptionBegin();
-	public void receptionEnd();
+	public void receivePacket(Packet packet);
 }
 
