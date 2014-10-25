@@ -38,7 +38,7 @@ package sim.type;
  * Simulates 32 bit unsigned data type for the Java language.
  * (Especially used for the hardware registers.) 
  * 
- * @author Kasım Sinan YILDIRIM
+ * @author Kasım Sinan YILDIRIM (sinanyil81@gmail.com)
  *
  */
 public class Register implements Comparable<Register>{
