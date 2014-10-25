@@ -22,13 +22,14 @@
  * Date last modified: 02/09/04
  */
 
-package sim.radio;
+package hardware.transceiver;
 
 import hardware.Register32;
 import sim.configuration.TransmissionConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
 import sim.node.Position;
+import sim.radio.Radio;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
 

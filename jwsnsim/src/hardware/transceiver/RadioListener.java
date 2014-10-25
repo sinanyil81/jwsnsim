@@ -1,4 +1,4 @@
-package sim.radio;
+package hardware.transceiver;
 
 public interface RadioListener {
 	public void radioTransmissionBegin();

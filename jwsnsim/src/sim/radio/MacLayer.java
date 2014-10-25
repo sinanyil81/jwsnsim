@@ -1,4 +1,8 @@
 package sim.radio;
+
+import hardware.transceiver.RadioListener;
+import hardware.transceiver.RadioPacket;
+
 /**
  * 
  * @author K. Sinan YILDIRIM

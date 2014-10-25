@@ -35,6 +35,7 @@
 
 package hardware.clock;
 
+import hardware.Register32;
 import sim.statistics.GaussianDistribution;
 
 public class Clock32 {
@@ -91,5 +92,13 @@ public class Clock32 {
 
 	public void dynamicDrift() {
 		dynamicDrift = true;
+	}
+	
+	public Register32 getValue(){
+		return counter.getValue();
+	}
+	
+	public void setValue(Register32 value) {
+		counter.setValue(value);
 	}
 }

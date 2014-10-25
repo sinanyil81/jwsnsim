@@ -2,6 +2,7 @@ package sim.radio;
 
 
 
+import hardware.transceiver.RadioPacket;
 import sim.node.Node;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;

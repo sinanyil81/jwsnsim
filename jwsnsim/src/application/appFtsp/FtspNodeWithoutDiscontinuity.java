@@ -3,14 +3,14 @@ package application.appFtsp;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
+import hardware.transceiver.RadioPacket;
+import hardware.transceiver.SimpleRadio;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
-import sim.radio.RadioPacket;
-import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 
 public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{

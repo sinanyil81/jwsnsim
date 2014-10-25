@@ -1,5 +1,6 @@
 package sim.radio;
 
+import hardware.transceiver.RadioPacket;
 import sim.node.Node;
 
 public abstract class Radio {

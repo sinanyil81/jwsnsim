@@ -3,12 +3,12 @@ package application.appPIFlooding;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
+import hardware.transceiver.RadioPacket;
+import hardware.transceiver.SimpleRadio;
 import sim.clock.DynamicDriftClock;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
-import sim.radio.RadioPacket;
-import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 

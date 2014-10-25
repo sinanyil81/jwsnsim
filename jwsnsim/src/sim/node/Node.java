@@ -1,9 +1,9 @@
 package sim.node;
 
 import hardware.clock.Clock32;
+import hardware.transceiver.RadioPacket;
 import sim.radio.MacLayer;
 import sim.radio.Radio;
-import sim.radio.RadioPacket;
 
 public abstract class Node {
 	protected int NODE_ID;
