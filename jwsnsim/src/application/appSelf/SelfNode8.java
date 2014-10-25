@@ -3,8 +3,8 @@ package application.appSelf;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -65,7 +65,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -74,7 +74,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
-	double calculateSkew(RadioPacket packet) {
+	double calculateSkew(Packet packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -102,7 +102,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		return speed;
 	}
 	
-	private void updateNeighbor(RadioPacket packet){
+	private void updateNeighbor(Packet packet){
 		SelfMessage msg = (SelfMessage)packet.getPayload();
 		
 		float neighborSpeed = getNeighborSpeed(msg.nodeid, msg.hardwareClock, packet.getEventTime(), msg.rateMultiplier);
@@ -138,7 +138,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		return offset.add(logicalClock.getOffset());
 	}
 	
-	private void adjustClock(RadioPacket packet) {
+	private void adjustClock(Packet packet) {
 
 		logicalClock.update(packet.getEventTime());
 		updateNeighbor(packet);	
@@ -271,7 +271,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		adjustClock(packet);		
 	}
 
@@ -296,7 +296,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;
 
-		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
+		Packet packet = new Packet(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

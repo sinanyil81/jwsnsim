@@ -1,7 +1,7 @@
 package sim.radio;
 
-import hardware.transceiver.RadioListener;
-import hardware.transceiver.RadioPacket;
+import hardware.transceiver.TransceiverListener;
+import hardware.transceiver.Packet;
 
 /**
  * 
@@ -9,7 +9,7 @@ import hardware.transceiver.RadioPacket;
  *
  *Do not call sendPacket within receivePacket or vice versa.
  */
-public abstract class MacLayer implements RadioListener{
-	public abstract boolean sendPacket(RadioPacket packet);
-	public abstract void receivePacket(RadioPacket packet);
+public abstract class MacLayer implements TransceiverListener{
+	public abstract boolean sendPacket(Packet packet);
+	public abstract void receivePacket(Packet packet);
 }

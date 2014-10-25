@@ -3,8 +3,8 @@ package application.appSelf;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
@@ -33,7 +33,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -42,7 +42,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
-	int calculateSkew(RadioPacket packet) {
+	int calculateSkew(Packet packet) {
 		SelfMessage9 msg = (SelfMessage9) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -51,7 +51,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toInteger();
 	}
 
-	private void adjustClock(RadioPacket packet) {
+	private void adjustClock(Packet packet) {
 		SelfMessage9 msg = (SelfMessage9) packet.getPayload();
 		
 		int skew = calculateSkew(packet);
@@ -83,7 +83,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		logicalClock.update(packet.getEventTime());	
 		adjustClock(packet);
 	}
@@ -108,7 +108,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		outgoingMsg.offset = logicalClock.getOffset();
 		outgoingMsg.sequence++;		
 		
-		RadioPacket packet = new RadioPacket(new SelfMessage9(outgoingMsg));
+		Packet packet = new Packet(new SelfMessage9(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

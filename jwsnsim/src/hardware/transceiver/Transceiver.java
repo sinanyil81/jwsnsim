@@ -1,25 +1,36 @@
 /*
- * Copyright (c) 2003, Vanderbilt University
+ * Copyright (c) 2014, Ege University
  * All rights reserved.
  *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice, the following
- * two paragraphs and the author appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE VANDERBILT UNIVERSITY BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE VANDERBILT
- * UNIVERSITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE VANDERBILT UNIVERSITY SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE VANDERBILT UNIVERSITY HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * Author: Gyorgy Balogh, Gabor Pap, Miklos Maroti
- * Date last modified: 02/09/04
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the
+ *   distribution.
+ * - Neither the name of the copyright holder nor the names of
+ *   its contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * @author Kasım Sinan YILDIRIM (sinanyil81@gmail.com)
+ *
  */
 
 package hardware.transceiver;
@@ -48,7 +59,7 @@ import sim.simulator.EventObserver;
  * level N.
  * 
  */
-public class SimpleRadio extends Radio implements EventObserver{	
+public class Transceiver extends Radio implements EventObserver{	
 	
 	/** owner node */
 	protected Node node;
@@ -59,8 +70,8 @@ public class SimpleRadio extends Radio implements EventObserver{
 	private Node[] receivers;
 
 	
-	protected RadioPacket packetToTransmit = null;
-	protected RadioPacket receivingPacket = null;
+	protected Packet packetToTransmit = null;
+	protected Packet receivingPacket = null;
 
 	/**	Signal stregth of transmitting or parent node.  */
 	private double signalStrength = 0;
@@ -78,16 +89,16 @@ public class SimpleRadio extends Radio implements EventObserver{
 	
 	private Event endTransmissionEvent = new Event(this);
 	
-	private RadioListener listener;	
+	private TransceiverListener listener;	
 
-	public SimpleRadio(Node node,RadioListener listener){
+	public Transceiver(Node node,TransceiverListener listener){
 		this.node = node;
 		this.listener= listener;
 	}
 	
 	public void on() {		
 		for(int i=0; i<NodeFactory.nodes.length;i++){
-			((SimpleRadio)(NodeFactory.nodes[i].getRadio())).updateNeighborhood();
+			((Transceiver)(NodeFactory.nodes[i].getRadio())).updateNeighborhood();
 		}
 	}
 
@@ -125,7 +136,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	
 
 
-	public void beginTransmission(RadioPacket packet){	
+	public void beginTransmission(Packet packet){	
 			
 		packetToTransmit = packet;
 		setTransmissionTimestamp();
@@ -142,7 +153,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 		}
 		
 		endTransmissionEvent.register(sendTransmissionTime);
-		listener.radioTransmissionBegin();
+		listener.transmissionBegin();
 	}
 
 	private void setTransmissionTimestamp() {	
@@ -160,17 +171,17 @@ public class SimpleRadio extends Radio implements EventObserver{
 		packetToTransmit = null;
 		receivers = null;
 		transmitting = false;
-		listener.radioTransmissionEnd();
+		listener.transmissionEnd();
 	}
 	
-	protected double getNoise(RadioPacket packet) {
+	protected double getNoise(Packet packet) {
 		Position pos = packet.getSender().getPosition();
 		double distance = pos.distanceTo(node.getPosition());
 		double poweredDistance = Math.pow(distance, TransmissionConfiguration.alpha);
 		return packet.getIntensity() / poweredDistance;
 	}
 	
-	public void receptionBegin(RadioPacket packet) {
+	public void receptionBegin(Packet packet) {
 		
         if(receiving){
 			noiseStrength += getNoise(packet);
@@ -180,14 +191,14 @@ public class SimpleRadio extends Radio implements EventObserver{
         } else{
             if(!transmitting){
                 // start receiving
-            	receivingPacket = new RadioPacket((RadioPacket)packet);
+            	receivingPacket = new Packet((Packet)packet);
             	setReceptionTimestamp();
                 receiving		= true;
                 corrupted     	= false;
                 signalStrength 	= getNoise(packet);
                 noiseStrength = TransmissionConfiguration.ambientNoise;
                 
-                listener.radioReceptionBegin();
+                listener.receptionBegin();
             }
             else{
                 noiseStrength += getNoise(packet);
@@ -207,7 +218,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	 * Calls the {@link Mica2NodeNonCSMA#removeNoise} method. See also 
 	 * {@link Node#receptionEnd} for more information.
 	 */
-	public void receptionEnd(RadioPacket packet) {
+	public void receptionEnd(Packet packet) {
 		
 		if(receivingPacket != null && receivingPacket.equals(packet)){            
             receiving = false;
@@ -221,7 +232,7 @@ public class SimpleRadio extends Radio implements EventObserver{
             receivingPacket = null;
             signalStrength = 0;
             noiseStrength -= TransmissionConfiguration.ambientNoise;
-            listener.radioReceptionEnd();                        
+            listener.receptionEnd();                        
         }
 		else{
 			noiseStrength -= getNoise(packet);

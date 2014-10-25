@@ -1,7 +1,7 @@
 package sim.node;
 
 import hardware.clock.Clock32;
-import hardware.transceiver.RadioPacket;
+import hardware.transceiver.Packet;
 import sim.radio.MacLayer;
 import sim.radio.Radio;
 
@@ -91,11 +91,11 @@ public abstract class Node {
 		return running;
 	}
 
-	public void sendMessage(RadioPacket packet) {
+	public void sendMessage(Packet packet) {
 		MAC.sendPacket(packet);
 	}
 
-	public abstract void receiveMessage(RadioPacket packet);
+	public abstract void receiveMessage(Packet packet);
 
 	public String toString() {
 		String s = Integer.toString(NODE_ID);

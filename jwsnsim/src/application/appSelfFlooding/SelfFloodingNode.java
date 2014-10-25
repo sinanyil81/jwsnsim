@@ -3,8 +3,8 @@ package application.appSelfFlooding;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
@@ -24,7 +24,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	SelfFloodingMessage outgoingMsg = new SelfFloodingMessage();
     
 	public SelfFloodingNode(int id, Position position) {
@@ -33,7 +33,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 //		CLOCK = new ConstantDriftClock();
 		CLOCK = new DynamicDriftClock();
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 		
@@ -46,7 +46,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		outgoingMsg.nodeid = NODE_ID;
 	}
 	
-	int calculateSkew(RadioPacket packet) {
+	int calculateSkew(Packet packet) {
 		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -56,7 +56,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	}
 	
 
-	private void adjustClock(RadioPacket packet) {
+	private void adjustClock(Packet packet) {
 		logicalClock.update(packet.getEventTime());
 		
 		SelfFloodingMessage msg = (SelfFloodingMessage)packet.getPayload();
@@ -91,7 +91,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -114,7 +114,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 			outgoingMsg.clock = new Register32(globalTime);	
 		}
 		
-		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
+		Packet packet = new Packet(new SelfFloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);	

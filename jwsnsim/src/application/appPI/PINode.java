@@ -3,8 +3,8 @@ package application.appPI;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import sim.clock.DynamicDriftClock;
 import sim.node.Node;
 import sim.node.Position;
@@ -40,7 +40,7 @@ public class PINode extends Node implements TimerHandler {
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -48,7 +48,7 @@ public class PINode extends Node implements TimerHandler {
 //				+ (int) (CLOCK.getDrift() * 1000000.0));
 	}
 
-	int calculateSkew(RadioPacket packet) {
+	int calculateSkew(Packet packet) {
 		PIMessage msg = (PIMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -83,7 +83,7 @@ public class PINode extends Node implements TimerHandler {
 	int avgSkew = 0;
 	int num = 0;
 	
-	private void algorithmPI(RadioPacket packet) {
+	private void algorithmPI(Packet packet) {
 		Register32 updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
 
@@ -105,12 +105,12 @@ public class PINode extends Node implements TimerHandler {
 		}
 	}
 
-	private void adjustClock(RadioPacket packet) {
+	private void adjustClock(Packet packet) {
 		algorithmPI(packet);
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		adjustClock(packet);
 	}
 
@@ -133,7 +133,7 @@ public class PINode extends Node implements TimerHandler {
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
 
-		RadioPacket packet = new RadioPacket(new PIMessage(outgoingMsg));
+		Packet packet = new Packet(new PIMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

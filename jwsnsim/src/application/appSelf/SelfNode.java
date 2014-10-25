@@ -3,8 +3,8 @@ package application.appSelf;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
@@ -33,7 +33,7 @@ public class SelfNode extends Node implements TimerHandler {
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -43,7 +43,7 @@ public class SelfNode extends Node implements TimerHandler {
 				+ (int) (CLOCK.getDrift() * 1000000.0));
 	}
 
-	double calculateSkew(RadioPacket packet) {
+	double calculateSkew(Packet packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -52,7 +52,7 @@ public class SelfNode extends Node implements TimerHandler {
 		return myClock.subtract(neighborClock).toDouble();
 	}
 
-	private void adjustClock(RadioPacket packet) {
+	private void adjustClock(Packet packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 		logicalClock.update(packet.getEventTime());
 
@@ -88,7 +88,7 @@ public class SelfNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		adjustClock(packet);
 	}
 
@@ -110,7 +110,7 @@ public class SelfNode extends Node implements TimerHandler {
 
 		double delta = logicalClock.rate.getAdvancedAVT().getDeltaManager()
 				.getDelta();
-		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
+		Packet packet = new Packet(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

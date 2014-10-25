@@ -2,7 +2,7 @@ package sim.radio;
 
 
 
-import hardware.transceiver.RadioPacket;
+import hardware.transceiver.Packet;
 import sim.node.Node;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
@@ -15,7 +15,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	 * message part is forwarded to the appropriate application, see
 	 * {@link SynchronizationSimulation#receiveMessage}.
 	 */
-	protected RadioPacket sendingPacket = null;
+	protected Packet sendingPacket = null;
 
 	/**
 	 * State variable, true if radio failed to transmit a message do to high
@@ -87,7 +87,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	 *            the application sending the message
 	 * @return If the node is in sending state it returns false otherwise true.
 	 */
-	public boolean sendPacket(RadioPacket packet) {
+	public boolean sendPacket(Packet packet) {
 		if (sending)
 			return false;
 		else {
@@ -105,7 +105,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	}
 
 	@Override
-	public void receivePacket(RadioPacket packet) {
+	public void receivePacket(Packet packet) {
 		node.receiveMessage(packet);
 	}
 
@@ -132,22 +132,22 @@ public class MicaMac extends MacLayer implements EventObserver {
 	}
 
 	@Override
-	public void radioTransmissionBegin() {
+	public void transmissionBegin() {
 
 	}
 
 	@Override
-	public void radioTransmissionEnd() {
+	public void transmissionEnd() {
 		sending = false;
 	}
 
 	@Override
-	public void radioReceptionBegin() {
+	public void receptionBegin() {
 		receiving = true;
 	}
 
 	@Override
-	public void radioReceptionEnd() {
+	public void receptionEnd() {
 		receiving = false;
 
 		if (sendingPostponed) {

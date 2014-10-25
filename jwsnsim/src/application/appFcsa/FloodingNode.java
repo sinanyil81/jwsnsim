@@ -3,8 +3,8 @@ package application.appFcsa;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import application.appSelf.ClockSpeedAdapter;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
@@ -30,7 +30,7 @@ public class FloodingNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	FloodingMessage outgoingMsg = new FloodingMessage();
     
 	int heartBeats; // the number of sucessfully sent messages
@@ -41,7 +41,7 @@ public class FloodingNode extends Node implements TimerHandler {
 
 		CLOCK = new ConstantDriftClock();
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 		
@@ -178,7 +178,7 @@ public class FloodingNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -209,7 +209,7 @@ public class FloodingNode extends Node implements TimerHandler {
 		
 		outgoingMsg.rootClock = new Register32(globalTime);
 		
-		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
+		Packet packet = new Packet(new FloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);	

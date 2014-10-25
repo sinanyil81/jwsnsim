@@ -3,8 +3,8 @@ package application.appFtsp;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
@@ -39,7 +39,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
     int heartBeats; // the number of sucessfully sent messages
                     // since adding a new entry with lower beacon id than ours
 	
-    RadioPacket processedMsg = null;
+    Packet processedMsg = null;
     FtspMessage outgoingMsg = new FtspMessage();
 
 	public FtspNodeWithoutDiscontinuity(int id, Position position) {
@@ -47,7 +47,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 		
 		CLOCK = new ConstantDriftClock();		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this,MAC);
+		RADIO = new Transceiver(this,MAC);
 		
 		timer0 = new Timer(CLOCK,this);		
 		ROOT_ID = NODE_ID;
@@ -61,7 +61,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	}
 	
 	@Override
-	public void receiveMessage(RadioPacket packet) {		
+	public void receiveMessage(Packet packet) {		
 		processedMsg = packet;
 		processMsg();			
 	}
@@ -110,7 +110,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
             ++heartBeats;
         }
         else{
-        	RadioPacket packet = new RadioPacket(new FtspMessage(outgoingMsg));
+        	Packet packet = new Packet(new FtspMessage(outgoingMsg));
         	packet.setSender(this);
         	packet.setEventTime(new Register32(localTime));
             MAC.sendPacket(packet);

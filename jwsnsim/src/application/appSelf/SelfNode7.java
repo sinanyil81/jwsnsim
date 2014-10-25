@@ -3,8 +3,8 @@ package application.appSelf;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
@@ -34,7 +34,7 @@ public class SelfNode7 extends Node implements TimerHandler {
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -43,14 +43,14 @@ public class SelfNode7 extends Node implements TimerHandler {
 		System.out.println("Node:" + this.NODE_ID + ":" + (int)(CLOCK.getDrift()*1000000.0));
 	}
 
-	private void adjustClockSpeed(RadioPacket packet) {
+	private void adjustClockSpeed(Packet packet) {
 		SelfMessage7 msg = (SelfMessage7) packet.getPayload();
 		speedAdapter.adjust(msg.nodeid, msg.progress,msg.hardwareProgress, packet.getEventTime(),msg.rate);
 		logicalClock.rate = speedAdapter.getSpeed();
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		/* update logical clock */
 		logicalClock.update(packet.getEventTime());
 
@@ -81,7 +81,7 @@ public class SelfNode7 extends Node implements TimerHandler {
 		outgoingMsg.rate = logicalClock.rate;
 		outgoingMsg.sequence++;		
 
-		RadioPacket packet = new RadioPacket(new SelfMessage7(outgoingMsg));
+		Packet packet = new Packet(new SelfMessage7(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

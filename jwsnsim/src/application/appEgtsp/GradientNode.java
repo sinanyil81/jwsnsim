@@ -3,8 +3,8 @@ package application.appEgtsp;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
@@ -28,7 +28,7 @@ public class GradientNode extends Node implements TimerHandler {
 	GradientClock logicalClock = new GradientClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	GradientMessage outgoingMsg = new GradientMessage();
 
 	public GradientNode(int id, Position position) {
@@ -36,7 +36,7 @@ public class GradientNode extends Node implements TimerHandler {
 
 		CLOCK = new DynamicDriftClock();
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 		
@@ -212,7 +212,7 @@ public class GradientNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -240,7 +240,7 @@ public class GradientNode extends Node implements TimerHandler {
 		
 		outgoingMsg.rootOffset = logicalClock.getRootOffset();
 				
-		RadioPacket packet = new RadioPacket(new GradientMessage(outgoingMsg));
+		Packet packet = new Packet(new GradientMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);	

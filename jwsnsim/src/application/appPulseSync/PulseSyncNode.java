@@ -3,8 +3,8 @@ package application.appPulseSync;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import application.regression.LeastSquares;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
@@ -37,7 +37,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 	int ROOT_ID = 1; // fixed root
 	int sequence;
 	
-    RadioPacket processedMsg = null;
+    Packet processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
 
     Register32 pulse;
@@ -48,7 +48,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 		
 		CLOCK = new DynamicDriftClock();		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this,MAC);
+		RADIO = new Transceiver(this,MAC);
 		
 		timer0 = new Timer(CLOCK,this);		
 		sequence = 0;
@@ -66,7 +66,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 	}
 	
 	@Override
-	public void receiveMessage(RadioPacket packet) {		
+	public void receiveMessage(Packet packet) {		
 		processedMsg = packet;
 		processMsg();
 	}
@@ -100,7 +100,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
                 
         // we don't send time sync msg, if we don't have enough data
         if( numEntries >= ENTRY_SEND_LIMIT || ROOT_ID == NODE_ID){
-        	RadioPacket packet = new RadioPacket(new PulseSyncMessage(outgoingMsg));
+        	Packet packet = new Packet(new PulseSyncMessage(outgoingMsg));
         	packet.setSender(this);
         	packet.setEventTime(new Register32(localTime));
             MAC.sendPacket(packet);

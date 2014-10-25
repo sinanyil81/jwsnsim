@@ -1,6 +1,6 @@
 package sim.radio;
 
-import hardware.transceiver.RadioPacket;
+import hardware.transceiver.Packet;
 import sim.node.Node;
 
 public abstract class Radio {
@@ -15,13 +15,13 @@ public abstract class Radio {
 
 	public abstract void on();
 
-	public abstract void beginTransmission(RadioPacket stream);
+	public abstract void beginTransmission(Packet stream);
 
 	public abstract void endTransmission();
 
-	public abstract void receptionBegin(RadioPacket stream);
+	public abstract void receptionBegin(Packet stream);
 
-	public abstract void receptionEnd(RadioPacket stream);
+	public abstract void receptionEnd(Packet stream);
 
 	protected abstract boolean isChannelFree();
 	

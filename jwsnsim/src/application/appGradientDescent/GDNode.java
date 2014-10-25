@@ -3,8 +3,8 @@ package application.appGradientDescent;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 
 import java.security.acl.LastOwnerException;
 
@@ -23,7 +23,7 @@ public class GDNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	GDMessage outgoingMsg = new GDMessage();
 
 	public GDNode(int id, Position position) {
@@ -32,7 +32,7 @@ public class GDNode extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		if (this.NODE_ID == 1)
 			CLOCK.setDrift(0.0f);
@@ -46,7 +46,7 @@ public class GDNode extends Node implements TimerHandler {
 		outgoingMsg.nodeid = NODE_ID;
 	}
 
-	int calculateSkew(RadioPacket packet) {
+	int calculateSkew(Packet packet) {
 		GDMessage msg = (GDMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -62,7 +62,7 @@ public class GDNode extends Node implements TimerHandler {
 	float lastDerivative; 
 	float alpha = 1.0f;
 	
-	private void algorithm(RadioPacket packet) {
+	private void algorithm(Packet packet) {
 		Register32 updateTime = packet.getEventTime();
 
 		GDMessage msg = (GDMessage) packet.getPayload();
@@ -121,7 +121,7 @@ public class GDNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -143,7 +143,7 @@ public class GDNode extends Node implements TimerHandler {
 			outgoingMsg.clock = new Register32(globalTime);
 		}
 
-		RadioPacket packet = new RadioPacket(new GDMessage(outgoingMsg));
+		Packet packet = new Packet(new GDMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);

@@ -3,8 +3,8 @@ package application.appRateDetection;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
@@ -24,7 +24,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 	LeastSquares ls = new LeastSquares();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	RateMessage outgoingMsg = new RateMessage();
     
 	float myRate = 1;
@@ -40,7 +40,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 		}
 		
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);
 
@@ -128,7 +128,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -149,7 +149,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 			outgoingMsg.sequence++;
 		}
 		
-		RadioPacket packet = new RadioPacket(new RateMessage(outgoingMsg));
+		Packet packet = new Packet(new RateMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);	

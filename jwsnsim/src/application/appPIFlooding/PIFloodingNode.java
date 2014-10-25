@@ -3,8 +3,8 @@ package application.appPIFlooding;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
-import hardware.transceiver.RadioPacket;
-import hardware.transceiver.SimpleRadio;
+import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
 import sim.node.Node;
@@ -21,7 +21,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	LogicalClock logicalClock = new LogicalClock();
 	Timer timer0;
 
-	RadioPacket processedMsg = null;
+	Packet processedMsg = null;
 	PIFloodingMessage outgoingMsg = new PIFloodingMessage();
 
 	public PIFloodingNode(int id, Position position) {
@@ -30,7 +30,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		CLOCK = new DynamicDriftClock();
 
 		MAC = new MicaMac(this);
-		RADIO = new SimpleRadio(this, MAC);
+		RADIO = new Transceiver(this, MAC);
 
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		// System.out.println(CLOCK.getDrift());
@@ -42,7 +42,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		outgoingMsg.nodeid = NODE_ID;
 	}
 
-	int calculateSkew(RadioPacket packet) {
+	int calculateSkew(Packet packet) {
 		PIFloodingMessage msg = (PIFloodingMessage) packet.getPayload();
 
 		Register32 neighborClock = msg.clock;
@@ -60,7 +60,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	
 	float p = 0;
 
-	private void algorithm(RadioPacket packet) {
+	private void algorithm(Packet packet) {
 		Register32 updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
 		PIFloodingMessage msg = (PIFloodingMessage) packet.getPayload();
@@ -118,7 +118,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	}
 
 	@Override
-	public void receiveMessage(RadioPacket packet) {
+	public void receiveMessage(Packet packet) {
 		processedMsg = packet;
 		processMsg();
 	}
@@ -140,7 +140,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 			outgoingMsg.clock = new Register32(globalTime);
 		}
 
-		RadioPacket packet = new RadioPacket(new PIFloodingMessage(outgoingMsg));
+		Packet packet = new Packet(new PIFloodingMessage(outgoingMsg));
 		packet.setSender(this);
 		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);
