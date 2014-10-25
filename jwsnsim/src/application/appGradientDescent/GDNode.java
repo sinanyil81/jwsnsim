@@ -1,6 +1,6 @@
 package application.appGradientDescent;
 
-import hardware.Register;
+import hardware.Register32;
 
 import java.security.acl.LastOwnerException;
 
@@ -36,7 +36,7 @@ public class GDNode extends Node implements TimerHandler {
 
 		if (this.NODE_ID == 1)
 			CLOCK.setDrift(0.0f);
-		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		// System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);
@@ -49,21 +49,21 @@ public class GDNode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		GDMessage msg = (GDMessage) packet.getPayload();
 
-		Register neighborClock = msg.clock;
-		Register myClock = logicalClock.getValue(packet.getEventTime());
+		Register32 neighborClock = msg.clock;
+		Register32 myClock = logicalClock.getValue(packet.getEventTime());
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
 
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
 
-	Register lastEvent; 
+	Register32 lastEvent; 
 	int lastSkew;
 	float lastDerivative; 
 	float alpha = 1.0f;
 	
 	private void algorithm(RadioPacket packet) {
-		Register updateTime = packet.getEventTime();
+		Register32 updateTime = packet.getEventTime();
 
 		GDMessage msg = (GDMessage) packet.getPayload();
 
@@ -83,7 +83,7 @@ public class GDNode extends Node implements TimerHandler {
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
 					updateTime);
 			logicalClock.rate = 0.0f;
-			lastEvent = new Register(updateTime);
+			lastEvent = new Register32(updateTime);
 			lastSkew = 0;
 			alpha = 1.0f;
 			lastDerivative = 0.0f;
@@ -108,7 +108,7 @@ public class GDNode extends Node implements TimerHandler {
 		if (alpha > 1.0f) alpha = 1.0f;		
 		if(alpha < 0.0000000001f) alpha = 0.0000000001f;
 		
-		lastEvent = new Register(updateTime);
+		lastEvent = new Register32(updateTime);
 		lastSkew = skew;
 		lastDerivative = derivative;
 				
@@ -132,20 +132,20 @@ public class GDNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		Register localTime, globalTime;
+		Register32 localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 
 		if (outgoingMsg.rootid == NODE_ID) {
-			outgoingMsg.clock = new Register(localTime);
+			outgoingMsg.clock = new Register32(localTime);
 		} else {
-			outgoingMsg.clock = new Register(globalTime);
+			outgoingMsg.clock = new Register32(globalTime);
 		}
 
 		RadioPacket packet = new RadioPacket(new GDMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new Register(localTime));
+		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);
 
 		if (outgoingMsg.rootid == NODE_ID)
@@ -160,7 +160,7 @@ public class GDNode extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public Register local2Global() {
+	public Register32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

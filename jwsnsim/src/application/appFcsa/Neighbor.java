@@ -1,6 +1,6 @@
 package application.appFcsa;
 
-import hardware.Register;
+import hardware.Register32;
 import application.regression.RegressionEntry;
 
 public class Neighbor {
@@ -10,7 +10,7 @@ public class Neighbor {
 	public int id;
 	public float rate;
 	public float relativeRate;
-	public Register timestamp = new Register();
+	public Register32 timestamp = new Register32();
 	public boolean free = true;
 
 	public RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES];
@@ -37,7 +37,7 @@ public class Neighbor {
 
 	}
 
-	public void addNewEntry(Register neighborTime, Register localTime) {
+	public void addNewEntry(Register32 neighborTime, Register32 localTime) {
 		int i;
 
 		if (tableEntries == MAX_ENTRIES) {
@@ -50,7 +50,7 @@ public class Neighbor {
 		}
 
 		table[tableEnd].free = false;
-		table[tableEnd].x = new Register(localTime);
+		table[tableEnd].x = new Register32(localTime);
 		table[tableEnd].y = neighborTime.toInteger() - localTime.toInteger();
 	}
 

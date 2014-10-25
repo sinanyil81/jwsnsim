@@ -1,8 +1,9 @@
 package sim.mobility;
 
+import hardware.Counter32;
+
 import java.lang.reflect.Constructor;
 
-import sim.clock.Counter32;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;

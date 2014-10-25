@@ -1,24 +1,24 @@
 package application.appPulseSync;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class PulseSyncMessage {
 	public int nodeid = -1;
 	public int rootid = -1;
-	public Register clock = new Register();
+	public Register32 clock = new Register32();
 	public int sequence = -1;
 	
-	public PulseSyncMessage(int nodeid,int rootid,Register clock,int sequence){
+	public PulseSyncMessage(int nodeid,int rootid,Register32 clock,int sequence){
 		this.nodeid = nodeid;
 		this.rootid = rootid;
-		this.clock = new Register(clock);
+		this.clock = new Register32(clock);
 		this.sequence = sequence;
 	}
 	
 	public PulseSyncMessage(PulseSyncMessage msg){
 		this.nodeid = msg.nodeid;
 		this.rootid = msg.rootid;
-		this.clock = new Register(msg.clock);
+		this.clock = new Register32(msg.clock);
 		this.sequence = msg.sequence;
 	}
 

@@ -1,6 +1,6 @@
 package application.appFcsaRt;
 
-import hardware.Register;
+import hardware.Register32;
 import application.regression.RegressionEntry;
 
 public class Neighbor {
@@ -12,11 +12,11 @@ public class Neighbor {
 	public float rootRate;
 	public float relativeRate;
 	
-	public Register rootClock = new Register();
+	public Register32 rootClock = new Register32();
 	
 
 
-	public Register timestamp = new Register();
+	public Register32 timestamp = new Register32();
 	public boolean free = true;
 
 	public RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES];
@@ -40,11 +40,11 @@ public class Neighbor {
 		return relativeRate;
 	}
 
-	public Register getRootClock() {
+	public Register32 getRootClock() {
 		return rootClock;
 	}
 
-	public Register getTimestamp() {
+	public Register32 getTimestamp() {
 		return timestamp;
 	}
 
@@ -59,7 +59,7 @@ public class Neighbor {
 
 	}
 
-	public void addNewEntry(Register neighborTime, Register localTime) {
+	public void addNewEntry(Register32 neighborTime, Register32 localTime) {
 		int i;
 
 		if (tableEntries == MAX_ENTRIES) {
@@ -72,11 +72,11 @@ public class Neighbor {
 		}
 
 		table[tableEnd].free = false;
-		table[tableEnd].x = new Register(localTime);
+		table[tableEnd].x = new Register32(localTime);
 		table[tableEnd].y = neighborTime.toInteger() - localTime.toInteger();
 	}
 	
-	public Register getClock(Register currentTime){
+	public Register32 getClock(Register32 currentTime){
 		int timePassed = currentTime.subtract(timestamp).toInteger();
 		float r = relativeRate + rate + relativeRate * rate;
 		r -= rootRate;
@@ -89,6 +89,6 @@ public class Neighbor {
 		
 		int  progress = timePassed +  (int) (r * (float)timePassed);
 		
-		return rootClock.add(new Register(progress));
+		return rootClock.add(new Register32(progress));
 	}
 }

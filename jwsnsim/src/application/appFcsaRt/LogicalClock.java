@@ -1,15 +1,15 @@
 package application.appFcsaRt;
 
-import hardware.Register;
-import sim.clock.Counter32;
+import hardware.Counter32;
+import hardware.Register32;
 
 public class LogicalClock {
 	
 	private boolean isReference = false;
-	private Register value = new Register();    
+	private Register32 value = new Register32();    
 	private float rate = 0;
 	private float rootRate = 0;
-    private Register updateLocalTime = new Register();
+    private Register32 updateLocalTime = new Register32();
 	private Counter32 clock;
     
     public LogicalClock(Counter32 clock){
@@ -40,19 +40,19 @@ public class LogicalClock {
 			this.rootRate = rootRate;
 	}
 	
-	public void setUpdateLocalTime(Register updateLocalTime) {
-		this.updateLocalTime = new Register(updateLocalTime);
+	public void setUpdateLocalTime(Register32 updateLocalTime) {
+		this.updateLocalTime = new Register32(updateLocalTime);
 	}
     
-    public void setValue(Register currentTime){
-		value = new Register(currentTime);
+    public void setValue(Register32 currentTime){
+		value = new Register32(currentTime);
 	}
     
-    public Register getOffset(){
-		return new Register(value);
+    public Register32 getOffset(){
+		return new Register32(value);
 	}
     
-	public Register getValue(Register local){
+	public Register32 getValue(Register32 local){
 		if(isReference){
 			return local;
 		}
@@ -61,10 +61,10 @@ public class LogicalClock {
 		int progress = timePassed + (int)(((float)timePassed)*rate);
 		progress = (int) (((float)progress)/(1.0+rootRate));
 		
-		return value.add(new Register(progress));
+		return value.add(new Register32(progress));
 	}
     
-	public Register getValue(){
+	public Register32 getValue(){
 		if(isReference){
 			return clock.getValue();
 		}
@@ -73,6 +73,6 @@ public class LogicalClock {
 		int progress = timePassed + (int)(((float)timePassed)*rate);
 		progress = (int) (((float)progress)/(1.0+rootRate));
 		
-		return value.add(new Register(progress));
+		return value.add(new Register32(progress));
 	}
 }

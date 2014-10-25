@@ -41,7 +41,7 @@ package hardware;
  * @author Kasım Sinan YILDIRIM (sinanyil81@gmail.com)
  *
  */
-public class Register implements Comparable<Register>{
+public class Register32 implements Comparable<Register32>{
 	
 	/** Maximum possible value. */
 	public static final long MAX_VALUE = 0xFFFFFFFFL;
@@ -51,19 +51,19 @@ public class Register implements Comparable<Register>{
 
 	private long value;
 
-	public Register() {
+	public Register32() {
 		this.value = 0;
 	}
 	
-	public Register(Register value) {
+	public Register32(Register32 value) {
 		this.value = value.toLong();
 	}
 	
-	public Register(long value) {
+	public Register32(long value) {
 		this.value = value & MAX_VALUE;
 	}
 	
-	public Register(int value) {
+	public Register32(int value) {
 		/* get all bits other than the sign bit */		
 		this.value = value & 0x7FFFFFFFL;
 		
@@ -75,7 +75,7 @@ public class Register implements Comparable<Register>{
 		}		
 	}
 	
-	public Register add(Register x){
+	public Register32 add(Register32 x){
 		long result = value + x.toLong();
 		
 		if(result > MAX_VALUE){
@@ -83,14 +83,14 @@ public class Register implements Comparable<Register>{
 			result--;
 		}
 					
-		return new Register(result);
+		return new Register32(result);
 	}
 	
-	public Register add(int x){
-		return add(new Register(x));
+	public Register32 add(int x){
+		return add(new Register32(x));
 	}
 	
-	public Register twosComplement(){
+	public Register32 twosComplement(){
 		long result = value;
 		
 		/* inverse of 2's complement */
@@ -103,23 +103,23 @@ public class Register implements Comparable<Register>{
 			result++;
 		}
 		
-		return new Register(result);
+		return new Register32(result);
 	}
 	
-	public Register subtract(Register x){
+	public Register32 subtract(Register32 x){
 		
-		Register twosComplementOfX = x.twosComplement();
+		Register32 twosComplementOfX = x.twosComplement();
 					
 		return add(twosComplementOfX);
 	}
 	
-	public Register subtract(int x){
-		return subtract(new Register(x));
+	public Register32 subtract(int x){
+		return subtract(new Register32(x));
 	}
 	
-	public Register multiply(float x){		
+	public Register32 multiply(float x){		
 		
-		return new Register((int)(x*this.value));
+		return new Register32((int)(x*this.value));
 	}
 
 	public long toLong(){
@@ -143,7 +143,7 @@ public class Register implements Comparable<Register>{
 	}
 
 	@Override
-	public int compareTo(Register o) {
+	public int compareTo(Register32 o) {
 		return (int)(value - o.toLong());
 	}
 

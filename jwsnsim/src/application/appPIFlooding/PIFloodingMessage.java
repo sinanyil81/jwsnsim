@@ -1,24 +1,24 @@
 package application.appPIFlooding;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class PIFloodingMessage {
 	public int nodeid = -1;
-	public Register clock = new Register();
+	public Register32 clock = new Register32();
 	public int rootid = -1;
 	public int sequence = -1;
 	
-	public PIFloodingMessage(int nodeid,int rootid,Register clock,int sequence){
+	public PIFloodingMessage(int nodeid,int rootid,Register32 clock,int sequence){
 		this.nodeid = nodeid;
 		this.rootid = rootid;
-		this.clock = new Register(clock);
+		this.clock = new Register32(clock);
 		this.sequence = sequence;
 	}
 	
 	public PIFloodingMessage(PIFloodingMessage msg){
 		this.nodeid = msg.nodeid;
 		this.rootid = msg.rootid;
-		this.clock = new Register(msg.clock);
+		this.clock = new Register32(msg.clock);
 		this.sequence = msg.sequence;
 	}
 

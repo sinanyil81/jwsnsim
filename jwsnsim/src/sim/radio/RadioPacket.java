@@ -1,14 +1,14 @@
 package sim.radio;
 
-import hardware.Register;
+import hardware.Register32;
 import sim.node.Node;
 
 public class RadioPacket {
 	
 	private Node sender;
 	private Object payload;	
-	private Register timestamp = new Register();
-	private Register eventTime = new Register();
+	private Register32 timestamp = new Register32();
+	private Register32 eventTime = new Register32();
 	private double intensity = 1.0;
 	
 	public RadioPacket(Object payload){
@@ -18,8 +18,8 @@ public class RadioPacket {
 	public RadioPacket(RadioPacket packet){
 		this.sender = packet.getSender();
 		this.payload = packet.getPayload();
-		this.timestamp = new Register(packet.getTimestamp());
-		this.eventTime = new Register(packet.getEventTime());
+		this.timestamp = new Register32(packet.getTimestamp());
+		this.eventTime = new Register32(packet.getEventTime());
 		this.intensity = packet.intensity;
 	}
 	
@@ -47,19 +47,19 @@ public class RadioPacket {
 		return payload;
 	}
 	
-	public void setTimestamp(Register timestamp){
-		this.timestamp = new Register(timestamp);
+	public void setTimestamp(Register32 timestamp){
+		this.timestamp = new Register32(timestamp);
 	}
 	
-	public Register getTimestamp(){
+	public Register32 getTimestamp(){
 		return timestamp;
 	}
 	
-	public void setEventTime(Register eventTime){
-		this.eventTime = new Register(eventTime);
+	public void setEventTime(Register32 eventTime){
+		this.eventTime = new Register32(eventTime);
 	}
 	
-	public Register getEventTime(){
+	public Register32 getEventTime(){
 		return eventTime;
 	}
 	

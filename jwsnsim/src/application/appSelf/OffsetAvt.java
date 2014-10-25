@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class OffsetAvt {
 	final private float INCREASE_FACTOR = 2.0f;
@@ -10,7 +10,7 @@ public class OffsetAvt {
 	final static public int FEEDBACK_LOWER = 1;
 	final static public int FEEDBACK_GOOD = 2;
 	 
-	Register value = new Register();
+	Register32 value = new Register32();
 	
 	float delta, deltaMin, deltaMax;
 	
@@ -23,9 +23,9 @@ public class OffsetAvt {
 		delta = (dMin + dMax)/2.0f;
     }
     
-    public Register getValue(){
+    public Register32 getValue(){
     
-    	return new Register(value);
+    	return new Register32(value);
     }
     
     void increaseDelta(){

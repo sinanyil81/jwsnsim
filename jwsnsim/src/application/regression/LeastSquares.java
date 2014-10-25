@@ -1,17 +1,17 @@
 package application.regression;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class LeastSquares {
 	
 	private float slope = 0.0f;
-	private Register meanX = new Register();
+	private Register32 meanX = new Register32();
 	private int meanY = 0;
 	
 	public void calculate(RegressionEntry table[], int tableEntries){
 		float newSlope = slope;
         
-		Register newMeanX;
+		Register32 newMeanX;
         int newMeanY;        
         int meanXRest;
         int meanYRest;
@@ -40,7 +40,7 @@ public class LeastSquares {
 
         while( ++i < table.length )
             if( !table[i].free) {                
-            	Register diff = table[i].x.subtract(newMeanX);
+            	Register32 diff = table[i].x.subtract(newMeanX);
             	
             	xSum += diff.toInteger() / tableEntries;
             	meanXRest += diff.toInteger() % tableEntries;
@@ -50,8 +50,8 @@ public class LeastSquares {
             }
         
         
-        xSum = (new Register(xSum).add(new Register(meanXRest/tableEntries))).toLong();    
-        newMeanX =  newMeanX.add(new Register(xSum));
+        xSum = (new Register32(xSum).add(new Register32(meanXRest/tableEntries))).toLong();    
+        newMeanX =  newMeanX.add(new Register32(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;
 
@@ -70,7 +70,7 @@ public class LeastSquares {
 
         slope = newSlope;
         meanY = newMeanY;
-        meanX = new Register(newMeanX);
+        meanX = new Register32(newMeanX);
 	}
 	
 	private long getWeightDivisor(RegressionEntry table[], int tableEntries){
@@ -138,11 +138,11 @@ public class LeastSquares {
 		this.slope = slope;
 	}
 
-	public Register getMeanX() {
+	public Register32 getMeanX() {
 		return meanX;
 	}
 
-	public void setMeanX(Register meanX) {
+	public void setMeanX(Register32 meanX) {
 		this.meanX = meanX;
 	}
 
@@ -156,12 +156,12 @@ public class LeastSquares {
 	
 	public void clear(){
 		slope = 0.0f;
-		meanX = new Register();
+		meanX = new Register32();
 		meanY = 0;
 	}
 	
-	public Register calculateY(Register x) {
-		Register result = new Register(x);
+	public Register32 calculateY(Register32 x) {
+		Register32 result = new Register32(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);
@@ -177,8 +177,8 @@ public class LeastSquares {
     	setMeanX(meanX.subtract(xOffset));
 	}
 	
-	public Register calculateY(Register x,Register meanX,int meanY) {
-		Register result = new Register(x);
+	public Register32 calculateY(Register32 x,Register32 meanX,int meanY) {
+		Register32 result = new Register32(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);

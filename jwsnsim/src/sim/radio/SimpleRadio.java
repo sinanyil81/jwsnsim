@@ -24,7 +24,7 @@
 
 package sim.radio;
 
-import hardware.Register;
+import hardware.Register32;
 import sim.configuration.TransmissionConfiguration;
 import sim.node.Node;
 import sim.node.NodeFactory;
@@ -145,7 +145,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 
 	private void setTransmissionTimestamp() {	
-		Register age = node.getClock().getValue();
+		Register32 age = node.getClock().getValue();
 		age = age.subtract(packetToTransmit.getEventTime());
 //		System.out.println("Packet age " + age.getValue());
 		packetToTransmit.setEventTime(age);
@@ -195,7 +195,7 @@ public class SimpleRadio extends Radio implements EventObserver{
 	}
 
 	private void setReceptionTimestamp() {
-		Register timestamp = node.getClock().getValue();
+		Register32 timestamp = node.getClock().getValue();
 		receivingPacket.setTimestamp(timestamp);
 //		System.out.println("Receiving age: " + receivingPacket.getEventTime().getValue());
 		timestamp  = timestamp.subtract(receivingPacket.getEventTime());

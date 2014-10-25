@@ -1,6 +1,5 @@
-package sim.clock;
+package hardware;
 
-import hardware.Register;
 import sim.simulator.SimTime;
 
 public abstract class Counter32 {
@@ -20,8 +19,8 @@ public abstract class Counter32 {
 	protected SimTime lastRead = new SimTime();
 	
 	public abstract void start();
-	public abstract Register getValue();
-	public abstract void setValue(Register value);
+	public abstract Register32 getValue();
+	public abstract void setValue(Register32 value);
 	public abstract double getDrift();
 	public abstract void setDrift(double drift);
 }

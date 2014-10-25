@@ -1,7 +1,7 @@
 package test;
 
 import static org.junit.Assert.*;
-import hardware.Register;
+import hardware.Register32;
 
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class LeastSquaresTest {
 	int index = 0;
 	
 	void addElement(long x,long y){
-		table[index].x = new Register(x);
+		table[index].x = new Register32(x);
 		table[index].y = (int)(y-x);
 		table[index].free = false;	
 		
@@ -57,7 +57,7 @@ public class LeastSquaresTest {
 
 	    ls.calculate(table, numElements);
 	    
-	    error = (ls.calculateY(new Register(0x4c61357))).toLong() - 0x4d457df;
+	    error = (ls.calculateY(new Register32(0x4c61357))).toLong() - 0x4d457df;
 	    assertTrue(Math.abs(error) <= epsilon);
 	    
 	    addElement(0x4c61357,0x4d457df);
@@ -68,52 +68,52 @@ public class LeastSquaresTest {
         System.out.println("meanX:"+ls.getMeanX());
         System.out.println("meanY:"+ls.getMeanY());
 
-	    error = ls.calculateY(new Register(0x54f70a9)).toLong()- 0x55db50a;
+	    error = ls.calculateY(new Register32(0x54f70a9)).toLong()- 0x55db50a;
 	    assertTrue(Math.abs(error) <= epsilon);
 	    
 	    addElement(0x54f70a9,0x55db50a);
 	    ls.calculate(table, numElements);
-	    error = ls.calculateY(new Register(0x5d8cdfb)).toLong() - 0x5e71236;
+	    error = ls.calculateY(new Register32(0x5d8cdfb)).toLong() - 0x5e71236;
 	    assertTrue(Math.abs(error) <= epsilon);
 	    
         addElement(0x5d8cdfb,0x5e71236);
         ls.calculate(table, numElements);
-        error = ls.calculateY(new Register(0x6622b4e)).toLong() - 0x6706f62;
+        error = ls.calculateY(new Register32(0x6622b4e)).toLong() - 0x6706f62;
         assertTrue(Math.abs(error) <= epsilon);
         
 	    addElement(0x6622b4e,0x6706f62);
 	    ls.calculate(table, numElements);
-	    error = ls.calculateY(new Register(0x6eb889f)).toLong() - 0x6f9cc8d;
+	    error = ls.calculateY(new Register32(0x6eb889f)).toLong() - 0x6f9cc8d;
 	    assertTrue(Math.abs(error) <= epsilon);
 
         addElement(0x6eb889f,0x6f9cc8d);
         ls.calculate(table, numElements);
-        error = ls.calculateY(new Register(0x774e5f1)).toLong() - 0x78329b8;
+        error = ls.calculateY(new Register32(0x774e5f1)).toLong() - 0x78329b8;
         assertTrue(Math.abs(error) <= epsilon);
 
 	    addElement(0x774e5f1,0x78329b8);
 	    ls.calculate(table, numElements);
-	    error = ls.calculateY(new Register(0x7fe4343)).toLong() - 0x80c86e3;
+	    error = ls.calculateY(new Register32(0x7fe4343)).toLong() - 0x80c86e3;
 	    assertTrue(Math.abs(error) <= epsilon);
 	    
 	    addElement(0x7fe4343,0x80c86e3);
 	    ls.calculate(table, numElements);
-	    error = ls.calculateY(new Register(0x887a094)).toLong() - 0x895e40e;
+	    error = ls.calculateY(new Register32(0x887a094)).toLong() - 0x895e40e;
 	    assertTrue(Math.abs(error) <= epsilon);
 	    
         addElement(0x887a094,0x895e40e);
         ls.calculate(table, numElements);
-        error = ls.calculateY(new Register(0x910fde7)).toLong() - 0x91f413a;
+        error = ls.calculateY(new Register32(0x910fde7)).toLong() - 0x91f413a;
         assertTrue(Math.abs(error) <= epsilon);
         
         addElement(0x910fde7,0x91f413a);
         ls.calculate(table, numElements);
-        error = ls.calculateY(new Register(0x99a5b37)).toLong() - 0x9a89e64;
+        error = ls.calculateY(new Register32(0x99a5b37)).toLong() - 0x9a89e64;
         assertTrue(Math.abs(error) <= epsilon);
         
         addElement(0x99a5b37,0x9a89e64);
         ls.calculate(table, numElements);
-        error = ls.calculateY(new Register(0xa23b889)).toLong()- 0xa31fb8f;
+        error = ls.calculateY(new Register32(0xa23b889)).toLong()- 0xa31fb8f;
         assertTrue(Math.abs(error) <= epsilon);
         
         clear();

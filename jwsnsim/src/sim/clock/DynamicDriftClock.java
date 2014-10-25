@@ -1,6 +1,7 @@
 package sim.clock;
 
-import hardware.Register;
+import hardware.Counter32;
+import hardware.Register32;
 import sim.simulator.SimTime;
 import sim.simulator.Simulator;
 import sim.statistics.GaussianDistribution;
@@ -67,12 +68,12 @@ public class DynamicDriftClock implements Counter32 {
 		}
 	}
 	
-	public Register getValue(){
+	public Register32 getValue(){
 		SimTime currentTime = Simulator.getInstance().getTime();
 		progress(currentTime.sub(lastRead).toDouble());
 		lastRead = currentTime;
 		
-		return new Register((long)clock);
+		return new Register32((long)clock);
 	}
 
 	public double getDrift() {
@@ -90,7 +91,7 @@ public class DynamicDriftClock implements Counter32 {
 	}
 
 	@Override
-	public void setValue(Register value) {
+	public void setValue(Register32 value) {
 		this.clock = value.toDouble();		
 	}
 }

@@ -1,6 +1,6 @@
 package application.appFtsp;
 
-import hardware.Register;
+import hardware.Register32;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
@@ -80,10 +80,10 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        Register localTime, globalTime;
+        Register32 localTime, globalTime;
 
         localTime = CLOCK.getValue();
-        globalTime = new Register(localTime);
+        globalTime = new Register32(localTime);
         globalTime = ls.calculateY(globalTime);
 //        globalTime = globalTime.add(correction);
 
@@ -92,7 +92,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         if( outgoingMsg.rootid == NODE_ID ) {
             if( (localTime.subtract(ls.getMeanX())).toLong() >= 0x20000000 )
             {
-            		ls.setMeanX(new Register(localTime));
+            		ls.setMeanX(new Register32(localTime));
                     ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
             }
         }
@@ -102,7 +102,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
             outgoingMsg.sequence++; // maybe set it to zero?
         }
 
-        outgoingMsg.clock = new Register(globalTime);
+        outgoingMsg.clock = new Register32(globalTime);
         outgoingMsg.nodeid = NODE_ID;
         
         // we don't send time sync msg, if we don't have enough data
@@ -112,7 +112,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         else{
         	RadioPacket packet = new RadioPacket(new FtspMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new Register(localTime));
+        	packet.setEventTime(new Register32(localTime));
             MAC.sendPacket(packet);
             
             if( outgoingMsg.rootid == NODE_ID )
@@ -129,10 +129,10 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
 	}	
 	
 	private int numErrors=0;    
-    void addNewEntry(FtspMessage msg,Register localTime)
+    void addNewEntry(FtspMessage msg,Register32 localTime)
     {
         int i, freeItem = -1, oldestItem = 0;
-        Register age, oldestTime = new Register();
+        Register32 age, oldestTime = new Register32();
         int  timeError;
 
         // clear table if the received entry's been inconsistent for some time
@@ -149,7 +149,7 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
         numErrors = 0;
 
         for(i = 0; i < MAX_ENTRIES; ++i) {  
-        	age = new Register(localTime);
+        	age = new Register32(localTime);
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
@@ -173,18 +173,18 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
             ++tableEntries;
 
     	table[freeItem].free = false;
-        table[freeItem].x  = new Register(localTime);
+        table[freeItem].x  = new Register32(localTime);
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
 
         /* calculate using previous least-squares line */
-        Register y1 = local2Global(localTime);
+        Register32 y1 = local2Global(localTime);
         
         /* calculate new least-squares line */
         ls.calculate(table, tableEntries);
         correction = 0;
         
         /* calculate using new least-squares line */
-        Register y2 = local2Global(localTime);
+        Register32 y2 = local2Global(localTime);
         
         /* detect time discontinuity */
         timeError = y1.subtract(y2).toInteger();
@@ -264,16 +264,16 @@ public class FtspNodeWithoutDiscontinuity extends Node implements TimerHandler{
          return false;
 	}
 	
-	public Register local2Global() {
-		Register local = CLOCK.getValue();		
-		Register time = ls.calculateY(local);
+	public Register32 local2Global() {
+		Register32 local = CLOCK.getValue();		
+		Register32 time = ls.calculateY(local);
 				
 		return time.add(correction);
 //		return time;
 	}
 	
-	public Register local2Global(Register now) {
-		Register time = ls.calculateY(now);
+	public Register32 local2Global(Register32 now) {
+		Register32 time = ls.calculateY(now);
 		
 		return time.add(correction);
 		

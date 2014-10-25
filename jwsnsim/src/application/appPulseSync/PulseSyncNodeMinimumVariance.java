@@ -1,6 +1,6 @@
 package application.appPulseSync;
 
-import hardware.Register;
+import hardware.Register32;
 import application.regression.LeastSquares;
 import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
@@ -39,8 +39,8 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
     
-    Register pulse;
-    Register pulseTime;
+    Register32 pulse;
+    Register32 pulseTime;
 
 	public PulseSyncNodeMinimumVariance(int id, Position position) {
 		super(id,position);
@@ -76,17 +76,17 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        Register localTime, globalTime;
+        Register32 localTime, globalTime;
 
         localTime = CLOCK.getValue();
         
         if(NODE_ID != ROOT_ID){
-        	Register elapsed = localTime.subtract(pulseTime);
+        	Register32 elapsed = localTime.subtract(pulseTime);
         	elapsed = elapsed.add(elapsed.multiply(ls.getSlope()));               	        		
         	globalTime = pulse.add(elapsed);
         }
         else{
-            globalTime = new Register(localTime);        	
+            globalTime = new Register32(localTime);        	
         }
 
         outgoingMsg.rootid = ROOT_ID;
@@ -95,13 +95,13 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
         if(NODE_ID == ROOT_ID)
         	outgoingMsg.sequence++; // maybe set it to zero?
         
-        outgoingMsg.clock = new Register(globalTime);
+        outgoingMsg.clock = new Register32(globalTime);
                 
         // we don't send time sync msg, if we don't have enough data
         if( numEntries >= ENTRY_SEND_LIMIT || ROOT_ID == NODE_ID){
         	RadioPacket packet = new RadioPacket(new PulseSyncMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new Register(localTime));
+        	packet.setEventTime(new Register32(localTime));
             MAC.sendPacket(packet);
         }        
 	}
@@ -114,7 +114,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	}	
 	
 	private int numErrors=0;    
-    void addNewEntry(PulseSyncMessage msg,Register localTime)
+    void addNewEntry(PulseSyncMessage msg,Register32 localTime)
     {
     	 int i;
          int  timeError;
@@ -143,7 +143,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
            }
          
      	table[tableEnd].free = false;
-         table[tableEnd].x  = new Register(localTime);
+         table[tableEnd].x  = new Register32(localTime);
          table[tableEnd].y = msg.clock.subtract(localTime).toInteger();	  
          
          ls.calculate(table, tableEntries);
@@ -168,7 +168,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
             
-            pulse = new Register(msg.clock);
+            pulse = new Register32(msg.clock);
             pulseTime = processedMsg.getEventTime();
             
             /* for sending data */
@@ -188,13 +188,13 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
          return false;
 	}
 	
-	public Register local2Global() {
-		Register now = CLOCK.getValue();
+	public Register32 local2Global() {
+		Register32 now = CLOCK.getValue();
 		
 		return ls.calculateY(now);
 	}
 	
-	public Register local2Global(Register now) {
+	public Register32 local2Global(Register32 now) {
 		
 		return ls.calculateY(now);
 	}

@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 
 import java.util.Hashtable;
 
@@ -13,12 +13,12 @@ public class ClockSpeedAdapter2 {
 	private static float TOLERANCE = 2f;
 
 	class NeighborData {
-		public Register val;
-		public Register timestamp;
+		public Register32 val;
+		public Register32 timestamp;
 
-		public NeighborData(Register val, Register timestamp) {
-			this.val = new Register(val);
-			this.timestamp = new Register(timestamp);
+		public NeighborData(Register32 val, Register32 timestamp) {
+			this.val = new Register32(val);
+			this.timestamp = new Register32(timestamp);
 		}
 	}
 	
@@ -36,15 +36,15 @@ public class ClockSpeedAdapter2 {
 	
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 	
-	private Register value = new Register();
-	private Register lastUpdate = new Register();
+	private Register32 value = new Register32();
+	private Register32 lastUpdate = new Register32();
 
 	public ClockSpeedAdapter2(){
 //		double deltaMin = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMax();		
 //		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMin);
 	}
 	
-	private float decide(int nodeid,int neighborProgress,Register timestamp) {
+	private float decide(int nodeid,int neighborProgress,Register32 timestamp) {
 
 		float decision = 0.0f;
 		
@@ -61,7 +61,7 @@ public class ClockSpeedAdapter2 {
 		return decision;
 	}
 	
-	public void adjust(int nodeid, int neighborProgress,Register timestamp) {
+	public void adjust(int nodeid, int neighborProgress,Register32 timestamp) {
 		
 		update(timestamp);
 		float decision = decide(nodeid,neighborProgress,timestamp);
@@ -86,15 +86,15 @@ public class ClockSpeedAdapter2 {
 		neighbors.put(nodeid, new NeighborData(getValue(timestamp),timestamp));
 	}
 	
-	public void update(Register timestamp){
+	public void update(Register32 timestamp){
 		int timePassed = timestamp.subtract(lastUpdate).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*(float)rate.getValue());
 		value = value.add(progress);
 		
-		lastUpdate = new Register(timestamp);
+		lastUpdate = new Register32(timestamp);
 	}
 	
-	public Register getValue(Register timestamp){
+	public Register32 getValue(Register32 timestamp){
 		int timePassed = timestamp.subtract(lastUpdate).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*(float)rate.getValue());
 

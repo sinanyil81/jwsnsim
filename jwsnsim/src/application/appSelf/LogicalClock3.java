@@ -1,42 +1,42 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class LogicalClock3 {
 
-	private Register value = new Register();
+	private Register32 value = new Register32();
 	public float rate = 0.0f;
-	public Register offset = new Register();
+	public Register32 offset = new Register32();
 			
-	Register updateLocalTime = new Register();
+	Register32 updateLocalTime = new Register32();
 		
-	public void setOffset(Register offset) {
-		this.offset = new Register(offset);
+	public void setOffset(Register32 offset) {
+		this.offset = new Register32(offset);
 	}
 	
-	public Register getOffset() {
-		return new Register(offset);
+	public Register32 getOffset() {
+		return new Register32(offset);
 	}
 	
-	public void update(Register local){
+	public void update(Register32 local){
 		int timePassed = local.subtract(updateLocalTime).toInteger();
 		timePassed  += (int) (((float) timePassed) * rate);
 
 		value = value.add(timePassed);
-		this.updateLocalTime = new Register(local);
+		this.updateLocalTime = new Register32(local);
 	}
 
-	public Register getValue(Register local) {
+	public Register32 getValue(Register32 local) {
 		int timePassed = local.subtract(updateLocalTime).toInteger();
 		timePassed  += (int) (((float) timePassed) * rate);
 
-		Register val = value.add(offset);
-		return val.add(new Register(timePassed));
+		Register32 val = value.add(offset);
+		return val.add(new Register32(timePassed));
 	}
 	
-	public void setValue(Register time,Register local) {
-		value = new Register(time);
-		offset = new Register();
-		this.updateLocalTime = new Register(local);
+	public void setValue(Register32 time,Register32 local) {
+		value = new Register32(time);
+		offset = new Register32();
+		this.updateLocalTime = new Register32(local);
 	}	
 }

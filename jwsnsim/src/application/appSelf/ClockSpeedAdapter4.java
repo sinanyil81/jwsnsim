@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -15,13 +15,13 @@ public class ClockSpeedAdapter4 {
 	private static float TOLERANCE = 0.00000001f;
 
 	class NeighborData {
-		public Register clock;
-		public Register timestamp;
+		public Register32 clock;
+		public Register32 timestamp;
 		public float decision = 0.0f;
 
-		public NeighborData(Register clock, Register timestamp,float decision) {
-			this.clock = new Register(clock);
-			this.timestamp = new Register(timestamp);
+		public NeighborData(Register32 clock, Register32 timestamp,float decision) {
+			this.clock = new Register32(clock);
+			this.timestamp = new Register32(timestamp);
 			this.decision = decision;
 		}
 	}
@@ -49,7 +49,7 @@ public class ClockSpeedAdapter4 {
 ////		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMin);
 //	}
 	
-	private void updateNeighbor(int nodeid,Register clock,Register timestamp,float rate) {
+	private void updateNeighbor(int nodeid,Register32 clock,Register32 timestamp,float rate) {
 
 		float decision = 0.0f;
 		
@@ -71,7 +71,7 @@ public class ClockSpeedAdapter4 {
 		neighbors.put(nodeid, new NeighborData(clock,timestamp,decision));
 	}
 	
-	public void adjust(int nodeid, Register clock,Register timestamp,float rate) {
+	public void adjust(int nodeid, Register32 clock,Register32 timestamp,float rate) {
 		updateNeighbor(nodeid,clock,timestamp,rate);
 		
 		float average = getAverageDecision();

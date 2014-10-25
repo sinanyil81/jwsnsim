@@ -1,18 +1,18 @@
 package application.regression;
 
-import hardware.Register;
+import hardware.Register32;
 
 public class ModifiedLeastSquares {
 	
 	private float slope = 0.0f;
-	private Register meanX = new Register();
+	private Register32 meanX = new Register32();
 	private int meanY = 0;
-	private Register offset = new Register();
+	private Register32 offset = new Register32();
 	
 	public void calculate(RegressionEntry table[], int tableEntries){
 		float newSlope = slope;
         
-		Register newMeanX;
+		Register32 newMeanX;
         int newMeanY;        
         int meanXRest;
         int meanYRest;
@@ -41,7 +41,7 @@ public class ModifiedLeastSquares {
 
         while( ++i < table.length )
             if( !table[i].free) {                
-            	Register diff = table[i].x.subtract(newMeanX);
+            	Register32 diff = table[i].x.subtract(newMeanX);
             	
             	xSum += diff.toInteger() / tableEntries;
             	meanXRest += diff.toInteger() % tableEntries;
@@ -50,8 +50,8 @@ public class ModifiedLeastSquares {
             }
         
         
-        xSum = (new Register(xSum).add(new Register(meanXRest/tableEntries))).toLong();    
-        newMeanX =  newMeanX.add(new Register(xSum));
+        xSum = (new Register32(xSum).add(new Register32(meanXRest/tableEntries))).toLong();    
+        newMeanX =  newMeanX.add(new Register32(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;
 
@@ -70,9 +70,9 @@ public class ModifiedLeastSquares {
 
         slope = newSlope;
         meanY = newMeanY;
-        meanX = new Register(newMeanX);
+        meanX = new Register32(newMeanX);
         
-        offset = new Register(newMeanY);
+        offset = new Register32(newMeanY);
         newMeanX = newMeanX.multiply(slope);
         offset = offset.subtract(newMeanX);
 	}
@@ -96,11 +96,11 @@ public class ModifiedLeastSquares {
 			meanX.add(val); 			
 		}
 		
-		this.offset = new Register(offset);
+		this.offset = new Register32(offset);
 	}
 		
-	public Register calculateY(Register x) {
-		Register result = new Register(x);
+	public Register32 calculateY(Register32 x) {
+		Register32 result = new Register32(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);

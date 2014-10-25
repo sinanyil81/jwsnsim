@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
@@ -30,7 +30,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -45,8 +45,8 @@ public class SelfNode10 extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		SelfMessage9 msg = (SelfMessage9) packet.getPayload();
 
-		Register neighborClock = msg.clock;
-		Register myClock = logicalClock.getValue(packet.getEventTime());
+		Register32 neighborClock = msg.clock;
+		Register32 myClock = logicalClock.getValue(packet.getEventTime());
 
 		return myClock.subtract(neighborClock).toInteger();
 	}
@@ -65,7 +65,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 			skew /= 2;
 			int skewRest = skew % 2;
 			skew += skewRest/2;
-			Register offset = logicalClock.getOffset();
+			Register32 offset = logicalClock.getOffset();
 			offset = offset.add(-skew);
 			logicalClock.setOffset(offset);
 		}
@@ -94,7 +94,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		Register localTime, globalTime;
+		Register32 localTime, globalTime;
 		
 		localTime = CLOCK.getValue();
 		
@@ -110,7 +110,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 		
 		RadioPacket packet = new RadioPacket(new SelfMessage9(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new Register(localTime));
+		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);
 	}
 
@@ -121,7 +121,7 @@ public class SelfNode10 extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public Register local2Global() {
+	public Register32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

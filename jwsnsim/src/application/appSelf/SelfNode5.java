@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 import sim.clock.ConstantDriftClock;
 import sim.clock.Timer;
 import sim.clock.TimerHandler;
@@ -22,7 +22,7 @@ public class SelfNode5 extends Node implements TimerHandler {
 	SelfMessage5 outgoingMsg = new SelfMessage5();
 	ClockSpeedAdapter5 speedAdapter = new ClockSpeedAdapter5();
 	
-	Register lastGlobalTime = new Register();
+	Register32 lastGlobalTime = new Register32();
 
 	public SelfNode5(int id, Position position) {
 		super(id, position);
@@ -30,7 +30,7 @@ public class SelfNode5 extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 
 		/* to start clock with a random value */
-		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -62,22 +62,22 @@ public class SelfNode5 extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		Register localTime, globalTime;
+		Register32 localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 
 		outgoingMsg.nodeid = NODE_ID;
 		outgoingMsg.clock = globalTime;
-		outgoingMsg.hardwareClock = new Register(localTime);
+		outgoingMsg.hardwareClock = new Register32(localTime);
 		outgoingMsg.progress = globalTime.subtract(lastGlobalTime);
 		outgoingMsg.sequence++;
 
-		lastGlobalTime = new Register(globalTime);
+		lastGlobalTime = new Register32(globalTime);
 
 		RadioPacket packet = new RadioPacket(new SelfMessage5(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new Register(localTime));
+		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);
 	}
 
@@ -88,7 +88,7 @@ public class SelfNode5 extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public Register local2Global() {
+	public Register32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

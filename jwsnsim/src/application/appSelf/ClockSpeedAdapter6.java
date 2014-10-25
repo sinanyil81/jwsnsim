@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import hardware.Register;
+import hardware.Register32;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -15,11 +15,11 @@ public class ClockSpeedAdapter6 {
 	private static float TOLERANCE = 0.00000001f;
 
 	class NeighborData {
-		public Register timestamp;
+		public Register32 timestamp;
 		public float decision;
 
-		public NeighborData(Register timestamp, float decision) {
-			this.timestamp = new Register(timestamp);
+		public NeighborData(Register32 timestamp, float decision) {
+			this.timestamp = new Register32(timestamp);
 			this.decision = decision;
 		}
 	}
@@ -44,7 +44,7 @@ public class ClockSpeedAdapter6 {
 				.setDelta(0.000001f);
 	}
 
-	private float getDecision(int nodeid, Register progress, Register timestamp,float rate) {
+	private float getDecision(int nodeid, Register32 progress, Register32 timestamp,float rate) {
 
 		float decision = 0.0f;
 
@@ -67,7 +67,7 @@ public class ClockSpeedAdapter6 {
 		return decision;
 	}
 
-	public void adjust(int nodeid, Register progress, Register timestamp,float rate) {
+	public void adjust(int nodeid, Register32 progress, Register32 timestamp,float rate) {
 		float neighborDecision = getDecision(nodeid, progress, timestamp,rate);
 
 		adjustRate(neighborDecision);

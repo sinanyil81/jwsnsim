@@ -1,5 +1,6 @@
 package sim.clock;
 
+import hardware.Counter32;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
 

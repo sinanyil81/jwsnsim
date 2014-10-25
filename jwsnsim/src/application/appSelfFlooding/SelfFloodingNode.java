@@ -1,6 +1,6 @@
 package application.appSelfFlooding;
 
-import hardware.Register;
+import hardware.Register32;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
@@ -38,7 +38,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		timer0 = new Timer(CLOCK, this);
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
 	
 		outgoingMsg.sequence = 0;
@@ -49,8 +49,8 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
 
-		Register neighborClock = msg.clock;
-		Register myClock = logicalClock.getValue(packet.getEventTime());
+		Register32 neighborClock = msg.clock;
+		Register32 myClock = logicalClock.getValue(packet.getEventTime());
 
 		return myClock.subtract(neighborClock).toInteger();
 	}
@@ -102,21 +102,21 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		Register localTime, globalTime;
+		Register32 localTime, globalTime;
 		
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 		
 		if( outgoingMsg.rootid == NODE_ID ) {
-			outgoingMsg.clock = new Register(localTime);
+			outgoingMsg.clock = new Register32(localTime);
 		}
 		else{
-			outgoingMsg.clock = new Register(globalTime);	
+			outgoingMsg.clock = new Register32(globalTime);	
 		}
 		
 		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new Register(localTime));
+		packet.setEventTime(new Register32(localTime));
 		MAC.sendPacket(packet);	
 		
 		if (outgoingMsg.rootid == NODE_ID)
@@ -129,7 +129,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		timer0.startPeriodic(BEACON_RATE+((Distribution.getRandom().nextInt() % 100) + 1)*10000);
 	}
 
-	public Register local2Global() {
+	public Register32 local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 
