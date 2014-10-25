@@ -38,50 +38,58 @@ package hardware.clock;
 import sim.statistics.GaussianDistribution;
 
 public class Clock32 {
-	
+
 	private static final int MEAN_DRIFT = 50;
 	private static final int DRIFT_VARIANCE = 300;
-	
+
 	private static final int NOISE_MEAN = 0;
 	private static final int NOISE_VARIANCE = 2;
-	
+
 	Counter32 counter = new Counter32();
-	
+
 	/** Drift of the clock */
 	private double drift = 0.0;
-	
+
 	/** is started? */
 	protected boolean started = false;
-	
+	protected boolean dynamicDrift = false;
+
 	public void start() {
 		started = true;
 	}
-	
-	public Clock32(){
-		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE); 	
-		drift /= 1000000.0;
-	}
-	
-	public void progress(double amount){
-		
-		if(!started)
+
+	public void progress(double amount) {
+
+		if (!started)
 			return;
-		
+
 		/* Add dynamic noise */
-		double noise = GaussianDistribution.nextGaussian(NOISE_MEAN, NOISE_VARIANCE);
-		noise /= 100000000.0;
-		
+		double noise = 0.0;
+		if (dynamicDrift) {
+			noise = GaussianDistribution.nextGaussian(NOISE_MEAN,
+					NOISE_VARIANCE);
+			noise /= 100000000.0;
+		}
+
 		/* Progress clock by considering the constant drift. */
-		amount += amount*(drift + noise);
-		counter.increment(amount);		
+		amount += amount * (drift + noise);
+		counter.increment(amount);
 	}
-	
-	public double getDrift() {
-		return drift;
+
+	public void setRandomDrift() {
+		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE);
+		drift /= 1000000.0;
 	}
 
 	public void setDrift(double drift) {
 		this.drift = drift;
 	}
 
+	public double getDrift() {
+		return drift;
+	}
+
+	public void dynamicDrift() {
+		dynamicDrift = true;
+	}
 }

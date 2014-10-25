@@ -1,16 +1,15 @@
 package sim.node;
 
-import hardware.clock.Counter32;
+import hardware.clock.Clock32;
 import sim.radio.MacLayer;
 import sim.radio.Radio;
 import sim.radio.RadioPacket;
-import sim.simulator.Simulator;
 
 public abstract class Node {
 	protected int NODE_ID;
 	protected MacLayer MAC = null;
 	protected Radio RADIO = null;
-	protected Counter32 CLOCK = null;
+	protected Clock32 CLOCK = null;
 
 	protected boolean running = false;
 
@@ -25,11 +24,11 @@ public abstract class Node {
 		this.position = position;
 	}
 
-	public void setClock(Counter32 clock) {
+	public void setClock(Clock32 clock) {
 		CLOCK = clock;
 	}
 
-	public Counter32 getClock() {
+	public Clock32 getClock() {
 		return CLOCK;
 	}
 
