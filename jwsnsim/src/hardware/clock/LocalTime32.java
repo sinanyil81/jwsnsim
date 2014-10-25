@@ -43,7 +43,7 @@ public class LocalTime32 extends Counter32{
 	private static final int DRIFT_VARIANCE = 300;
 	
 	private static final int NOISE_MEAN = 0;
-	private static final int NOISE_VARIANCE = 5;
+	private static final int NOISE_VARIANCE = 2;
 	
 	/** Drift of the hardware clock */
 	private double drift = 0.0;
