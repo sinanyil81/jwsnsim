@@ -1,7 +1,7 @@
 package application.appFcsaRt;
 
-import hardware.Counter32;
 import hardware.Register32;
+import hardware.clock.Counter32;
 
 public class LogicalClock {
 	

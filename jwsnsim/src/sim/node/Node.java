@@ -1,6 +1,6 @@
 package sim.node;
 
-import hardware.Counter32;
+import hardware.clock.Counter32;
 import sim.radio.MacLayer;
 import sim.radio.Radio;
 import sim.radio.RadioPacket;

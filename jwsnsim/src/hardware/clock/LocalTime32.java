@@ -28,8 +28,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Simulates 32 bit hardware counter register 
  * 
  * @author Kasım Sinan YILDIRIM (sinanyil81@gmail.com)
  *
@@ -37,42 +35,40 @@
 
 package hardware.clock;
 
-import hardware.Register32;
+import sim.statistics.GaussianDistribution;
 
-public class Counter32 {
-
-	protected static double MAX_VALUE = 4294967295.0;
-
-	/** Value of the clock register */
-	protected double clock = 0.0;
-
-	/** is started? */
-	protected boolean started = false;
-
-	public void start() {
-		started = true;
+public class LocalTime32 extends Counter32{
+	
+	private static final int MEAN_DRIFT = 50;
+	private static final int DRIFT_VARIANCE = 300;
+	
+	private static final int NOISE_MEAN = 0;
+	private static final int NOISE_VARIANCE = 5;
+	
+	/** Drift of the hardware clock */
+	private double drift = 0.0;
+	
+	public LocalTime32(){
+		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE); 	
+		drift /= 1000000.0;
 	}
-
-	public void progress(double amount) {
-
-		if (!started)
-			return;
-
-		/* Progress clock. */
-		clock += amount;
+	
+	public void progress(double amount){
+		/* Add dynamic noise */
+		double noise = GaussianDistribution.nextGaussian(NOISE_MEAN, NOISE_VARIANCE);
+		noise /= 100000000.0;
 		
-		/* Check if wraparound has occured. */
-		if (clock > MAX_VALUE) {
-			clock -= MAX_VALUE;
-		}
+		/* Progress clock by considering the constant drift. */
+		amount += amount*(drift + noise);
+		super.progress(amount);		
+	}
+	
+	public double getDrift() {
+		return drift;
 	}
 
-	public Register32 getValue() {
-
-		return new Register32((long) clock);
+	public void setDrift(double drift) {
+		this.drift = drift;
 	}
 
-	public void setValue(Register32 value) {
-		this.clock = value.toDouble();
-	}
 }

@@ -1,6 +1,6 @@
 package sim.mobility;
 
-import hardware.Counter32;
+import hardware.clock.Counter32;
 
 import java.lang.reflect.Constructor;
 
