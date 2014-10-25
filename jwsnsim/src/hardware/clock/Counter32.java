@@ -43,36 +43,26 @@ public class Counter32 {
 
 	protected static double MAX_VALUE = 4294967295.0;
 
-	/** Value of the clock register */
-	protected double clock = 0.0;
+	/** Value of the register */
+	protected double value = 0.0;
 
-	/** is started? */
-	protected boolean started = false;
+	public void increment(double amount) {
 
-	public void start() {
-		started = true;
-	}
-
-	public void progress(double amount) {
-
-		if (!started)
-			return;
-
-		/* Progress clock. */
-		clock += amount;
+		/* increment the register */
+		value += amount;
 		
 		/* Check if wraparound has occured. */
-		if (clock > MAX_VALUE) {
-			clock -= MAX_VALUE;
+		if (value > MAX_VALUE) {
+			value -= MAX_VALUE;
 		}
 	}
 
 	public Register32 getValue() {
 
-		return new Register32((long) clock);
+		return new Register32((long) value);
 	}
 
 	public void setValue(Register32 value) {
-		this.clock = value.toDouble();
+		this.value = value.toDouble();
 	}
 }

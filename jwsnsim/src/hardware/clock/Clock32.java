@@ -37,7 +37,7 @@ package hardware.clock;
 
 import sim.statistics.GaussianDistribution;
 
-public class LocalTime32 extends Counter32{
+public class Clock32 {
 	
 	private static final int MEAN_DRIFT = 50;
 	private static final int DRIFT_VARIANCE = 300;
@@ -45,22 +45,35 @@ public class LocalTime32 extends Counter32{
 	private static final int NOISE_MEAN = 0;
 	private static final int NOISE_VARIANCE = 2;
 	
-	/** Drift of the hardware clock */
+	Counter32 counter = new Counter32();
+	
+	/** Drift of the clock */
 	private double drift = 0.0;
 	
-	public LocalTime32(){
+	/** is started? */
+	protected boolean started = false;
+	
+	public void start() {
+		started = true;
+	}
+	
+	public Clock32(){
 		drift = GaussianDistribution.nextGaussian(MEAN_DRIFT, DRIFT_VARIANCE); 	
 		drift /= 1000000.0;
 	}
 	
 	public void progress(double amount){
+		
+		if(!started)
+			return;
+		
 		/* Add dynamic noise */
 		double noise = GaussianDistribution.nextGaussian(NOISE_MEAN, NOISE_VARIANCE);
 		noise /= 100000000.0;
 		
 		/* Progress clock by considering the constant drift. */
 		amount += amount*(drift + noise);
-		super.progress(amount);		
+		counter.increment(amount);		
 	}
 	
 	public double getDrift() {

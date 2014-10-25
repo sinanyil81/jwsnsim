@@ -40,7 +40,7 @@ import sim.simulator.EventObserver;
 
 public class Interrupt implements EventObserver {
 
-	/** Simulation event which will be used for interrupt events */
+	/** Simulation event which will be used for interrupt */
 	Event event = null;
 	InterruptHandler handler = null;
 

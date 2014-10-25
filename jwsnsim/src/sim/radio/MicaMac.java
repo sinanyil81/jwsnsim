@@ -1,11 +1,10 @@
 package sim.radio;
 
 
-import application.SynchronizationSimulation;
+
 import sim.node.Node;
 import sim.simulator.Event;
 import sim.simulator.EventObserver;
-import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
 public class MicaMac extends MacLayer implements EventObserver {
