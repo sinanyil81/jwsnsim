@@ -176,6 +176,9 @@ public class Main {
 			drift_j.add(i, delta_j*f_i);
 			drift_k.add(i, delta_k*f_i);
 			drift_l.add(i, delta_l*f_i);
+			
+			if(i==20)
+				f_i = 1000050.0;
 		}
 
 //		dataset.addSeries(drift);
