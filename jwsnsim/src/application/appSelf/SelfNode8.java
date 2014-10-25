@@ -2,13 +2,13 @@ package application.appSelf;
 
 import hardware.Register32;
 import hardware.clock.Timer;
+import hardware.clock.TimerHandler;
 
 import java.util.Hashtable;
 import java.util.Iterator;
 
 import application.appSelf.ClockSpeedAdapter7.NeighborData;
 import sim.clock.ConstantDriftClock;
-import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;

@@ -2,11 +2,11 @@ package sim.mobility;
 
 import hardware.clock.Counter32;
 import hardware.clock.Timer;
+import hardware.clock.TimerHandler;
 
 import java.lang.reflect.Constructor;
 
 import sim.clock.ConstantDriftClock;
-import sim.clock.TimerHandler;
 import sim.node.NodeFactory;
 import sim.node.Position;
 

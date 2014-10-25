@@ -36,7 +36,6 @@ package hardware.clock;
 
 import hardware.Interrupt;
 import hardware.InterruptHandler;
-import sim.clock.TimerHandler;
 
 /**
  * Simulates Timer which is built on a hardware clock.

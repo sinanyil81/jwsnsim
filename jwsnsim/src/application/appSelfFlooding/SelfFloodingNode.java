@@ -2,10 +2,10 @@ package application.appSelfFlooding;
 
 import hardware.Register32;
 import hardware.clock.Timer;
+import hardware.clock.TimerHandler;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.NodeFactory;
 import sim.node.Position;

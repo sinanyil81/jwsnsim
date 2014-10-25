@@ -2,10 +2,10 @@ package application.appFcsa;
 
 import hardware.Register32;
 import hardware.clock.Timer;
+import hardware.clock.TimerHandler;
 import application.appSelf.ClockSpeedAdapter;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
-import sim.clock.TimerHandler;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
