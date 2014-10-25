@@ -7,18 +7,18 @@ import application.appSelf.ClockSpeedAdapter3.NeighborData;
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class ClockSpeedAdapter5 {
 
 	private static float TOLERANCE = 0.00000001f;
 
 	class NeighborData {
-		public UInt32 timestamp;
+		public Register timestamp;
 		public float decision;
 
-		public NeighborData(UInt32 timestamp, float decision) {
-			this.timestamp = new UInt32(timestamp);
+		public NeighborData(Register timestamp, float decision) {
+			this.timestamp = new Register(timestamp);
 			this.decision = decision;
 		}
 	}
@@ -39,7 +39,7 @@ public class ClockSpeedAdapter5 {
 				.setDelta(0.000001f);
 	}
 
-	private float getDecision(int nodeid, UInt32 progress, UInt32 timestamp) {
+	private float getDecision(int nodeid, Register progress, Register timestamp) {
 
 		float decision = 0.0f;
 
@@ -61,7 +61,7 @@ public class ClockSpeedAdapter5 {
 		return decision;
 	}
 
-	public void adjust(int nodeid, UInt32 progress, UInt32 timestamp) {
+	public void adjust(int nodeid, Register progress, Register timestamp) {
 		float neighborDecision = getDecision(nodeid, progress, timestamp);
 
 		adjustRate(neighborDecision);

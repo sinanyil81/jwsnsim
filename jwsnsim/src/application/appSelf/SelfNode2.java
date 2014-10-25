@@ -10,7 +10,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class SelfNode2 extends Node implements TimerHandler {
 
@@ -28,7 +28,7 @@ public class SelfNode2 extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -68,7 +68,7 @@ public class SelfNode2 extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
@@ -81,12 +81,12 @@ public class SelfNode2 extends Node implements TimerHandler {
 			outgoingMsg.sequence++;
 		}
 
-		outgoingMsg.hardwareClock = new UInt32(localTime);
+		outgoingMsg.hardwareClock = new Register(localTime);
 		outgoingMsg.rateMultiplier = logicalClock.rate;
 
 		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);
 	}
 
@@ -97,7 +97,7 @@ public class SelfNode2 extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

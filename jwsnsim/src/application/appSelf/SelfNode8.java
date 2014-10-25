@@ -14,7 +14,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class SelfNode8 extends Node implements TimerHandler {
 
@@ -25,16 +25,16 @@ public class SelfNode8 extends Node implements TimerHandler {
 	Timer timer0;
 	
 	class NeighborData {
-		public UInt32 clock;
-		public UInt32 hwclock;		
+		public Register clock;
+		public Register hwclock;		
 		public float speed;
-		public UInt32 timestamp;
+		public Register timestamp;
 
-		public NeighborData( UInt32 clock,UInt32 hwclock,float speed,UInt32 timestamp) {
-			this.timestamp = new UInt32(timestamp);
+		public NeighborData( Register clock,Register hwclock,float speed,Register timestamp) {
+			this.timestamp = new Register(timestamp);
 			this.speed = speed;
-			this.clock = new UInt32(clock);
-			this.hwclock = new UInt32(hwclock);
+			this.clock = new Register(clock);
+			this.hwclock = new Register(hwclock);
 		}
 	}
 	
@@ -61,7 +61,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		CLOCK = new ConstantDriftClock();
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -76,13 +76,13 @@ public class SelfNode8 extends Node implements TimerHandler {
 	double calculateSkew(RadioPacket packet) {
 		SelfMessage msg = (SelfMessage) packet.getPayload();
 
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		Register neighborClock = msg.clock;
+		Register myClock = logicalClock.getValue(packet.getEventTime());
 
 		return myClock.subtract(neighborClock).toDouble();
 	}
 
-	private float getNeighborSpeed(int nodeid,UInt32 neighborTimestamp, UInt32 timestamp,float rate) {
+	private float getNeighborSpeed(int nodeid,Register neighborTimestamp, Register timestamp,float rate) {
 
 		float speed = 0.0f;
 
@@ -110,25 +110,25 @@ public class SelfNode8 extends Node implements TimerHandler {
 		neighbors.put(msg.nodeid, new NeighborData(msg.clock,msg.hardwareClock,neighborSpeed,packet.getEventTime()));
 	}
 	
-	public UInt32 getNeighborClock(int id,UInt32 currentTime){
+	public Register getNeighborClock(int id,Register currentTime){
 		NeighborData n = neighbors.get(id);	
 		
 		int timePassed = currentTime.subtract(n.timestamp).toInteger();	
 		int  progress = timePassed +  (int) (n.speed * (float)timePassed);
 		
-		return n.clock.add(new UInt32(progress));
+		return n.clock.add(new Register(progress));
 	}
 	
-	public UInt32 getOffset(UInt32 time,UInt32 localTime){
+	public Register getOffset(Register time,Register localTime){
 		//UInt32 offset = logicalClock.getOffset();
-		UInt32 offset = new UInt32();
+		Register offset = new Register();
 		
 		int diff = 0;
 		
 		for (Iterator<Integer> iterator = neighbors.keySet().iterator(); iterator.hasNext();) {
 			Integer id = (Integer) iterator.next();
 			
-			UInt32 nclock = getNeighborClock(id,localTime);
+			Register nclock = getNeighborClock(id,localTime);
 			diff = nclock.subtract(time).toInteger();
 			if(Math.abs(diff) <= 500)
 				offset = offset.add(diff/2);					
@@ -144,8 +144,8 @@ public class SelfNode8 extends Node implements TimerHandler {
 
 		double skew = calculateSkew(packet);
 		
-		UInt32 time = logicalClock.getValue(packet.getEventTime());			
-		UInt32 offset = getOffset(time,packet.getEventTime());
+		Register time = logicalClock.getValue(packet.getEventTime());			
+		Register offset = getOffset(time,packet.getEventTime());
 
 		if (skew > TOLERANCE) {
 			logicalClock.rate.adjustValue(AvtSimple.FEEDBACK_LOWER);
@@ -216,7 +216,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 	private void adjustOffset(double skew) {
 		
 		if(skew < -100000 && (++errCount == 5)){
-			UInt32 offset = logicalClock.getOffset();
+			Register offset = logicalClock.getOffset();
 			offset = offset.add((int) -skew);
 			logicalClock.setOffset(offset);
 			logicalClock.rate = new AvtSimple(-0.0001f, 0.0001f, 0.0f, 0.0000000001f, 0.0001f);
@@ -226,7 +226,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 			return;
 		}
 		else{
-			UInt32 offset = logicalClock.getOffset();
+			Register offset = logicalClock.getOffset();
 			offset = offset.add((int) -(skew * skew_multiplier.getValue()));
 //			offset = offset.add((int) -(skew * 0.5));
 			logicalClock.setOffset(offset);		
@@ -280,7 +280,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 
 //		adjustOffset();
 		
@@ -297,7 +297,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 
 		RadioPacket packet = new RadioPacket(new SelfMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);
 		
 		averager = new Averager();
@@ -310,7 +310,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

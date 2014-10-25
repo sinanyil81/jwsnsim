@@ -14,7 +14,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class PulseSyncNode extends Node implements TimerHandler{
 	
@@ -40,8 +40,8 @@ public class PulseSyncNode extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
 
-    UInt32 pulse;
-    UInt32 pulseTime;
+    Register pulse;
+    Register pulseTime;
     
 	public PulseSyncNode(int id, Position position) {
 		super(id,position);
@@ -62,7 +62,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
 		outgoingMsg.sequence = 0;
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 	}
 	
 	@Override
@@ -77,17 +77,17 @@ public class PulseSyncNode extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        UInt32 localTime, globalTime;
+        Register localTime, globalTime;
 
         localTime = CLOCK.getValue();
         
         if(NODE_ID != ROOT_ID){
-        	UInt32 elapsed = localTime.subtract(pulseTime);
+        	Register elapsed = localTime.subtract(pulseTime);
         	elapsed = elapsed.add(elapsed.multiply(ls.getSlope()));               	        		
         	globalTime = pulse.add(elapsed);
         }
         else{
-            globalTime = new UInt32(localTime);        	
+            globalTime = new Register(localTime);        	
         }
                
         outgoingMsg.rootid = ROOT_ID;
@@ -96,13 +96,13 @@ public class PulseSyncNode extends Node implements TimerHandler{
         if(NODE_ID == ROOT_ID)
         	outgoingMsg.sequence++; // maybe set it to zero?
         
-        outgoingMsg.clock = new UInt32(globalTime);
+        outgoingMsg.clock = new Register(globalTime);
                 
         // we don't send time sync msg, if we don't have enough data
         if( numEntries >= ENTRY_SEND_LIMIT || ROOT_ID == NODE_ID){
         	RadioPacket packet = new RadioPacket(new PulseSyncMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new UInt32(localTime));
+        	packet.setEventTime(new Register(localTime));
             MAC.sendPacket(packet);
         }        
 	}
@@ -115,10 +115,10 @@ public class PulseSyncNode extends Node implements TimerHandler{
 	}	
 	
 	private int numErrors=0;    
-    void addNewEntry(PulseSyncMessage msg,UInt32 localTime)
+    void addNewEntry(PulseSyncMessage msg,Register localTime)
     {
         int i, freeItem = -1, oldestItem = 0;
-        UInt32 age, oldestTime = new UInt32();
+        Register age, oldestTime = new Register();
         int  timeError;
 
         // clear table if the received entry's been inconsistent for some time
@@ -135,7 +135,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
         numErrors = 0;
 
         for(i = 0; i < MAX_ENTRIES; ++i) {  
-        	age = new UInt32(localTime);
+        	age = new Register(localTime);
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
@@ -159,7 +159,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
             ++tableEntries;
 
     	table[freeItem].free = false;
-        table[freeItem].x  = new UInt32(localTime);
+        table[freeItem].x  = new Register(localTime);
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
     
         /* calculate new least-squares line */
@@ -183,7 +183,7 @@ public class PulseSyncNode extends Node implements TimerHandler{
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
             
-            pulse = new UInt32(msg.clock);
+            pulse = new Register(msg.clock);
             pulseTime = processedMsg.getEventTime();
             
             /* for sending data */
@@ -203,13 +203,13 @@ public class PulseSyncNode extends Node implements TimerHandler{
          return false;
 	}
 	
-	public UInt32 local2Global() {
-		UInt32 now = CLOCK.getValue();
+	public Register local2Global() {
+		Register now = CLOCK.getValue();
 		
 		return ls.calculateY(now);
 	}
 	
-	public UInt32 local2Global(UInt32 now) {
+	public Register local2Global(Register now) {
 		
 		return ls.calculateY(now);
 	}

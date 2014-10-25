@@ -11,7 +11,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class FtspNodeMinimumVariance extends Node implements TimerHandler{
 	
@@ -79,10 +79,10 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        UInt32 localTime, globalTime;
+        Register localTime, globalTime;
 
         localTime = CLOCK.getValue();
-        globalTime = new UInt32(localTime);
+        globalTime = new Register(localTime);
         globalTime = ls.calculateY(globalTime);
 
         // we need to periodically update the reference point for the root
@@ -90,7 +90,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
         if( outgoingMsg.rootid == NODE_ID ) {
             if( (localTime.subtract(ls.getMeanX())).toLong() >= 0x20000000 )
             {
-            		ls.setMeanX(new UInt32(localTime));
+            		ls.setMeanX(new Register(localTime));
                     ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
             }
         }
@@ -100,7 +100,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
             outgoingMsg.sequence++; // maybe set it to zero?
         }
 
-        outgoingMsg.clock = new UInt32(globalTime);
+        outgoingMsg.clock = new Register(globalTime);
         outgoingMsg.nodeid = NODE_ID;
         
         // we don't send time sync msg, if we don't have enough data
@@ -110,7 +110,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
         else{
         	RadioPacket packet = new RadioPacket(new FtspMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new UInt32(localTime));
+        	packet.setEventTime(new Register(localTime));
             MAC.sendPacket(packet);
             
             if( outgoingMsg.rootid == NODE_ID )
@@ -127,7 +127,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
 	}	
 	
 	private int numErrors=0;    
-    void addNewEntry(FtspMessage msg,UInt32 localTime)
+    void addNewEntry(FtspMessage msg,Register localTime)
     {
         int i;
         int  timeError;
@@ -156,7 +156,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
           }
         
     	table[tableEnd].free = false;
-        table[tableEnd].x  = new UInt32(localTime);
+        table[tableEnd].x  = new Register(localTime);
         table[tableEnd].y = msg.clock.subtract(localTime).toInteger();	  
         
         ls.calculate(table, tableEntries);
@@ -206,7 +206,7 @@ public class FtspNodeMinimumVariance extends Node implements TimerHandler{
          return false;
 	}
 	
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return ls.calculateY(CLOCK.getValue());
 	}
 	

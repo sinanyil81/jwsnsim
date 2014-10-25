@@ -13,7 +13,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class FtspNodeAverage extends Node implements TimerHandler{
 	
@@ -88,10 +88,10 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        UInt32 localTime, globalTime;
+        Register localTime, globalTime;
 
         localTime = CLOCK.getValue();
-        globalTime = new UInt32(localTime);
+        globalTime = new Register(localTime);
         globalTime = ls.calculateY(globalTime);
 
         // we need to periodically update the reference point for the root
@@ -99,7 +99,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         if( outgoingMsg.rootid == NODE_ID ) {
             if( (localTime.subtract(ls.getMeanX())).toLong() >= 0x20000000 )
             {
-            		ls.setMeanX(new UInt32(localTime));
+            		ls.setMeanX(new Register(localTime));
                     ls.setMeanY(globalTime.toInteger() - localTime.toInteger());
             }
         }
@@ -109,7 +109,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
             outgoingMsg.sequence++; // maybe set it to zero?
         }
 
-        outgoingMsg.clock = new UInt32(globalTime);
+        outgoingMsg.clock = new Register(globalTime);
         outgoingMsg.nodeid = NODE_ID;
         
         // we don't send time sync msg, if we don't have enough data
@@ -119,7 +119,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         else{
         	RadioPacket packet = new RadioPacket(new FtspMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new UInt32(localTime));
+        	packet.setEventTime(new Register(localTime));
             MAC.sendPacket(packet);
             
             if( outgoingMsg.rootid == NODE_ID )
@@ -147,7 +147,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 		return val;
 	}
 	
-	void adjustLine(UInt32 localTime){
+	void adjustLine(Register localTime){
         if(is_synced()){
         	
         	slopeTable[lineIndex] = ls.getSlope();       	
@@ -166,7 +166,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         }
 	}
 		
-	void adjustLine2(UInt32 localTime){
+	void adjustLine2(Register localTime){
         if(is_synced()){
         	
         	slopeTable[lineIndex] = ls.getSlope();       	
@@ -193,10 +193,10 @@ public class FtspNodeAverage extends Node implements TimerHandler{
 	}
 	
 	private int numErrors=0;    
-    void addNewEntry(FtspMessage msg,UInt32 localTime)
+    void addNewEntry(FtspMessage msg,Register localTime)
     {
         int i, freeItem = -1, oldestItem = 0;
-        UInt32 age, oldestTime = new UInt32();
+        Register age, oldestTime = new Register();
         int  timeError;
 
         // clear table if the received entry's been inconsistent for some time
@@ -213,7 +213,7 @@ public class FtspNodeAverage extends Node implements TimerHandler{
         numErrors = 0;
 
         for(i = 0; i < MAX_ENTRIES; ++i) {  
-        	age = new UInt32(localTime);
+        	age = new Register(localTime);
         	age = age.subtract(table[i].x);
 
             //logical time error compensation
@@ -237,18 +237,18 @@ public class FtspNodeAverage extends Node implements TimerHandler{
             ++tableEntries;
 
     	table[freeItem].free = false;
-        table[freeItem].x  = new UInt32(localTime);
+        table[freeItem].x  = new Register(localTime);
         table[freeItem].y = msg.clock.toInteger() -localTime.toInteger();	 
      
         /* calculate new least-squares line */
         ls.calculate(table, tableEntries);
         
-        UInt32 time1 = ls.calculateY(localTime);
+        Register time1 = ls.calculateY(localTime);
 
         adjustLine2(localTime);
 
         /* time discontinuity adjustment */
-        UInt32 time2 = ls.calculateY(localTime);
+        Register time2 = ls.calculateY(localTime);
         
         timeError = time1.subtract(time2).toInteger();
         
@@ -306,15 +306,15 @@ public class FtspNodeAverage extends Node implements TimerHandler{
          return false;
 	}
 	
-	public UInt32 local2Global() {
-		UInt32 local = CLOCK.getValue();
-		UInt32 time = ls.calculateY(local);
+	public Register local2Global() {
+		Register local = CLOCK.getValue();
+		Register time = ls.calculateY(local);
 		
 		return time;
 	}
 	
-	public UInt32 local2Global(UInt32 now) {
-		UInt32 time = ls.calculateY(now);
+	public Register local2Global(Register now) {
+		Register time = ls.calculateY(now);
 		
 		return time;
 	}

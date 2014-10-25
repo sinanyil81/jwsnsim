@@ -12,7 +12,7 @@ import sim.radio.MicaMac;
 import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	
@@ -39,8 +39,8 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
     RadioPacket processedMsg = null;
     PulseSyncMessage outgoingMsg = new PulseSyncMessage();
     
-    UInt32 pulse;
-    UInt32 pulseTime;
+    Register pulse;
+    Register pulseTime;
 
 	public PulseSyncNodeMinimumVariance(int id, Position position) {
 		super(id,position);
@@ -76,17 +76,17 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	}
 
 	private void sendMsg() {
-        UInt32 localTime, globalTime;
+        Register localTime, globalTime;
 
         localTime = CLOCK.getValue();
         
         if(NODE_ID != ROOT_ID){
-        	UInt32 elapsed = localTime.subtract(pulseTime);
+        	Register elapsed = localTime.subtract(pulseTime);
         	elapsed = elapsed.add(elapsed.multiply(ls.getSlope()));               	        		
         	globalTime = pulse.add(elapsed);
         }
         else{
-            globalTime = new UInt32(localTime);        	
+            globalTime = new Register(localTime);        	
         }
 
         outgoingMsg.rootid = ROOT_ID;
@@ -95,13 +95,13 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
         if(NODE_ID == ROOT_ID)
         	outgoingMsg.sequence++; // maybe set it to zero?
         
-        outgoingMsg.clock = new UInt32(globalTime);
+        outgoingMsg.clock = new Register(globalTime);
                 
         // we don't send time sync msg, if we don't have enough data
         if( numEntries >= ENTRY_SEND_LIMIT || ROOT_ID == NODE_ID){
         	RadioPacket packet = new RadioPacket(new PulseSyncMessage(outgoingMsg));
         	packet.setSender(this);
-        	packet.setEventTime(new UInt32(localTime));
+        	packet.setEventTime(new Register(localTime));
             MAC.sendPacket(packet);
         }        
 	}
@@ -114,7 +114,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
 	}	
 	
 	private int numErrors=0;    
-    void addNewEntry(PulseSyncMessage msg,UInt32 localTime)
+    void addNewEntry(PulseSyncMessage msg,Register localTime)
     {
     	 int i;
          int  timeError;
@@ -143,7 +143,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
            }
          
      	table[tableEnd].free = false;
-         table[tableEnd].x  = new UInt32(localTime);
+         table[tableEnd].x  = new Register(localTime);
          table[tableEnd].y = msg.clock.subtract(localTime).toInteger();	  
          
          ls.calculate(table, tableEntries);
@@ -168,7 +168,7 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
         if( ROOT_ID == msg.rootid && (msg.sequence - outgoingMsg.sequence) > 0 ) {
             outgoingMsg.sequence = msg.sequence;
             
-            pulse = new UInt32(msg.clock);
+            pulse = new Register(msg.clock);
             pulseTime = processedMsg.getEventTime();
             
             /* for sending data */
@@ -188,13 +188,13 @@ public class PulseSyncNodeMinimumVariance extends Node implements TimerHandler{
          return false;
 	}
 	
-	public UInt32 local2Global() {
-		UInt32 now = CLOCK.getValue();
+	public Register local2Global() {
+		Register now = CLOCK.getValue();
 		
 		return ls.calculateY(now);
 	}
 	
-	public UInt32 local2Global(UInt32 now) {
+	public Register local2Global(Register now) {
 		
 		return ls.calculateY(now);
 	}

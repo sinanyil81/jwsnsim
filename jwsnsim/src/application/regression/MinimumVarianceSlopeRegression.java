@@ -1,17 +1,17 @@
 package application.regression;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class MinimumVarianceSlopeRegression {
 
 	private float slope = 0.0f;
-	private UInt32 meanX = new UInt32();
+	private Register meanX = new Register();
 	private int meanY = 0;
 
 	public void calculate(RegressionEntry table[], int tableEntries) {
 		float newSlope = slope;
 
-		UInt32 newMeanX;
+		Register newMeanX;
 		int newMeanY;
 		int meanXRest;
 		int meanYRest;
@@ -34,7 +34,7 @@ public class MinimumVarianceSlopeRegression {
 
 		while (++i < tableEntries)
 			if (!table[i].free) {
-				UInt32 diff = table[i].x.subtract(newMeanX);
+				Register diff = table[i].x.subtract(newMeanX);
 				xSum += diff.toInteger() / tableEntries;
 				meanXRest += diff.toInteger() % tableEntries;
 
@@ -42,9 +42,9 @@ public class MinimumVarianceSlopeRegression {
 				meanYRest += (table[i].y - newMeanY) % tableEntries;
 			}
 
-		xSum = (new UInt32(xSum).add(new UInt32(meanXRest / tableEntries)))
+		xSum = (new Register(xSum).add(new Register(meanXRest / tableEntries)))
 				.toLong();
-		newMeanX = newMeanX.add(new UInt32(xSum));
+		newMeanX = newMeanX.add(new Register(xSum));
 
 		newMeanY += ySum + meanYRest / tableEntries;
 
@@ -85,7 +85,7 @@ public class MinimumVarianceSlopeRegression {
 
 		slope = newSlope;
 		meanY = newMeanY;
-		meanX = new UInt32(newMeanX);
+		meanX = new Register(newMeanX);
 	}
 
 	public float getSlope() {
@@ -96,11 +96,11 @@ public class MinimumVarianceSlopeRegression {
 		this.slope = slope;
 	}
 
-	public UInt32 getMeanX() {
+	public Register getMeanX() {
 		return meanX;
 	}
 
-	public void setMeanX(UInt32 meanX) {
+	public void setMeanX(Register meanX) {
 		this.meanX = meanX;
 	}
 
@@ -112,25 +112,25 @@ public class MinimumVarianceSlopeRegression {
 		this.meanY = meanY;
 	}
 
-	public UInt32 calculateY(UInt32 x) {
-		UInt32 diff = new UInt32(x);
+	public Register calculateY(Register x) {
+		Register diff = new Register(x);
 		diff = diff.subtract(meanX);
 
 		int mult = (int) (slope * (float) (diff.toInteger()));
 		mult += meanY;
 
-		UInt32 result = x.add(new UInt32(mult));
+		Register result = x.add(new Register(mult));
 		return result;
 	}
 	
-	public UInt32 calculateY(UInt32 x,float slope) {
-		UInt32 diff = new UInt32(x);
+	public Register calculateY(Register x,float slope) {
+		Register diff = new Register(x);
 		diff = diff.subtract(meanX);
 
 		int mult = (int) (slope * (float) (diff.toInteger()));
 		mult += meanY;
 
-		UInt32 result = x.add(new UInt32(mult));
+		Register result = x.add(new Register(mult));
 		return result;
 	}
 

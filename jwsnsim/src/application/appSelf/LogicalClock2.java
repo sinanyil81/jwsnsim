@@ -1,22 +1,22 @@
 package application.appSelf;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class LogicalClock2 {
 
-	private UInt32 value = new UInt32();
+	private Register value = new Register();
 	public float rate = 0.0f;
-	UInt32 updateLocalTime = new UInt32();
+	Register updateLocalTime = new Register();
 	
-	public UInt32 getValue(UInt32 local) {
+	public Register getValue(Register local) {
 		int timePassed = local.subtract(updateLocalTime).toInteger();
 		timePassed  += (int) (((float) timePassed) * rate);
 
-		return value.add(new UInt32(timePassed));
+		return value.add(new Register(timePassed));
 	}
 	
-	public void setValue(UInt32 time,UInt32 local) {
-		value = new UInt32(time);
-		this.updateLocalTime = new UInt32(local);
+	public void setValue(Register time,Register local) {
+		value = new Register(time);
+		this.updateLocalTime = new Register(local);
 	}	
 }

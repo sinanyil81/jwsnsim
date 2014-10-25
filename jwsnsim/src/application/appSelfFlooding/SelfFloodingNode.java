@@ -14,7 +14,7 @@ import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 import sim.topology.Grid2D;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class SelfFloodingNode extends Node implements TimerHandler {
 
@@ -38,7 +38,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		timer0 = new Timer(CLOCK, this);
 		
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 		
 	
 		outgoingMsg.sequence = 0;
@@ -49,8 +49,8 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		SelfFloodingMessage msg = (SelfFloodingMessage) packet.getPayload();
 
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		Register neighborClock = msg.clock;
+		Register myClock = logicalClock.getValue(packet.getEventTime());
 
 		return myClock.subtract(neighborClock).toInteger();
 	}
@@ -102,21 +102,21 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 		
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 		
 		if( outgoingMsg.rootid == NODE_ID ) {
-			outgoingMsg.clock = new UInt32(localTime);
+			outgoingMsg.clock = new Register(localTime);
 		}
 		else{
-			outgoingMsg.clock = new UInt32(globalTime);	
+			outgoingMsg.clock = new Register(globalTime);	
 		}
 		
 		RadioPacket packet = new RadioPacket(new SelfFloodingMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);	
 		
 		if (outgoingMsg.rootid == NODE_ID)
@@ -129,7 +129,7 @@ public class SelfFloodingNode extends Node implements TimerHandler {
 		timer0.startPeriodic(BEACON_RATE+((Distribution.getRandom().nextInt() % 100) + 1)*10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

@@ -4,38 +4,38 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 
 public class UInt32Test {
 
 	@Test
 	public void test(){
-		UInt32 unsigned;
-		UInt32 unsigned1;
+		Register unsigned;
+		Register unsigned1;
 		
 		int x = 5;
 		
-		unsigned = new UInt32(x);
+		unsigned = new Register(x);
 		assertTrue(unsigned.toLong() == 5);		
 		
 		x = -5;
-		unsigned = new UInt32(x);
+		unsigned = new Register(x);
 		assertTrue(unsigned.toLong() == 0xFFFFFFFBL);
 		assertTrue(unsigned.toInteger()==-5);
 		
-		unsigned = new UInt32(0xFFFFFFFFL);
-		unsigned1 = new UInt32(0xFFFFFFF0L);
+		unsigned = new Register(0xFFFFFFFFL);
+		unsigned1 = new Register(0xFFFFFFF0L);
 		unsigned = unsigned.add(unsigned1);
 		assertTrue(unsigned.toLong() == 0xFFFFFFF0L);
 		
-		unsigned = new UInt32(0xFFFFFFFFL);
-		unsigned1 = new UInt32(0xFFFFFFF0L);
+		unsigned = new Register(0xFFFFFFFFL);
+		unsigned1 = new Register(0xFFFFFFF0L);
 		unsigned = unsigned.subtract(unsigned1);
 		assertTrue(unsigned.toLong() == 0x10L);
 		
-		unsigned = new UInt32(0xFFFFFFF0L);
-		unsigned1 = new UInt32(0xFFFFFFFFL);
+		unsigned = new Register(0xFFFFFFF0L);
+		unsigned1 = new Register(0xFFFFFFFFL);
 		unsigned = unsigned.subtract(unsigned1);
 		assertTrue(unsigned.toLong() == 0xFFFFFFF1L);
 	}

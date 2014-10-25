@@ -1,17 +1,17 @@
 package application.regression;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class LeastSquares {
 	
 	private float slope = 0.0f;
-	private UInt32 meanX = new UInt32();
+	private Register meanX = new Register();
 	private int meanY = 0;
 	
 	public void calculate(RegressionEntry table[], int tableEntries){
 		float newSlope = slope;
         
-		UInt32 newMeanX;
+		Register newMeanX;
         int newMeanY;        
         int meanXRest;
         int meanYRest;
@@ -40,7 +40,7 @@ public class LeastSquares {
 
         while( ++i < table.length )
             if( !table[i].free) {                
-            	UInt32 diff = table[i].x.subtract(newMeanX);
+            	Register diff = table[i].x.subtract(newMeanX);
             	
             	xSum += diff.toInteger() / tableEntries;
             	meanXRest += diff.toInteger() % tableEntries;
@@ -50,8 +50,8 @@ public class LeastSquares {
             }
         
         
-        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).toLong();    
-        newMeanX =  newMeanX.add(new UInt32(xSum));
+        xSum = (new Register(xSum).add(new Register(meanXRest/tableEntries))).toLong();    
+        newMeanX =  newMeanX.add(new Register(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;
 
@@ -70,7 +70,7 @@ public class LeastSquares {
 
         slope = newSlope;
         meanY = newMeanY;
-        meanX = new UInt32(newMeanX);
+        meanX = new Register(newMeanX);
 	}
 	
 	private long getWeightDivisor(RegressionEntry table[], int tableEntries){
@@ -138,11 +138,11 @@ public class LeastSquares {
 		this.slope = slope;
 	}
 
-	public UInt32 getMeanX() {
+	public Register getMeanX() {
 		return meanX;
 	}
 
-	public void setMeanX(UInt32 meanX) {
+	public void setMeanX(Register meanX) {
 		this.meanX = meanX;
 	}
 
@@ -156,12 +156,12 @@ public class LeastSquares {
 	
 	public void clear(){
 		slope = 0.0f;
-		meanX = new UInt32();
+		meanX = new Register();
 		meanY = 0;
 	}
 	
-	public UInt32 calculateY(UInt32 x) {
-		UInt32 result = new UInt32(x);
+	public Register calculateY(Register x) {
+		Register result = new Register(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);
@@ -177,8 +177,8 @@ public class LeastSquares {
     	setMeanX(meanX.subtract(xOffset));
 	}
 	
-	public UInt32 calculateY(UInt32 x,UInt32 meanX,int meanY) {
-		UInt32 result = new UInt32(x);
+	public Register calculateY(Register x,Register meanX,int meanY) {
+		Register result = new Register(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);

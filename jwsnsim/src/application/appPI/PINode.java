@@ -10,7 +10,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class PINode extends Node implements TimerHandler {
 
@@ -37,7 +37,7 @@ public class PINode extends Node implements TimerHandler {
 		CLOCK = new DynamicDriftClock();
 
 		/* to start clock with a random value */
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 		
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
@@ -51,8 +51,8 @@ public class PINode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		PIMessage msg = (PIMessage) packet.getPayload();
 
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		Register neighborClock = msg.clock;
+		Register myClock = logicalClock.getValue(packet.getEventTime());
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
@@ -63,7 +63,7 @@ public class PINode extends Node implements TimerHandler {
 	
 	int previousSkew = Integer.MAX_VALUE;
 	
-	void updateClock(int skew,UInt32 updateTime){
+	void updateClock(int skew,Register updateTime){
 		float newK_i = K_i;
 		
 		if((previousSkew-skew) != 0 && previousSkew != 0.0f)
@@ -84,7 +84,7 @@ public class PINode extends Node implements TimerHandler {
 	int num = 0;
 	
 	private void algorithmPI(RadioPacket packet) {
-		UInt32 updateTime = packet.getEventTime();
+		Register updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
 
 		int skew = calculateSkew(packet);
@@ -96,7 +96,7 @@ public class PINode extends Node implements TimerHandler {
 		}
 		else{
 			if(skew > BOUNDARY){
-				UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+				Register myClock = logicalClock.getValue(packet.getEventTime());
 				logicalClock.setValue(myClock.add(skew),updateTime);
 				previousSkew = 0;
 				avgSkew = 0;
@@ -120,7 +120,7 @@ public class PINode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		if(num>0)
@@ -135,7 +135,7 @@ public class PINode extends Node implements TimerHandler {
 
 		RadioPacket packet = new RadioPacket(new PIMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);
 	}
 
@@ -146,7 +146,7 @@ public class PINode extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

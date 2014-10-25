@@ -12,7 +12,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class GDNode extends Node implements TimerHandler {
 
@@ -35,7 +35,7 @@ public class GDNode extends Node implements TimerHandler {
 
 		if (this.NODE_ID == 1)
 			CLOCK.setDrift(0.0f);
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 		// System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);
@@ -48,21 +48,21 @@ public class GDNode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		GDMessage msg = (GDMessage) packet.getPayload();
 
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		Register neighborClock = msg.clock;
+		Register myClock = logicalClock.getValue(packet.getEventTime());
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
 
 	private static final float BOUNDARY = 2.0f * MAX_PPM * (float) BEACON_RATE;
 
-	UInt32 lastEvent; 
+	Register lastEvent; 
 	int lastSkew;
 	float lastDerivative; 
 	float alpha = 1.0f;
 	
 	private void algorithm(RadioPacket packet) {
-		UInt32 updateTime = packet.getEventTime();
+		Register updateTime = packet.getEventTime();
 
 		GDMessage msg = (GDMessage) packet.getPayload();
 
@@ -82,7 +82,7 @@ public class GDNode extends Node implements TimerHandler {
 			logicalClock.setValue(logicalClock.getValue(updateTime).add(skew),
 					updateTime);
 			logicalClock.rate = 0.0f;
-			lastEvent = new UInt32(updateTime);
+			lastEvent = new Register(updateTime);
 			lastSkew = 0;
 			alpha = 1.0f;
 			lastDerivative = 0.0f;
@@ -107,7 +107,7 @@ public class GDNode extends Node implements TimerHandler {
 		if (alpha > 1.0f) alpha = 1.0f;		
 		if(alpha < 0.0000000001f) alpha = 0.0000000001f;
 		
-		lastEvent = new UInt32(updateTime);
+		lastEvent = new Register(updateTime);
 		lastSkew = skew;
 		lastDerivative = derivative;
 				
@@ -131,20 +131,20 @@ public class GDNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 
 		if (outgoingMsg.rootid == NODE_ID) {
-			outgoingMsg.clock = new UInt32(localTime);
+			outgoingMsg.clock = new Register(localTime);
 		} else {
-			outgoingMsg.clock = new UInt32(globalTime);
+			outgoingMsg.clock = new Register(globalTime);
 		}
 
 		RadioPacket packet = new RadioPacket(new GDMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);
 
 		if (outgoingMsg.rootid == NODE_ID)
@@ -159,7 +159,7 @@ public class GDNode extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

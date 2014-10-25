@@ -5,19 +5,19 @@ import java.util.Hashtable;
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class ClockSpeedAdapter2 {
 	
 	private static float TOLERANCE = 2f;
 
 	class NeighborData {
-		public UInt32 val;
-		public UInt32 timestamp;
+		public Register val;
+		public Register timestamp;
 
-		public NeighborData(UInt32 val, UInt32 timestamp) {
-			this.val = new UInt32(val);
-			this.timestamp = new UInt32(timestamp);
+		public NeighborData(Register val, Register timestamp) {
+			this.val = new Register(val);
+			this.timestamp = new Register(timestamp);
 		}
 	}
 	
@@ -35,15 +35,15 @@ public class ClockSpeedAdapter2 {
 	
 	private Hashtable<Integer, NeighborData> neighbors = new Hashtable<Integer, NeighborData>();
 	
-	private UInt32 value = new UInt32();
-	private UInt32 lastUpdate = new UInt32();
+	private Register value = new Register();
+	private Register lastUpdate = new Register();
 
 	public ClockSpeedAdapter2(){
 //		double deltaMin = rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().getDeltaMax();		
 //		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMin);
 	}
 	
-	private float decide(int nodeid,int neighborProgress,UInt32 timestamp) {
+	private float decide(int nodeid,int neighborProgress,Register timestamp) {
 
 		float decision = 0.0f;
 		
@@ -60,7 +60,7 @@ public class ClockSpeedAdapter2 {
 		return decision;
 	}
 	
-	public void adjust(int nodeid, int neighborProgress,UInt32 timestamp) {
+	public void adjust(int nodeid, int neighborProgress,Register timestamp) {
 		
 		update(timestamp);
 		float decision = decide(nodeid,neighborProgress,timestamp);
@@ -85,15 +85,15 @@ public class ClockSpeedAdapter2 {
 		neighbors.put(nodeid, new NeighborData(getValue(timestamp),timestamp));
 	}
 	
-	public void update(UInt32 timestamp){
+	public void update(Register timestamp){
 		int timePassed = timestamp.subtract(lastUpdate).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*(float)rate.getValue());
 		value = value.add(progress);
 		
-		lastUpdate = new UInt32(timestamp);
+		lastUpdate = new Register(timestamp);
 	}
 	
-	public UInt32 getValue(UInt32 timestamp){
+	public Register getValue(Register timestamp){
 		int timePassed = timestamp.subtract(lastUpdate).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*(float)rate.getValue());
 

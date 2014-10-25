@@ -1,22 +1,22 @@
 package application.appFcsa;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class LogicalClock {
 	
-	public UInt32 value = new UInt32();
+	public Register value = new Register();
     public float rate = 0;
     
-    UInt32 updateLocalTime = new UInt32();
+    Register updateLocalTime = new Register();
     
-    public void setValue(UInt32 currentTime){
-		value = new UInt32(currentTime);
+    public void setValue(Register currentTime){
+		value = new Register(currentTime);
 	}
     
-	public UInt32 getValue(UInt32 currentTime){
+	public Register getValue(Register currentTime){
 		int timePassed = currentTime.subtract(updateLocalTime).toInteger();
 		int progress = timePassed + (int)(((float)timePassed)*rate);
 		
-		return value.add(new UInt32(progress));
+		return value.add(new Register(progress));
 	}
 }

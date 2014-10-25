@@ -1,6 +1,6 @@
 package application.appSelf;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class OffsetAvt {
 	final private float INCREASE_FACTOR = 2.0f;
@@ -10,7 +10,7 @@ public class OffsetAvt {
 	final static public int FEEDBACK_LOWER = 1;
 	final static public int FEEDBACK_GOOD = 2;
 	 
-	UInt32 value = new UInt32();
+	Register value = new Register();
 	
 	float delta, deltaMin, deltaMax;
 	
@@ -23,9 +23,9 @@ public class OffsetAvt {
 		delta = (dMin + dMax)/2.0f;
     }
     
-    public UInt32 getValue(){
+    public Register getValue(){
     
-    	return new UInt32(value);
+    	return new Register(value);
     }
     
     void increaseDelta(){

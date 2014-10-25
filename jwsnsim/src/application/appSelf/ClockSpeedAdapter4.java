@@ -8,20 +8,20 @@ import application.appSelf.ClockSpeedAdapter3.NeighborData;
 import fr.irit.smac.util.avt.AVT;
 import fr.irit.smac.util.avt.AVTBuilder;
 import fr.irit.smac.util.avt.Feedback;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class ClockSpeedAdapter4 {
 	
 	private static float TOLERANCE = 0.00000001f;
 
 	class NeighborData {
-		public UInt32 clock;
-		public UInt32 timestamp;
+		public Register clock;
+		public Register timestamp;
 		public float decision = 0.0f;
 
-		public NeighborData(UInt32 clock, UInt32 timestamp,float decision) {
-			this.clock = new UInt32(clock);
-			this.timestamp = new UInt32(timestamp);
+		public NeighborData(Register clock, Register timestamp,float decision) {
+			this.clock = new Register(clock);
+			this.timestamp = new Register(timestamp);
 			this.decision = decision;
 		}
 	}
@@ -49,7 +49,7 @@ public class ClockSpeedAdapter4 {
 ////		rate.getAdvancedAVT().getDeltaManager().getAdvancedDM().setDelta(deltaMin);
 //	}
 	
-	private void updateNeighbor(int nodeid,UInt32 clock,UInt32 timestamp,float rate) {
+	private void updateNeighbor(int nodeid,Register clock,Register timestamp,float rate) {
 
 		float decision = 0.0f;
 		
@@ -71,7 +71,7 @@ public class ClockSpeedAdapter4 {
 		neighbors.put(nodeid, new NeighborData(clock,timestamp,decision));
 	}
 	
-	public void adjust(int nodeid, UInt32 clock,UInt32 timestamp,float rate) {
+	public void adjust(int nodeid, Register clock,Register timestamp,float rate) {
 		updateNeighbor(nodeid,clock,timestamp,rate);
 		
 		float average = getAverageDecision();

@@ -1,13 +1,13 @@
 package application.appFcsaRt;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class FloodingMessage {
 	
 	/* node's perspective */
 	public int nodeid = -1;
-	public UInt32 localTime = new UInt32();
-	public UInt32 globalTime = new UInt32();
+	public Register localTime = new Register();
+	public Register globalTime = new Register();
 	public float multiplier = 0;
 	
 	/* flooded data */
@@ -22,8 +22,8 @@ public class FloodingMessage {
 	public FloodingMessage(FloodingMessage msg){
 		this.nodeid = msg.nodeid;
 		this.rootid = msg.rootid;
-		this.localTime = new UInt32(msg.localTime);
-		this.globalTime = new UInt32(msg.globalTime);
+		this.localTime = new Register(msg.localTime);
+		this.globalTime = new Register(msg.globalTime);
 		this.sequence = msg.sequence;
 		this.multiplier = msg.multiplier;
 		this.rootMultiplier = msg.rootMultiplier;

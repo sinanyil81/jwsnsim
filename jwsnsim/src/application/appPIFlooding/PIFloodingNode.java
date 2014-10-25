@@ -11,7 +11,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class PIFloodingNode extends Node implements TimerHandler {
 
@@ -32,7 +32,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 		MAC = new MicaMac(this);
 		RADIO = new SimpleRadio(this, MAC);
 
-		CLOCK.setValue(new UInt32(Math.abs(Distribution.getRandom().nextInt())));
+		CLOCK.setValue(new Register(Math.abs(Distribution.getRandom().nextInt())));
 		// System.out.println(CLOCK.getDrift());
 
 		timer0 = new Timer(CLOCK, this);
@@ -45,8 +45,8 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	int calculateSkew(RadioPacket packet) {
 		PIFloodingMessage msg = (PIFloodingMessage) packet.getPayload();
 
-		UInt32 neighborClock = msg.clock;
-		UInt32 myClock = logicalClock.getValue(packet.getEventTime());
+		Register neighborClock = msg.clock;
+		Register myClock = logicalClock.getValue(packet.getEventTime());
 
 		return neighborClock.subtract(myClock).toInteger();
 	}
@@ -61,7 +61,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	float p = 0;
 
 	private void algorithm(RadioPacket packet) {
-		UInt32 updateTime = packet.getEventTime();
+		Register updateTime = packet.getEventTime();
 		logicalClock.update(updateTime);
 		PIFloodingMessage msg = (PIFloodingMessage) packet.getPayload();
 
@@ -129,20 +129,20 @@ public class PIFloodingNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 
 		localTime = CLOCK.getValue();
 		globalTime = logicalClock.getValue(localTime);
 
 		if (outgoingMsg.rootid == NODE_ID) {
-			outgoingMsg.clock = new UInt32(localTime);
+			outgoingMsg.clock = new Register(localTime);
 		} else {
-			outgoingMsg.clock = new UInt32(globalTime);
+			outgoingMsg.clock = new Register(globalTime);
 		}
 
 		RadioPacket packet = new RadioPacket(new PIFloodingMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);
 
 		if (outgoingMsg.rootid == NODE_ID)
@@ -157,7 +157,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 				+ ((Distribution.getRandom().nextInt() % 100) + 1) * 10000);
 	}
 
-	public UInt32 local2Global() {
+	public Register local2Global() {
 		return logicalClock.getValue(CLOCK.getValue());
 	}
 

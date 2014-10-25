@@ -1,18 +1,18 @@
 package application.regression;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class ModifiedLeastSquares {
 	
 	private float slope = 0.0f;
-	private UInt32 meanX = new UInt32();
+	private Register meanX = new Register();
 	private int meanY = 0;
-	private UInt32 offset = new UInt32();
+	private Register offset = new Register();
 	
 	public void calculate(RegressionEntry table[], int tableEntries){
 		float newSlope = slope;
         
-		UInt32 newMeanX;
+		Register newMeanX;
         int newMeanY;        
         int meanXRest;
         int meanYRest;
@@ -41,7 +41,7 @@ public class ModifiedLeastSquares {
 
         while( ++i < table.length )
             if( !table[i].free) {                
-            	UInt32 diff = table[i].x.subtract(newMeanX);
+            	Register diff = table[i].x.subtract(newMeanX);
             	
             	xSum += diff.toInteger() / tableEntries;
             	meanXRest += diff.toInteger() % tableEntries;
@@ -50,8 +50,8 @@ public class ModifiedLeastSquares {
             }
         
         
-        xSum = (new UInt32(xSum).add(new UInt32(meanXRest/tableEntries))).toLong();    
-        newMeanX =  newMeanX.add(new UInt32(xSum));
+        xSum = (new Register(xSum).add(new Register(meanXRest/tableEntries))).toLong();    
+        newMeanX =  newMeanX.add(new Register(xSum));
         
         newMeanY += ySum + meanYRest / tableEntries;
 
@@ -70,9 +70,9 @@ public class ModifiedLeastSquares {
 
         slope = newSlope;
         meanY = newMeanY;
-        meanX = new UInt32(newMeanX);
+        meanX = new Register(newMeanX);
         
-        offset = new UInt32(newMeanY);
+        offset = new Register(newMeanY);
         newMeanX = newMeanX.multiply(slope);
         offset = offset.subtract(newMeanX);
 	}
@@ -96,11 +96,11 @@ public class ModifiedLeastSquares {
 			meanX.add(val); 			
 		}
 		
-		this.offset = new UInt32(offset);
+		this.offset = new Register(offset);
 	}
 		
-	public UInt32 calculateY(UInt32 x) {
-		UInt32 result = new UInt32(x);
+	public Register calculateY(Register x) {
+		Register result = new Register(x);
 
 		result = result.subtract(meanX);		
 		result = result.multiply(slope);

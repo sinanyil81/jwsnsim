@@ -1,14 +1,14 @@
 package application.regression;
 
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class RegressionEntry {
-	public UInt32 x = new UInt32();
+	public Register x = new Register();
 	public int y;
 	public boolean free = true;
 
 	public RegressionEntry(RegressionEntry entry) {
-		this.x = new UInt32(entry.x);
+		this.x = new Register(entry.x);
 		this.y = entry.y;
 		this.free = entry.free;
 	}

@@ -11,7 +11,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class FloodingNode extends Node implements TimerHandler {
 
@@ -64,12 +64,12 @@ public class FloodingNode extends Node implements TimerHandler {
 	
 	private void updateNeighborhood(){
 		int i;
-		UInt32 age;
+		Register age;
 
-		UInt32 localTime = CLOCK.getValue();
+		Register localTime = CLOCK.getValue();
 
 		for (i = 0; i < MAX_NEIGHBORS; ++i) {
-			age = new UInt32(localTime);
+			age = new Register(localTime);
 			age = age.subtract(neighbors[i].timestamp);
 			
 			if(age.toLong() >= NEIGHBOR_REMOVE && neighbors[i].free == false) {
@@ -92,7 +92,7 @@ public class FloodingNode extends Node implements TimerHandler {
 		return freeItem;
 	}
 
-	private void addEntry(FloodingMessage msg, UInt32 eventTime) {
+	private void addEntry(FloodingMessage msg, Register eventTime) {
 
 		boolean found = false;
 				
@@ -114,9 +114,9 @@ public class FloodingNode extends Node implements TimerHandler {
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.multiplier;
 			neighbors[index].rootRate = msg.rootMultiplier;
-			neighbors[index].rootClock = new UInt32(msg.globalTime);			
+			neighbors[index].rootClock = new Register(msg.globalTime);			
 			neighbors[index].addNewEntry(msg.localTime,eventTime);
-			neighbors[index].timestamp = new UInt32(eventTime);
+			neighbors[index].timestamp = new Register(eventTime);
 			if(found){
 				ls.calculate(neighbors[index].table, neighbors[index].tableEntries);
 				neighbors[index].relativeRate = ls.getSlope();
@@ -176,20 +176,20 @@ public class FloodingNode extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime, globalTime;
+		Register localTime, globalTime;
 		
 		localTime = CLOCK.getValue();
 		globalTime = local2Global();
 	
 		outgoingMsg.nodeid = NODE_ID;
-		outgoingMsg.localTime = new UInt32(localTime);
+		outgoingMsg.localTime = new Register(localTime);
 		outgoingMsg.multiplier = (float) logicalClock.getRate();
 		outgoingMsg.rootMultiplier = (float) logicalClock.getRootRate();
-		outgoingMsg.globalTime = new UInt32(globalTime);
+		outgoingMsg.globalTime = new Register(globalTime);
 		
 		RadioPacket packet = new RadioPacket(new FloodingMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);	
 
 		if (outgoingMsg.rootid == NODE_ID)
@@ -202,26 +202,26 @@ public class FloodingNode extends Node implements TimerHandler {
 		timer0.startPeriodic(BEACON_RATE+((Distribution.getRandom().nextInt() % 100) + 1)*10000);
 	}
 
-	public UInt32 local2Global() {		
+	public Register local2Global() {		
 		return logicalClock.getValue();
 	}
 	
-	public UInt32 getNeighborClock(UInt32 timestamp, UInt32 base,float multiplier, float relativeRate,float rootRate){
+	public Register getNeighborClock(Register timestamp, Register base,float multiplier, float relativeRate,float rootRate){
 		int timePassed = CLOCK.getValue().subtract(timestamp).toInteger();
 		timePassed += (int) (((float)timePassed)*relativeRate);
 		int progress = timePassed + (int) (((float)timePassed)*multiplier);
 		progress = (int) (((float)progress)/(1.0+rootRate));
 		
-		return base.add(new UInt32(progress));
+		return base.add(new Register(progress));
 	}
 	
-	public UInt32 gradientClock(){
-		UInt32 gclock = logicalClock.getValue();
+	public Register gradientClock(){
+		Register gclock = logicalClock.getValue();
 		int diffSum = 0;
 		
 		for (int i = 0; i < neighbors.length; i++) {
 			if(neighbors[i].free == false){
-				UInt32 nclock = getNeighborClock(neighbors[i].getTimestamp(), 
+				Register nclock = getNeighborClock(neighbors[i].getTimestamp(), 
 												 neighbors[i].getRootClock(), 
 												 neighbors[i].getRate(),
 												 neighbors[i].getRelativeRate(),

@@ -11,7 +11,7 @@ import sim.radio.RadioPacket;
 import sim.radio.SimpleRadio;
 import sim.simulator.Simulator;
 import sim.statistics.Distribution;
-import sim.type.UInt32;
+import sim.type.Register;
 
 public class RateNodeLS extends Node implements TimerHandler {
 
@@ -74,7 +74,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 		return freeItem;
 	}
 
-	private float addEntry(RateMessage msg, UInt32 eventTime) {
+	private float addEntry(RateMessage msg, Register eventTime) {
 
 		boolean found = false;
 						
@@ -94,7 +94,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 			neighbors[index].id = msg.nodeid;
 			neighbors[index].rate = msg.rate;			
 			neighbors[index].addNewEntry(msg.clock,eventTime);
-			neighbors[index].timestamp = new UInt32(eventTime);
+			neighbors[index].timestamp = new Register(eventTime);
 
 			if(found){
 				ls.calculate(neighbors[index].table, neighbors[index].tableEntries);
@@ -139,10 +139,10 @@ public class RateNodeLS extends Node implements TimerHandler {
 	}
 
 	private void sendMsg() {
-		UInt32 localTime = CLOCK.getValue();
+		Register localTime = CLOCK.getValue();
 
 		outgoingMsg.nodeid = NODE_ID;
-		outgoingMsg.clock = new UInt32(localTime);
+		outgoingMsg.clock = new Register(localTime);
 		outgoingMsg.rate = myRate;
 		
 		if( 1 == NODE_ID ) {
@@ -151,7 +151,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 		
 		RadioPacket packet = new RadioPacket(new RateMessage(outgoingMsg));
 		packet.setSender(this);
-		packet.setEventTime(new UInt32(localTime));
+		packet.setEventTime(new Register(localTime));
 		MAC.sendPacket(packet);	
 	}
 

@@ -1,6 +1,6 @@
 package application.appEgtsp;
 
-import sim.type.UInt32;
+import sim.type.Register;
 import application.regression.RegressionEntry;
 
 public class Neighbor {
@@ -12,11 +12,11 @@ public class Neighbor {
 	public float rootRate;
 	public float relativeRate;
 	
-	public UInt32 rootClock = new UInt32();
+	public Register rootClock = new Register();
 	
 
 
-	public UInt32 timestamp = new UInt32();
+	public Register timestamp = new Register();
 	public boolean free = true;
 
 	public RegressionEntry table[] = new RegressionEntry[MAX_ENTRIES];
@@ -40,11 +40,11 @@ public class Neighbor {
 		return relativeRate;
 	}
 
-	public UInt32 getRootClock() {
+	public Register getRootClock() {
 		return rootClock;
 	}
 
-	public UInt32 getTimestamp() {
+	public Register getTimestamp() {
 		return timestamp;
 	}
 
@@ -59,7 +59,7 @@ public class Neighbor {
 
 	}
 
-	public void addNewEntry(UInt32 neighborTime, UInt32 localTime) {
+	public void addNewEntry(Register neighborTime, Register localTime) {
 		int i;
 
 		if (tableEntries == MAX_ENTRIES) {
@@ -72,11 +72,11 @@ public class Neighbor {
 		}
 
 		table[tableEnd].free = false;
-		table[tableEnd].x = new UInt32(localTime);
+		table[tableEnd].x = new Register(localTime);
 		table[tableEnd].y = neighborTime.toInteger() - localTime.toInteger();
 	}
 	
-	public UInt32 getClock(UInt32 currentTime){
+	public Register getClock(Register currentTime){
 		int timePassed = currentTime.subtract(timestamp).toInteger();
 		float r = relativeRate + rate + relativeRate * rate;
 		r -= rootRate;
@@ -89,6 +89,6 @@ public class Neighbor {
 		
 		int  progress = timePassed +  (int) (r * (float)timePassed);
 		
-		return rootClock.add(new UInt32(progress));
+		return rootClock.add(new Register(progress));
 	}
 }
