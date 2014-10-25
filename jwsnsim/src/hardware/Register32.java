@@ -29,18 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- */
-
-package hardware;
-
-/**
- *
  * Simulates 32 bit unsigned data type for the Java language.
  * (Especially used for the hardware registers.) 
  * 
  * @author Kasım Sinan YILDIRIM (sinanyil81@gmail.com)
  *
  */
+
+package hardware;
+
 public class Register32 implements Comparable<Register32>{
 	
 	/** Maximum possible value. */
