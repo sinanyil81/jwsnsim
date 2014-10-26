@@ -36,7 +36,7 @@
 package core;
 
 public abstract class Simulation {
-	public long MAXSECOND = 0;
+	private long MAXSECOND = 0;
 	
 	protected Simulation(int seconds){
 		this.MAXSECOND = seconds;
