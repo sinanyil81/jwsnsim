@@ -105,11 +105,11 @@ public class Transceiver implements InterruptHandler {
 
 		if (receiving) {
 			noiseStrength += signalStrength;
-			if (Signal.isCorrupted(signalStrength, noiseStrength))
+			if (RadioSignal.isCorrupted(signalStrength, noiseStrength))
 				corrupted = true;
 		} else {
 			if (!transmitting
-					&& Signal.isReceivable(signalStrength, noiseStrength)) {
+					&& RadioSignal.isReceivable(signalStrength, noiseStrength)) {
 				// start receiving
 				receivingPacket = new Packet((Packet) packet);
 				setReceptionTimestamp();
@@ -158,6 +158,6 @@ public class Transceiver implements InterruptHandler {
 	}
 
 	public boolean CCA() {
-		return Signal.isChannelFree(noiseStrength);
+		return RadioSignal.isChannelFree(noiseStrength);
 	}
 }

@@ -9,7 +9,7 @@ import hardware.transceiver.Transceiver;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import nodes.MicaMac;
+import nodes.CSMA;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -64,7 +64,7 @@ public class SelfNode8 extends Node implements TimerHandler {
 		/* to start clock with a random value */
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));
 		
-		MAC = new MicaMac(this);
+		MAC = new CSMA(this);
 		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);

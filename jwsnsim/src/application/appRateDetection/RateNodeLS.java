@@ -1,6 +1,6 @@
 package application.appRateDetection;
 
-import nodes.MicaMac;
+import nodes.CSMA;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -39,7 +39,7 @@ public class RateNodeLS extends Node implements TimerHandler {
 			CLOCK = new ConstantDriftClock();	
 		}
 		
-		MAC = new MicaMac(this);
+		MAC = new CSMA(this);
 		RADIO = new Transceiver(this, MAC);
 
 		timer0 = new Timer(CLOCK, this);

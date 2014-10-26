@@ -58,7 +58,7 @@ package hardware.transceiver;
 
 import sim.statistics.GaussianDistribution;
 
-public class Signal {
+public class RadioSignal {
 
 	public static double fallingFactorHalf = 1.1;
 	public static double staticRandomFactor = 0.3;

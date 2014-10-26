@@ -56,7 +56,7 @@ package nodes;
 
 import hardware.transceiver.Packet;
 import hardware.transceiver.PacketListener;
-import hardware.transceiver.Signal;
+import hardware.transceiver.RadioSignal;
 import hardware.transceiver.Transceiver;
 
 public class Channel implements PacketListener{
@@ -78,9 +78,9 @@ public class Channel implements PacketListener{
 		int j = 0;
 		for (int i = 0; i < nodes.length; i++) {
 			if(nodes[i]!=source){
-				double staticRadioStrength = Signal.getStaticFading(
+				double staticRadioStrength = RadioSignal.getStaticFading(
 						source.getDistanceSquare(nodes[i]), source.getTransceiver().getMaxSignalStrength());
-				if (staticRadioStrength >= Signal.radioStrengthCutoff) {
+				if (staticRadioStrength >= RadioSignal.radioStrengthCutoff) {
 					edges[j] = nodes[i].getTransceiver();
 					staticFadings[j++] = staticRadioStrength;
 				}
@@ -98,7 +98,7 @@ public class Channel implements PacketListener{
 	
 	public void transmit(Packet packet) {
 		for (int i = 0; i < dynamicStrengths.length; i++) {
-			dynamicStrengths[i] = Signal.getDynamicStrength(1, staticFadings[i]);	
+			dynamicStrengths[i] = RadioSignal.getDynamicStrength(1, staticFadings[i]);	
 		}
 		
 		source.getTransceiver().transmit(packet, edges,dynamicStrengths);

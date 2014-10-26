@@ -1,6 +1,6 @@
 package application.appPIFlooding;
 
-import nodes.MicaMac;
+import nodes.CSMA;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -29,7 +29,7 @@ public class PIFloodingNode extends Node implements TimerHandler {
 
 		CLOCK = new DynamicDriftClock();
 
-		MAC = new MicaMac(this);
+		MAC = new CSMA(this);
 		RADIO = new Transceiver(this, MAC);
 
 		CLOCK.setValue(new Register32(Math.abs(Distribution.getRandom().nextInt())));

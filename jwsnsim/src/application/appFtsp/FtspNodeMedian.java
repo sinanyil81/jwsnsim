@@ -9,7 +9,7 @@ import hardware.transceiver.Transceiver;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import nodes.MicaMac;
+import nodes.CSMA;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -54,7 +54,7 @@ public class FtspNodeMedian extends Node implements TimerHandler{
 		super(id,position);
 		
 		CLOCK = new ConstantDriftClock();		
-		MAC = new MicaMac(this);
+		MAC = new CSMA(this);
 		RADIO = new Transceiver(this,MAC);
 		
 		timer0 = new Timer(CLOCK,this);		

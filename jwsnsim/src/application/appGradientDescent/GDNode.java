@@ -8,7 +8,7 @@ import hardware.transceiver.Transceiver;
 
 import java.security.acl.LastOwnerException;
 
-import nodes.MicaMac;
+import nodes.CSMA;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -31,7 +31,7 @@ public class GDNode extends Node implements TimerHandler {
 
 		CLOCK = new ConstantDriftClock();
 
-		MAC = new MicaMac(this);
+		MAC = new CSMA(this);
 		RADIO = new Transceiver(this, MAC);
 
 		if (this.NODE_ID == 1)
