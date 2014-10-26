@@ -112,4 +112,8 @@ public class Channel implements PacketListener{
 	public boolean ClearChannelAssessment(){
 		return source.getTransceiver().CCA();
 	}
+	
+	public boolean isReceiving(){
+		return source.getTransceiver().isReceiving();
+	}
 }

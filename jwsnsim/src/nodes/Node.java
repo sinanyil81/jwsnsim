@@ -109,4 +109,9 @@ public abstract class Node implements PacketListener{
 		return null;
 	}
 
+	public Channel getChannel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -158,6 +158,11 @@ public class Transceiver implements InterruptHandler {
 	}
 
 	public boolean CCA() {
-		return RadioSignal.isChannelFree(noiseStrength);
+		return RadioSignal.isChannelFree(noiseStrength) || transmitting || receiving;
+	}
+
+	public boolean isReceiving() {
+
+		return receiving;
 	}
 }
