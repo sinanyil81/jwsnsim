@@ -52,8 +52,6 @@
  * ON AN "AS IS" BASIS, AND THE VANDERBILT UNIVERSITY HAS NO OBLIGATION TO
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
- * Author: Gyorgy Balogh, Gabor Pap, Miklos Maroti
- * Date last modified: 02/09/04
  */
 
 package hardware.transceiver;
@@ -67,17 +65,42 @@ public class Signal {
 	public static double radioStrengthCutoff = 0.1;
 	public static double dynamicRandomFactor = 0.05;
 
-	public static double getStaticFading(double distanceSquare,double maxSignalStrength){
-		double staticRandomFading = 1.0 + staticRandomFactor * GaussianDistribution.nextGaussian();
+	public static double noiseVariance = 0.025;
+	public static double maxAllowedNoiseOnSending = 5;
+	public static double receivingStartSNR = 4.0;
+	public static double corruptionSNR = 2.0;
 
-		return staticRandomFading <= 0.0 ? 0.0 : maxSignalStrength * staticRandomFading 
-			/ (1.0 + Math.pow(distanceSquare, fallingFactorHalf));
+	public static double getStaticFading(double distanceSquare,
+			double maxSignalStrength) {
+		double staticRandomFading = 1.0 + staticRandomFactor
+				* GaussianDistribution.nextGaussian();
+
+		return staticRandomFading <= 0.0 ? 0.0 : maxSignalStrength
+				* staticRandomFading
+				/ (1.0 + Math.pow(distanceSquare, fallingFactorHalf));
 	}
 
-	public static double getDynamicStrength(double signalStrength, double staticFading){
-		double dynamicRandomFading = 1.0 + dynamicRandomFactor * GaussianDistribution.nextGaussian();
-		return dynamicRandomFading <= 0.0 ? 0.0 :
-			signalStrength * staticFading * dynamicRandomFading;
+	public static double getDynamicStrength(double signalStrength,
+			double staticFading) {
+		double dynamicRandomFading = 1.0 + dynamicRandomFactor
+				* GaussianDistribution.nextGaussian();
+		return dynamicRandomFading <= 0.0 ? 0.0 : signalStrength * staticFading
+				* dynamicRandomFading;
 	}
 
+	public static boolean isChannelFree(double noiseStrength) {
+		return noiseStrength < maxAllowedNoiseOnSending * noiseVariance;
+	}
+
+	public static boolean isCorrupted(double signalStrength, double noiseStrength) {
+		return calcSNR(signalStrength, noiseStrength) < corruptionSNR;
+	}
+
+	protected static double calcSNR(double signalStrength, double noiseStrength) {
+		return signalStrength / (noiseVariance + noiseStrength);
+	}
+
+	public static boolean isReceivable(double signalStrength, double noiseStrength) {
+		return calcSNR(signalStrength, noiseStrength) > receivingStartSNR;
+	}
 }
