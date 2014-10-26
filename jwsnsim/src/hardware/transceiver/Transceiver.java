@@ -39,8 +39,6 @@ import hardware.Interrupt;
 import hardware.InterruptHandler;
 import hardware.Register32;
 import hardware.clock.Clock32;
-import hardware.clock.Timer;
-import hardware.clock.TimerHandler;
 
 public class Transceiver implements InterruptHandler {
 
