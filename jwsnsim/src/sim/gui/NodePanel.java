@@ -9,10 +9,10 @@ import java.awt.Graphics2D;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import core.Event;
+import core.EventObserver;
 import sim.node.Node;
 import sim.node.NodeFactory;
-import sim.simulator.Event;
-import sim.simulator.EventObserver;
 
 public class NodePanel extends JPanel implements EventObserver {
 	

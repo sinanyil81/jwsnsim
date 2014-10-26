@@ -1,4 +1,4 @@
-package sim.simulator;
+package core;
 
 import java.util.Collections;
 import java.util.NoSuchElementException;

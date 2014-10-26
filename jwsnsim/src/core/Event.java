@@ -31,7 +31,7 @@
  *
  */
 
-package sim.simulator;
+package core;
 
 public class Event implements Comparable<Event> {
 

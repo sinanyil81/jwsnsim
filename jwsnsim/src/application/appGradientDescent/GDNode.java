@@ -8,11 +8,11 @@ import hardware.transceiver.Transceiver;
 
 import java.security.acl.LastOwnerException;
 
+import core.Simulator;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
-import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
 public class GDNode extends Node implements TimerHandler {

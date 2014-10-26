@@ -11,10 +11,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import core.Event;
+import core.EventObserver;
+import core.Simulator;
 import sim.node.NodeFactory;
-import sim.simulator.Event;
-import sim.simulator.EventObserver;
-import sim.simulator.Simulator;
 
 public class InfoPanel extends JPanel implements EventObserver{
 	

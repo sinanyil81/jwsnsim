@@ -1,5 +1,6 @@
 package application.appFcsa;
 
+import core.Simulator;
 import hardware.Register32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
@@ -11,7 +12,6 @@ import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
-import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
 public class FloodingNode extends Node implements TimerHandler {

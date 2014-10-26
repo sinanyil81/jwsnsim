@@ -10,13 +10,13 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import core.Simulation;
 import application.appTheoric.Simulator;
 import application.tools.AvtSimple;
 import sim.gui.GUI;
 import sim.mobility.MobilityManager;
 import sim.mobility.RandomWayPoint;
 import sim.node.NodeFactory;
-import sim.simulator.Simulation;
 import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
 import sim.topology.Circle2D;

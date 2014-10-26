@@ -35,8 +35,8 @@
 
 package hardware;
 
-import sim.simulator.Event;
-import sim.simulator.EventObserver;
+import core.Event;
+import core.EventObserver;
 
 public class Interrupt implements EventObserver {
 

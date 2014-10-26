@@ -9,13 +9,13 @@ import hardware.transceiver.Transceiver;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import core.Simulator;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.node.Node;
 import sim.node.Position;
 import sim.radio.MicaMac;
-import sim.simulator.Simulator;
 
 public class FtspNodeMedian extends Node implements TimerHandler{
 	

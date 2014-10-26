@@ -1,10 +1,10 @@
 package application;
 
+import core.Event;
+import core.EventObserver;
+import core.Simulation;
+import core.Simulator;
 import sim.node.NodeFactory;
-import sim.simulator.Event;
-import sim.simulator.EventObserver;
-import sim.simulator.Simulation;
-import sim.simulator.Simulator;
 import sim.statistics.Distribution;
 
 public class SynchronizationSimulation extends Simulation implements EventObserver {

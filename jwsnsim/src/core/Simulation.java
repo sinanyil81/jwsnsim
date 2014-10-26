@@ -1,4 +1,4 @@
-package sim.simulator;
+package core;
 
 public abstract class Simulation {
 	public long MAXSECOND = 0;

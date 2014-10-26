@@ -1,4 +1,4 @@
-package sim.simulator;
+package core;
 
 public class SimTime {
 	
