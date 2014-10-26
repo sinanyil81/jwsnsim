@@ -1,5 +1,6 @@
 package application.appPIFlooding;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -10,7 +11,6 @@ import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class PIFloodingNode extends Node implements TimerHandler {

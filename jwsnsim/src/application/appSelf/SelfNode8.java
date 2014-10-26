@@ -9,12 +9,12 @@ import hardware.transceiver.Transceiver;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
 import application.appSelf.ClockSpeedAdapter7.NeighborData;
 import sim.clock.ConstantDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class SelfNode8 extends Node implements TimerHandler {

@@ -1,5 +1,6 @@
 package application.appEgtsp;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -11,7 +12,6 @@ import hardware.transceiver.Transceiver;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class GradientNode extends Node implements TimerHandler {

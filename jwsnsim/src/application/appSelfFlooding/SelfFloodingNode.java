@@ -1,5 +1,6 @@
 package application.appSelfFlooding;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.NodeFactory;
 import nodes.Position;
@@ -12,7 +13,6 @@ import hardware.transceiver.Transceiver;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 import sim.topology.Grid2D;
 

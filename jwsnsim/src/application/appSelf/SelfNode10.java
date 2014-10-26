@@ -1,5 +1,6 @@
 package application.appSelf;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -10,7 +11,6 @@ import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class SelfNode10 extends Node implements TimerHandler {

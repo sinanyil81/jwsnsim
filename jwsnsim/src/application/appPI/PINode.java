@@ -1,5 +1,6 @@
 package application.appPI;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -9,7 +10,6 @@ import hardware.clock.TimerHandler;
 import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
 import sim.clock.DynamicDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class PINode extends Node implements TimerHandler {

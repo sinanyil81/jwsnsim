@@ -90,9 +90,7 @@ public class SimulationTime {
 			lowSum -= 1.0;
 		}
 		
-		SimulationTime ret = new SimulationTime(highSum,lowSum);
-		
-		return ret;
+		return new SimulationTime(highSum,lowSum);
 	}
 	
 	public SimulationTime sub(SimulationTime time){

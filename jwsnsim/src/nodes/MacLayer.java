@@ -1,4 +1,4 @@
-package sim.radio;
+package nodes;
 
 import hardware.transceiver.TransceiverListener;
 import hardware.transceiver.Packet;

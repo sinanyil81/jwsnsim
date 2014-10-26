@@ -8,13 +8,13 @@ import hardware.transceiver.Transceiver;
 
 import java.util.Arrays;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
 import application.regression.LeastSquares;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
-import sim.radio.MicaMac;
 
 public class FtspNodeLSAverage extends Node implements TimerHandler{
 	

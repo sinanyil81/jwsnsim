@@ -1,5 +1,6 @@
 package application.appPulseSync;
 
+import nodes.MicaMac;
 import nodes.Node;
 import nodes.Position;
 import core.Simulator;
@@ -13,7 +14,6 @@ import application.regression.MinimumVarianceSlopeRegression;
 import application.regression.RegressionEntry;
 import sim.clock.ConstantDriftClock;
 import sim.clock.DynamicDriftClock;
-import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
 public class PulseSyncNode extends Node implements TimerHandler{

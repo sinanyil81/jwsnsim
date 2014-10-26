@@ -1,8 +1,7 @@
-package sim.radio;
+package nodes;
 
 
 
-import nodes.Node;
 import core.SimulationEvent;
 import core.SimulationEventObserver;
 import hardware.transceiver.Packet;
