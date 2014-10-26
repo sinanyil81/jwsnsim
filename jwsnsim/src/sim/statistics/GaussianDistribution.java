@@ -67,5 +67,9 @@ public class GaussianDistribution extends Distribution{
 		Random r = Distribution.getRandom();
 		return mean + r.nextGaussian() * Math.sqrt(variance);
 	}
+	
+	public static double nextGaussian() {
+		return Distribution.getRandom().nextGaussian();
+	}
 
 }

@@ -42,6 +42,9 @@ import hardware.clock.Clock32;
 
 public class Transceiver implements InterruptHandler {
 
+	protected static double MAX_RADIO_STRENGTH = 100;
+	protected static int TRANSMISSION_TIME = 960;
+
 	protected Packet packetToTransmit = null;
 	protected Packet receivingPacket = null;
 
@@ -49,8 +52,6 @@ public class Transceiver implements InterruptHandler {
 
 	protected boolean receiving = false;
 	protected boolean transmitting = false;
-
-	public static int sendTransmissionTime = 960;
 
 	private Clock32 clock;
 	private TransceiverListener listener;
@@ -66,7 +67,7 @@ public class Transceiver implements InterruptHandler {
 
 	public void transmit(Packet packet, Transceiver receivers[]) {
 
-		transmitting = true;		
+		transmitting = true;
 		packetToTransmit = packet;
 		setTransmissionTimestamp();
 
@@ -76,7 +77,7 @@ public class Transceiver implements InterruptHandler {
 			receivers[i].receptionBegin(packet);
 		}
 
-		interrupt.register(sendTransmissionTime);
+		interrupt.register(TRANSMISSION_TIME);
 	}
 
 	private void setTransmissionTimestamp() {
@@ -107,7 +108,7 @@ public class Transceiver implements InterruptHandler {
 				receiving = true;
 				corrupted = false;
 			} else {
-				
+
 			}
 		}
 	}
@@ -136,6 +137,10 @@ public class Transceiver implements InterruptHandler {
 	@Override
 	public void signal(Interrupt interrupt) {
 		endTransmission();
+	}
+	
+	public static double getMaxSignalStrength(){
+		return MAX_RADIO_STRENGTH;
 	}
 
 }

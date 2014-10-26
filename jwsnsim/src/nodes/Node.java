@@ -2,12 +2,17 @@ package nodes;
 
 import hardware.clock.Clock32;
 import hardware.transceiver.Packet;
+import hardware.transceiver.Transceiver;
+import hardware.transceiver.TransceiverListener;
 
-public abstract class Node {
+public abstract class Node implements TransceiverListener{
 	protected int NODE_ID;
+	protected Clock32 CLOCK = null;
+	protected Transceiver transceiver = null;
+	
 	protected MacLayer MAC = null;
 	protected Radio RADIO = null;
-	protected Clock32 CLOCK = null;
+	
 
 	protected boolean running = false;
 
@@ -92,8 +97,6 @@ public abstract class Node {
 	public void sendMessage(Packet packet) {
 		MAC.sendPacket(packet);
 	}
-
-	public abstract void receiveMessage(Packet packet);
 
 	public String toString() {
 		String s = Integer.toString(NODE_ID);
