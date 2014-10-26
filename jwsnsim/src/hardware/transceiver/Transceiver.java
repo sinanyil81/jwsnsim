@@ -35,12 +35,14 @@
 
 package hardware.transceiver;
 
+import hardware.Interrupt;
+import hardware.InterruptHandler;
 import hardware.Register32;
 import hardware.clock.Clock32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
 
-public class Transceiver implements TimerHandler {
+public class Transceiver implements InterruptHandler {
 
 	protected Packet packetToTransmit = null;
 	protected Packet receivingPacket = null;
@@ -54,14 +56,14 @@ public class Transceiver implements TimerHandler {
 
 	private Clock32 clock;
 	private TransceiverListener listener;
-	private Timer timer;
+	private Interrupt interrupt;
 
 	Transceiver receivers[];
 
 	public Transceiver(Clock32 clock, TransceiverListener listener) {
 		this.listener = listener;
 		this.clock = clock;
-		this.timer = new Timer(clock, this);
+		this.interrupt = new Interrupt(this);
 	}
 
 	public void transmit(Packet packet, Transceiver receivers[]) {
@@ -76,7 +78,7 @@ public class Transceiver implements TimerHandler {
 			receivers[i].receptionBegin(packet);
 		}
 
-		timer.startOneshot(sendTransmissionTime);
+		interrupt.register(sendTransmissionTime);
 	}
 
 	private void setTransmissionTimestamp() {
@@ -134,7 +136,7 @@ public class Transceiver implements TimerHandler {
 	}
 
 	@Override
-	public void fireEvent(Timer timer) {
+	public void signal(Interrupt interrupt) {
 		endTransmission();
 	}
 
