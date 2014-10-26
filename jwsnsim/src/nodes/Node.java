@@ -103,4 +103,10 @@ public abstract class Node implements PacketListener{
 
 		return s;
 	}
+
+	public Transceiver getTransceiver() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

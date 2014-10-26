@@ -60,7 +60,8 @@ public class Transceiver implements InterruptHandler {
 	private double receivingSignalStrength = 0.0;
 	private double noiseStrength = 0.0f;
 
-	Transceiver receivers[];
+	Transceiver[] receivers;
+	double[] signalStrengths;
 
 	public Transceiver(Clock32 clock, PacketListener listener) {
 		this.listener = listener;
@@ -68,18 +69,19 @@ public class Transceiver implements InterruptHandler {
 		this.interrupt = new Interrupt(this);
 	}
 
-	public void transmit(Packet packet, Transceiver receivers[]) {
+	public void transmit(Packet packet, Transceiver[] receivers,double[] signalStrengths) {
 
 		transmitting = true;
 		packetToTransmit = packet;
 		setTransmissionTimestamp();
 
 		this.receivers = receivers;
-		int i = receivers.length;
-		while (--i >= 0) {
-			receivers[i].receptionBegin(packet);
+		this.signalStrengths = signalStrengths;
+		
+		for (int i = 0; i < receivers.length; i++) {
+			receivers[i].receptionBegin(packet,signalStrengths[i]);
 		}
-
+		
 		interrupt.register(TRANSMISSION_TIME);
 	}
 
@@ -90,9 +92,9 @@ public class Transceiver implements InterruptHandler {
 	}
 
 	public void endTransmission() {
-		int i = receivers.length;
-		while (--i >= 0)
-			receivers[i].receptionEnd(packetToTransmit);
+		for (int i = 0; i < receivers.length; i++) {
+			receivers[i].receptionEnd(packetToTransmit,signalStrengths[i]);
+		}
 
 		packetToTransmit = null;
 		receivers = null;

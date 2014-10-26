@@ -60,32 +60,31 @@ import hardware.transceiver.Signal;
 import hardware.transceiver.Transceiver;
 
 public class Channel implements PacketListener{
-	protected Transceiver source = null;
+	protected Node source = null;
 
 	protected Transceiver edges[] = null;
 	protected double[] staticFadings;
 	protected double[] dynamicStrengths;
 
-	protected PacketListener listener;
-
-	public Channel(Transceiver source,PacketListener listener) {
+	public Channel(Node source) {
 		this.source = source;
-		this.listener = listener;
 	}
 
-	public void updateNeighbors(double[] squareDistances,
-			Transceiver[] transceivers) {
+	public void updateNeighbors(Node[] nodes) {
 
-		Transceiver[] edges = new Transceiver[transceivers.length];
-		double[] staticFadings = new double[transceivers.length];
+		Transceiver[] edges = new Transceiver[nodes.length];
+		double[] staticFadings = new double[nodes.length];
 
 		int j = 0;
-		for (int i = 0; i < transceivers.length; i++) {
-			double staticRadioStrength = Signal.getStaticFading(
-					squareDistances[i], source.getMaxSignalStrength());
-			if (staticRadioStrength >= Signal.radioStrengthCutoff) {
-				edges[j] = transceivers[i];
-				staticFadings[j++] = staticRadioStrength;
+		for (int i = 0; i < nodes.length; i++) {
+			if(nodes[i]!=source){
+				double staticRadioStrength = Signal.getStaticFading(
+						source.getDistanceSquare(nodes[i]), source.getTransceiver().getMaxSignalStrength());
+				if (staticRadioStrength >= Signal.radioStrengthCutoff) {
+					edges[j] = nodes[i].getTransceiver();
+					staticFadings[j++] = staticRadioStrength;
+				}
+				
 			}
 		}
 
@@ -94,16 +93,23 @@ public class Channel implements PacketListener{
 		this.dynamicStrengths = new double[j];
 
 		System.arraycopy(edges, 0, this.edges, 0, j);
-		System.arraycopy(staticFadings, 0, this.staticFadings, 0, j);
+		System.arraycopy(staticFadings, 0, this.staticFadings, 0, j);				
 	}
 	
 	public void transmit(Packet packet) {
-		source.transmit(packet, edges);
+		for (int i = 0; i < dynamicStrengths.length; i++) {
+			dynamicStrengths[i] = Signal.getDynamicStrength(1, staticFadings[i]);	
+		}
+		
+		source.getTransceiver().transmit(packet, edges,dynamicStrengths);
 	}
 
 	@Override
 	public void receivePacket(Packet packet) {
-		listener.receivePacket(packet);
-		
+		source.receivePacket(packet);
+	}
+	
+	public boolean ClearChannelAssessment(){
+		return source.getTransceiver().CCA();
 	}
 }
