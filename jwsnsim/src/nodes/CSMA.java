@@ -41,7 +41,7 @@ import hardware.clock.TimerHandler;
 import hardware.transceiver.Packet;
 import sim.statistics.Distribution;
 
-public class CSMA extends MacLayer implements TimerHandler {
+public class CSMA implements TimerHandler {
 
 
 	protected Packet sendingPacket = null;
