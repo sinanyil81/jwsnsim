@@ -2,8 +2,8 @@ package sim.topology;
 
 import java.util.Random;
 
+import nodes.Position;
 import sim.configuration.AreaConfiguration;
-import sim.node.Position;
 import sim.statistics.Distribution;
 
 public class RandomDeployment extends Topology{

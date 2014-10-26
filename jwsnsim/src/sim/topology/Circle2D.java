@@ -1,8 +1,8 @@
 package sim.topology;
 
+import nodes.NodeFactory;
+import nodes.Position;
 import sim.configuration.TransmissionConfiguration;
-import sim.node.NodeFactory;
-import sim.node.Position;
 
 public class Circle2D extends Topology{
 	int counter = 1;

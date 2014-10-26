@@ -1,5 +1,7 @@
 package application.appPIFlooding;
 
+import nodes.Node;
+import nodes.Position;
 import core.Simulator;
 import hardware.Register32;
 import hardware.clock.Timer;
@@ -7,8 +9,6 @@ import hardware.clock.TimerHandler;
 import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
 import sim.clock.DynamicDriftClock;
-import sim.node.Node;
-import sim.node.Position;
 import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 

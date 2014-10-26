@@ -9,10 +9,10 @@ import java.awt.Graphics2D;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import nodes.Node;
+import nodes.NodeFactory;
 import core.SimulationEvent;
 import core.SimulationEventObserver;
-import sim.node.Node;
-import sim.node.NodeFactory;
 
 public class NodePanel extends JPanel implements SimulationEventObserver {
 	
@@ -52,7 +52,7 @@ public class NodePanel extends JPanel implements SimulationEventObserver {
 		
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
 			Node node = NodeFactory.nodes[i];
-			sim.node.Position pos1 = node.getPosition();
+			nodes.Position pos1 = node.getPosition();
 
 			if(node.getID() == 1)
 				g2.setColor(Color.RED);
@@ -64,7 +64,7 @@ public class NodePanel extends JPanel implements SimulationEventObserver {
 			Node[] neighbors = node.getRadio().getNeighbors();
 			if(neighbors!=null){
 				for (int j = 0; j < neighbors.length; j++) {
-					sim.node.Position pos2 = neighbors[j].getPosition();
+					nodes.Position pos2 = neighbors[j].getPosition();
 					g2.setColor(Color.BLUE);
 					g2.setStroke(new BasicStroke(2));
 					g2.drawLine((int)pos1.xCoord, (int)pos1.yCoord, (int)pos2.xCoord, (int)pos2.yCoord);

@@ -5,6 +5,8 @@ import graph.XYGraph;
 import java.awt.Color;
 import java.util.Random;
 
+import nodes.NodeFactory;
+
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.data.xy.XYSeries;
@@ -16,7 +18,6 @@ import application.tools.AvtSimple;
 import sim.gui.GUI;
 import sim.mobility.MobilityManager;
 import sim.mobility.RandomWayPoint;
-import sim.node.NodeFactory;
 import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
 import sim.topology.Circle2D;

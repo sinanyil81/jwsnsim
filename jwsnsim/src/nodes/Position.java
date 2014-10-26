@@ -1,4 +1,4 @@
-package sim.node;
+package nodes;
 
 public class Position {
 

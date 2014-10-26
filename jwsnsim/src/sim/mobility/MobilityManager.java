@@ -6,8 +6,8 @@ import hardware.clock.TimerHandler;
 
 import java.lang.reflect.Constructor;
 
-import sim.node.NodeFactory;
-import sim.node.Position;
+import nodes.NodeFactory;
+import nodes.Position;
 
 public class MobilityManager implements TimerHandler {
 	protected Clock32 clock = new Clock32();

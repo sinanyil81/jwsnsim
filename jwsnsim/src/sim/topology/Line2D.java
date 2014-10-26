@@ -1,9 +1,9 @@
 package sim.topology;
 
+import nodes.NodeFactory;
+import nodes.Position;
 import sim.configuration.AreaConfiguration;
 import sim.configuration.TransmissionConfiguration;
-import sim.node.NodeFactory;
-import sim.node.Position;
 
 public class Line2D extends Topology{
 	private double dx;

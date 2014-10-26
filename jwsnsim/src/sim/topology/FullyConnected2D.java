@@ -1,6 +1,6 @@
 package sim.topology;
 
-import sim.node.Position;
+import nodes.Position;
 
 public class FullyConnected2D extends Topology{
 

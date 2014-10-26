@@ -1,7 +1,7 @@
 package sim.mobility;
 
-import sim.node.Node;
-import sim.node.Position;
+import nodes.Node;
+import nodes.Position;
 
 public abstract class MobilityModel {
 		public abstract Position getNextPos(Node n); 

@@ -1,9 +1,9 @@
 package sim.topology;
 
+import nodes.NodeFactory;
+import nodes.Position;
 import sim.configuration.AreaConfiguration;
 import sim.configuration.TransmissionConfiguration;
-import sim.node.NodeFactory;
-import sim.node.Position;
 
 public class Grid2D extends Topology {
 	private double size; // the cell-size of the gird

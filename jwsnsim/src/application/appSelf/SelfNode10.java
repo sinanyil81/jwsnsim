@@ -1,5 +1,7 @@
 package application.appSelf;
 
+import nodes.Node;
+import nodes.Position;
 import core.Simulator;
 import hardware.Register32;
 import hardware.clock.Timer;
@@ -8,8 +10,6 @@ import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
 import fr.irit.smac.util.avt.Feedback;
 import sim.clock.ConstantDriftClock;
-import sim.node.Node;
-import sim.node.Position;
 import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 

@@ -8,10 +8,10 @@ import hardware.transceiver.Transceiver;
 
 import java.security.acl.LastOwnerException;
 
+import nodes.Node;
+import nodes.Position;
 import core.Simulator;
 import sim.clock.ConstantDriftClock;
-import sim.node.Node;
-import sim.node.Position;
 import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 

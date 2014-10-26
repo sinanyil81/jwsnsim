@@ -2,10 +2,10 @@ package sim.mobility;
 
 import java.util.Random;
 
+import nodes.Node;
+import nodes.Position;
 import sim.configuration.AreaConfiguration;
 import sim.configuration.MobilityConfiguration;
-import sim.node.Node;
-import sim.node.Position;
 import sim.statistics.Distribution;
 import sim.statistics.GaussianDistribution;
 import sim.statistics.PoissonDistribution;

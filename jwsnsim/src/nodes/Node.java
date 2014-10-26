@@ -1,4 +1,4 @@
-package sim.node;
+package nodes;
 
 import hardware.clock.Clock32;
 import hardware.transceiver.Packet;

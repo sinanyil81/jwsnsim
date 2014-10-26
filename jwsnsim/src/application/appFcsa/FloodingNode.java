@@ -1,5 +1,7 @@
 package application.appFcsa;
 
+import nodes.Node;
+import nodes.Position;
 import core.Simulator;
 import hardware.Register32;
 import hardware.clock.Timer;
@@ -9,8 +11,6 @@ import hardware.transceiver.Transceiver;
 import application.appSelf.ClockSpeedAdapter;
 import application.regression.LeastSquares;
 import sim.clock.ConstantDriftClock;
-import sim.node.Node;
-import sim.node.Position;
 import sim.radio.MicaMac;
 import sim.statistics.Distribution;
 
