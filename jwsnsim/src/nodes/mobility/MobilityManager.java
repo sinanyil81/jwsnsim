@@ -1,4 +1,4 @@
-package sim.mobility;
+package nodes.mobility;
 
 import hardware.clock.Clock32;
 import hardware.clock.Timer;

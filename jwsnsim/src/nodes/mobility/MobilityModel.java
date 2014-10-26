@@ -1,4 +1,4 @@
-package sim.mobility;
+package nodes.mobility;
 
 import nodes.Node;
 import nodes.Position;

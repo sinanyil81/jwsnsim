@@ -1,4 +1,4 @@
-package sim.mobility;
+package nodes.mobility;
 
 import java.util.Random;
 
