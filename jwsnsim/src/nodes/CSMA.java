@@ -36,6 +36,7 @@
  */
 package nodes;
 
+import hardware.clock.Clock32;
 import hardware.clock.Timer;
 import hardware.clock.TimerHandler;
 import hardware.transceiver.Packet;
@@ -51,12 +52,11 @@ public class CSMA implements TimerHandler {
 	protected static int sendMinBackOffTime = 100;
 	protected static int sendRandomBackOffTime = 30;
 
-	protected Node node;
+	protected Channel channel;
 	protected Timer timer;
 
-	public CSMA(Node node) {
-		this.node = node;
-		this.timer = new Timer(node.CLOCK,this);
+	public CSMA(Channel channel) {		
+		this.timer = new Timer(new Clock32(),this);
 	}
 	
 	public boolean sendPacket(Packet packet) {
@@ -67,8 +67,8 @@ public class CSMA implements TimerHandler {
 
 	@Override
 	public void fireEvent(Timer timer) {
-		if (node.getChannel().ClearChannelAssessment())
-			node.getChannel().transmit(sendingPacket);
+		if (channel.ClearChannelAssessment())
+			channel.transmit(sendingPacket);
 		else
 			timer.startOneshot(generateBackOffTime());
 	}

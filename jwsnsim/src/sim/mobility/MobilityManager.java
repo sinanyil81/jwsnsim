@@ -32,7 +32,7 @@ public class MobilityManager implements TimerHandler {
 		}
 		
 		for (int i = 0; i < NodeFactory.numNodes; i++) {
-			NodeFactory.nodes[i].getRadio().updateNeighborhood();
+			NodeFactory.nodes[i].getChannel().updateChannel(NodeFactory.nodes);
 		}		
 	}
 	

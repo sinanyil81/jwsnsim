@@ -90,7 +90,7 @@ public class Clock32 {
 		return drift;
 	}
 
-	public void dynamicDrift() {
+	public void setDynamicDrift() {
 		dynamicDrift = true;
 	}
 	

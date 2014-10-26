@@ -41,14 +41,14 @@ import hardware.transceiver.PacketListener;
 
 public abstract class Node implements PacketListener{
 	protected int NODE_ID;
-
-	protected Clock32 CLOCK = null;
-	protected Transceiver transceiver = null;
-	protected Channel channel = null;
-
+	protected Clock32 CLOCK = new Clock32();
+	protected Transceiver TRANSCEIVER = new Transceiver(CLOCK, this);
+	protected Channel CHANNEL = new Channel(this);
+	
 	protected boolean running = false;
-
 	protected Position position = null;
+	
+	protected CSMA csmaMAC = new CSMA(CHANNEL);
 
 	public Node(int id) {
 		this.NODE_ID = id;
@@ -59,36 +59,16 @@ public abstract class Node implements PacketListener{
 		this.position = position;
 	}
 
-	public void setClock(Clock32 clock) {
-		CLOCK = clock;
-	}
-
 	public Clock32 getClock() {
 		return CLOCK;
 	}
 
-	public void setMAC(MacLayer mac) {
-		MAC = mac;
-	}
-
-	public MacLayer getMAC() {
-		return MAC;
-	}
-
-	public void setTransceiver(Transceiver transceiver) {
-		this.transceiver = transceiver;
-	}
-
 	public Transceiver getTransceiver() {
-		return transceiver;
+		return TRANSCEIVER;
 	}
 	
-	public void setChannel(Channel channel) {
-		this.channel = channel;
-	}
-
 	public Channel getChannel() {
-		return null;
+		return CHANNEL;
 	}
 
 	public double getDistance(Node other) {
@@ -116,15 +96,6 @@ public abstract class Node implements PacketListener{
 		if (running)
 			throw new Exception("Node started previously");
 
-		if (CLOCK == null)
-			throw new Exception("Clock object must be assigned");
-
-		if (transceiver == null)
-			throw new Exception("Transceiver object must be assigned");
-
-		if (channel == null)
-			throw new Exception("Channel object must be assigned");
-
 		running = true;
 		CLOCK.start();
 	}
@@ -132,12 +103,14 @@ public abstract class Node implements PacketListener{
 	public boolean isRunning() {
 		return running;
 	}
+	
+	public void sendPacket(Packet packet){
+		csmaMAC.sendPacket(packet);
+	}
 
 	public String toString() {
 		String s = Integer.toString(NODE_ID);
 
 		return s;
 	}
-
-
 }
