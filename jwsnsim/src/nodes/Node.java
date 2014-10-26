@@ -3,9 +3,9 @@ package nodes;
 import hardware.clock.Clock32;
 import hardware.transceiver.Packet;
 import hardware.transceiver.Transceiver;
-import hardware.transceiver.TransceiverListener;
+import hardware.transceiver.PacketListener;
 
-public abstract class Node implements TransceiverListener{
+public abstract class Node implements PacketListener{
 	protected int NODE_ID;
 	protected Clock32 CLOCK = null;
 	protected Transceiver transceiver = null;

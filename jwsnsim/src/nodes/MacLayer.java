@@ -1,6 +1,6 @@
 package nodes;
 
-import hardware.transceiver.TransceiverListener;
+import hardware.transceiver.PacketListener;
 import hardware.transceiver.Packet;
 
 /**
@@ -9,7 +9,7 @@ import hardware.transceiver.Packet;
  *
  *Do not call sendPacket within receivePacket or vice versa.
  */
-public abstract class MacLayer implements TransceiverListener{
+public abstract class MacLayer implements PacketListener{
 	public abstract boolean sendPacket(Packet packet);
 	public abstract void receivePacket(Packet packet);
 }

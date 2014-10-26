@@ -35,7 +35,7 @@
 
 package hardware.transceiver;
 
-public interface TransceiverListener {
+public interface PacketListener {
 	public void receivePacket(Packet packet);
 }
 
