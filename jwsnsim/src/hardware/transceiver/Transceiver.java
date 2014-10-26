@@ -42,7 +42,6 @@ import hardware.clock.Clock32;
 
 public class Transceiver implements InterruptHandler {
 
-	protected double MAX_RADIO_STRENGTH = 100;
 	protected static int TRANSMISSION_TIME = 960;
 
 	protected Packet packetToTransmit = null;
@@ -56,8 +55,8 @@ public class Transceiver implements InterruptHandler {
 	private Clock32 clock;
 	private PacketListener listener;
 	private Interrupt interrupt;
-	
-	private double receivingSignalStrength = 0.0;
+
+	protected double maxTransceiverStrength = 100;
 	private double noiseStrength = 0.0f;
 
 	Transceiver[] receivers;
@@ -69,7 +68,8 @@ public class Transceiver implements InterruptHandler {
 		this.interrupt = new Interrupt(this);
 	}
 
-	public void transmit(Packet packet, Transceiver[] receivers,double[] signalStrengths) {
+	public void transmit(Packet packet, Transceiver[] receivers,
+			double[] signalStrengths) {
 
 		transmitting = true;
 		packetToTransmit = packet;
@@ -77,11 +77,11 @@ public class Transceiver implements InterruptHandler {
 
 		this.receivers = receivers;
 		this.signalStrengths = signalStrengths;
-		
+
 		for (int i = 0; i < receivers.length; i++) {
-			receivers[i].receptionBegin(packet,signalStrengths[i]);
+			receivers[i].receptionBegin(packet, signalStrengths[i]);
 		}
-		
+
 		interrupt.register(TRANSMISSION_TIME);
 	}
 
@@ -93,7 +93,7 @@ public class Transceiver implements InterruptHandler {
 
 	public void endTransmission() {
 		for (int i = 0; i < receivers.length; i++) {
-			receivers[i].receptionEnd(packetToTransmit,signalStrengths[i]);
+			receivers[i].receptionEnd(packetToTransmit, signalStrengths[i]);
 		}
 
 		packetToTransmit = null;
@@ -101,17 +101,17 @@ public class Transceiver implements InterruptHandler {
 		transmitting = false;
 	}
 
-	public void receptionBegin(Packet packet,double signalStrength) {
+	public void receptionBegin(Packet packet, double signalStrength) {
 
 		if (receiving) {
 			noiseStrength += signalStrength;
-			if(Signal.isCorrupted(signalStrength, noiseStrength))
+			if (Signal.isCorrupted(signalStrength, noiseStrength))
 				corrupted = true;
 		} else {
-			if (!transmitting && Signal.isReceivable(signalStrength, noiseStrength)) {
+			if (!transmitting
+					&& Signal.isReceivable(signalStrength, noiseStrength)) {
 				// start receiving
 				receivingPacket = new Packet((Packet) packet);
-				receivingSignalStrength = signalStrength;
 				setReceptionTimestamp();
 				receiving = true;
 				corrupted = false;
@@ -128,7 +128,7 @@ public class Transceiver implements InterruptHandler {
 		receivingPacket.setEventTime(timestamp);
 	}
 
-	public void receptionEnd(Packet packet,double signalStrength) {
+	public void receptionEnd(Packet packet, double signalStrength) {
 
 		if (receivingPacket != null && receivingPacket.equals(packet)) {
 			receiving = false;
@@ -139,10 +139,7 @@ public class Transceiver implements InterruptHandler {
 				System.out.println("Corruption!");
 
 			receivingPacket = null;
-			receivingSignalStrength = 0.0;
-			
-		}
-		else{
+		} else {
 			noiseStrength -= signalStrength;
 		}
 	}
@@ -151,16 +148,16 @@ public class Transceiver implements InterruptHandler {
 	public void signal(Interrupt interrupt) {
 		endTransmission();
 	}
-	
-	public double getMaxSignalStrength(){
-		return MAX_RADIO_STRENGTH;
-	}
-	
-	public void setMaxSignalStrength(double maxStrength){
-		this.MAX_RADIO_STRENGTH = maxStrength;
+
+	public double getMaxSignalStrength() {
+		return maxTransceiverStrength;
 	}
 
-	public boolean CCA(){
+	public void setMaxSignalStrength(double maxStrength) {
+		this.maxTransceiverStrength = maxStrength;
+	}
+
+	public boolean CCA() {
 		return Signal.isChannelFree(noiseStrength);
-	}	
+	}
 }

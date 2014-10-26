@@ -70,7 +70,7 @@ public class Channel implements PacketListener{
 		this.source = source;
 	}
 
-	public void updateNeighbors(Node[] nodes) {
+	public void updateChannel(Node[] nodes) {
 
 		Transceiver[] edges = new Transceiver[nodes.length];
 		double[] staticFadings = new double[nodes.length];
