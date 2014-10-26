@@ -1,17 +1,17 @@
 package application;
 
-import core.Event;
-import core.EventObserver;
+import core.SimulationEvent;
+import core.SimulationEventObserver;
 import core.Simulation;
 import core.Simulator;
 import sim.node.NodeFactory;
 import sim.statistics.Distribution;
 
-public class SynchronizationSimulation extends Simulation implements EventObserver {
+public class SynchronizationSimulation extends Simulation implements SimulationEventObserver {
 	
 	private int PERIOD = 20000000;
 	protected Logger logger;
-	Event event = new Event(this);
+	SimulationEvent event = new SimulationEvent(this);
 	
 	public SynchronizationSimulation(String logFile, int durationTime){
 		super(durationTime);
@@ -44,7 +44,7 @@ public class SynchronizationSimulation extends Simulation implements EventObserv
 	}
 
 	@Override
-	public void signal(Event event) {
+	public void signal(SimulationEvent event) {
 		log();
 		event.register((int) (PERIOD + ((Distribution.getRandom().nextInt() % 4) + 1)*1000000));
 		

@@ -35,13 +35,13 @@
 
 package hardware;
 
-import core.Event;
-import core.EventObserver;
+import core.SimulationEvent;
+import core.SimulationEventObserver;
 
-public class Interrupt implements EventObserver {
+public class Interrupt implements SimulationEventObserver {
 
 	/** Simulation event which will be used for interrupt */
-	Event event = null;
+	SimulationEvent event = null;
 	InterruptHandler handler = null;
 
 	public Interrupt(InterruptHandler handler) {
@@ -57,7 +57,7 @@ public class Interrupt implements EventObserver {
 	}
 
 	@Override
-	public void signal(Event event) {
+	public void signal(SimulationEvent event) {
 		if (this.event == event)
 			if (handler != null)
 				handler.signal(this);

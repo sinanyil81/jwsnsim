@@ -9,15 +9,15 @@ import java.awt.Graphics2D;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import core.Event;
-import core.EventObserver;
+import core.SimulationEvent;
+import core.SimulationEventObserver;
 import sim.node.Node;
 import sim.node.NodeFactory;
 
-public class NodePanel extends JPanel implements EventObserver {
+public class NodePanel extends JPanel implements SimulationEventObserver {
 	
 	private static final long serialVersionUID = 1L;
-	Event event = new Event(this);
+	SimulationEvent event = new SimulationEvent(this);
 	
 	public static int SimulationSpeed = 0;
 
@@ -74,7 +74,7 @@ public class NodePanel extends JPanel implements EventObserver {
 	}
 
 	@Override
-	public void signal(Event event) {
+	public void signal(SimulationEvent event) {
 		event.register(1000000);
 		
 		if(SimulationSpeed>0){

@@ -35,27 +35,27 @@
 
 package core;
 
-public class SimTime {
+public class SimulationTime {
 	
 	private long timeHigh = 0;
 	private double timeLow  = 0.0;
 	
-	public SimTime(){
+	public SimulationTime(){
 		timeHigh = 0;
 		timeLow = 0.0;
 	}
 	
-	public SimTime(SimTime s){
+	public SimulationTime(SimulationTime s){
 		timeHigh = s.timeHigh;
 		timeLow = s.timeLow;
 	}
 	
-	public SimTime(double value){
+	public SimulationTime(double value){
 		timeHigh = (long)value;
 		timeLow = value - (long)value;
 	}
 	
-	public SimTime(long high,double low){
+	public SimulationTime(long high,double low){
 		timeHigh = high;
 		timeLow = low;
 	}
@@ -76,7 +76,7 @@ public class SimTime {
 		this.timeLow = timeLow;
 	}
 	
-	public SimTime add(SimTime time){
+	public SimulationTime add(SimulationTime time){
 		double lowSum = time.getTimeLow() + timeLow;
 		long highSum = timeHigh +(long)lowSum + time.getTimeHigh();
 		lowSum -= (double)((long)lowSum);
@@ -90,12 +90,12 @@ public class SimTime {
 			lowSum -= 1.0;
 		}
 		
-		SimTime ret = new SimTime(highSum,lowSum);
+		SimulationTime ret = new SimulationTime(highSum,lowSum);
 		
 		return ret;
 	}
 	
-	public SimTime sub(SimTime time){
+	public SimulationTime sub(SimulationTime time){
 		
 		if(timeLow < time.getTimeLow()){
 			timeHigh--;
@@ -110,12 +110,12 @@ public class SimTime {
 			lowDiff -= 1.0;
 		}
 		
-		SimTime ret = new SimTime(highDiff,lowDiff);
+		SimulationTime ret = new SimulationTime(highDiff,lowDiff);
 		
 		return ret;
 	}
 		
-	public int compareTo(SimTime time){
+	public int compareTo(SimulationTime time){
 		
 		if(this.timeHigh > time.getTimeHigh()){
 			return 1;

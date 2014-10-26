@@ -2,13 +2,13 @@ package sim.radio;
 
 
 
-import core.Event;
-import core.EventObserver;
+import core.SimulationEvent;
+import core.SimulationEventObserver;
 import hardware.transceiver.Packet;
 import sim.node.Node;
 import sim.statistics.Distribution;
 
-public class MicaMac extends MacLayer implements EventObserver {
+public class MicaMac extends MacLayer implements SimulationEventObserver {
 
 	/**
 	 * This is the message being sent, on reception it is extracted and the
@@ -55,7 +55,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	 * message transmission and posts a {@link Mica2Node#EndTransmissionEvent}
 	 * event.
 	 */
-	private Event testChannelEvent = new Event(this);
+	private SimulationEvent testChannelEvent = new SimulationEvent(this);
 
 	private Node node;
 
@@ -64,7 +64,7 @@ public class MicaMac extends MacLayer implements EventObserver {
 	}
 
 	@Override
-	public void signal(Event event) {
+	public void signal(SimulationEvent event) {
 		if (event == testChannelEvent) {
 			if (node.getRadio().isChannelFree()) {
 				node.getRadio().beginTransmission(sendingPacket);

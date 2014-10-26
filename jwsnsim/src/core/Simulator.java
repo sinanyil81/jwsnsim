@@ -42,14 +42,14 @@ import java.util.Vector;
 public class Simulator {
 	
 	private static Simulator simulator = null;
-	private SimTime simTime = new SimTime();
+	private SimulationTime simTime = new SimulationTime();
 	
-	private Vector<Event> events = null;
+	private Vector<SimulationEvent> events = null;
 	
 	private Simulation simulation = null;
 	
 	protected Simulator(){
-		events = new Vector<Event>();
+		events = new Vector<SimulationEvent>();
 	}
 
 	public static Simulator getInstance() {
@@ -75,18 +75,18 @@ public class Simulator {
 		return simulation;
 	}
 	
-	public void register(Event event) {
+	public void register(SimulationEvent event) {
 		events.add(event);
 		Collections.sort(events);		
 	}
 	
-	public void unregister(Event event) {
+	public void unregister(SimulationEvent event) {
 		events.removeElement(event);	
 		Collections.sort(events);
 	}	
 	
 	public void tick() {
-		Event eventToFire;
+		SimulationEvent eventToFire;
 		
 		try{
 			eventToFire = events.remove(0);	
@@ -104,11 +104,11 @@ public class Simulator {
 	
 	public void reset(){
 		events.removeAllElements();		
-		events = new Vector<Event>();		
-		simTime = new SimTime();
+		events = new Vector<SimulationEvent>();		
+		simTime = new SimulationTime();
 	}
 	
-	public SimTime getTime(){
+	public SimulationTime getTime(){
 		return simTime;
 	}
 	

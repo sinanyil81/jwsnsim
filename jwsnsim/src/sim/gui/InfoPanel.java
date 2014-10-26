@@ -11,12 +11,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import core.Event;
-import core.EventObserver;
+import core.SimulationEvent;
+import core.SimulationEventObserver;
 import core.Simulator;
 import sim.node.NodeFactory;
 
-public class InfoPanel extends JPanel implements EventObserver{
+public class InfoPanel extends JPanel implements SimulationEventObserver{
 	
 	JLabel numNodesCaption = new JLabel("Number of Nodes");
 	JLabel maxSecondCaption = new JLabel("Simulation End Time");
@@ -32,7 +32,7 @@ public class InfoPanel extends JPanel implements EventObserver{
 	JButton incrementSimulationSpeed = new JButton("Slow Down");
 	JButton decrementSimulationSpeed = new JButton(" Speed Up ");
 	
-	Event event = new Event(this);
+	SimulationEvent event = new SimulationEvent(this);
 	
 	/**
 	 * 
@@ -115,7 +115,7 @@ public class InfoPanel extends JPanel implements EventObserver{
 	}
 
 	@Override
-	public void signal(Event event) {
+	public void signal(SimulationEvent event) {
 		this.repaint();
 		event.register(1000000);		
 	}

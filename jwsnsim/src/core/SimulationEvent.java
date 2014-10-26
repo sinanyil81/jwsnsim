@@ -35,6 +35,35 @@
 
 package core;
 
-public interface EventObserver {
-	public abstract void signal(Event event);
+public class SimulationEvent implements Comparable<SimulationEvent> {
+
+	private SimulationTime eventTime = new SimulationTime();
+	private SimulationEventObserver observer = null;
+	
+	public SimulationEvent(SimulationEventObserver observer){
+		this.observer = observer;
+	}
+	
+	public void register(int numTicks){
+		eventTime = new SimulationTime(numTicks);
+		eventTime = eventTime.add(Simulator.getInstance().getTime());
+		Simulator.getInstance().register(this);		
+	}
+	
+	public void unregister(){
+		Simulator.getInstance().unregister(this);		
+	}
+	
+	public SimulationTime getEventTime(){
+		return eventTime;
+	}
+	
+	@Override
+	public int compareTo(SimulationEvent arg0) {		
+		return eventTime.compareTo(arg0.getEventTime());	
+	}
+
+	public void signalEvent() {
+		observer.signal(this);
+	}
 }
