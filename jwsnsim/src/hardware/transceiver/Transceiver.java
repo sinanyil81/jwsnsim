@@ -160,5 +160,5 @@ public class Transceiver implements InterruptHandler {
 
 	public boolean CCA(){
 		return Signal.isChannelFree(noiseStrength);
-	}
+	}	
 }

@@ -52,17 +52,25 @@
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
  */
-package hardware.transceiver;
+package nodes;
 
-public class Channel {
-	private Transceiver source = null;
+import hardware.transceiver.Packet;
+import hardware.transceiver.PacketListener;
+import hardware.transceiver.Signal;
+import hardware.transceiver.Transceiver;
 
-	private Transceiver edges[] = null;
+public class Channel implements PacketListener{
+	protected Transceiver source = null;
+
+	protected Transceiver edges[] = null;
 	protected double[] staticFadings;
 	protected double[] dynamicStrengths;
 
-	public Channel(Transceiver source) {
+	protected PacketListener listener;
+
+	public Channel(Transceiver source,PacketListener listener) {
 		this.source = source;
+		this.listener = listener;
 	}
 
 	public void updateNeighbors(double[] squareDistances,
@@ -91,5 +99,11 @@ public class Channel {
 	
 	public void transmit(Packet packet) {
 		source.transmit(packet, edges);
+	}
+
+	@Override
+	public void receivePacket(Packet packet) {
+		listener.receivePacket(packet);
+		
 	}
 }
