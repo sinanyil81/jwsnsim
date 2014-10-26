@@ -67,14 +67,14 @@ public class Signal {
 	public static double radioStrengthCutoff = 0.1;
 	public static double dynamicRandomFactor = 0.05;
 
-	protected double getStaticFading(double distanceSquare,double maxSignalStrength){
+	public static double getStaticFading(double distanceSquare,double maxSignalStrength){
 		double staticRandomFading = 1.0 + staticRandomFactor * GaussianDistribution.nextGaussian();
 
 		return staticRandomFading <= 0.0 ? 0.0 : maxSignalStrength * staticRandomFading 
 			/ (1.0 + Math.pow(distanceSquare, fallingFactorHalf));
 	}
 
-	protected double getDynamicStrength(double signalStrength, double staticFading){
+	public static double getDynamicStrength(double signalStrength, double staticFading){
 		double dynamicRandomFading = 1.0 + dynamicRandomFactor * GaussianDistribution.nextGaussian();
 		return dynamicRandomFading <= 0.0 ? 0.0 :
 			signalStrength * staticFading * dynamicRandomFading;
