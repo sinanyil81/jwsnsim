@@ -1,0 +1,1 @@
+A basic wireless sensor network simulation environment.
